@@ -3,11 +3,9 @@ use warnings;
 
 package fastx;
 
-my $task = "fastx";
-
 sub new {
   my $struct = {};
-  $struct->{'task'} = $task;
+  $struct->{'task'} = __PACKAGE__;
   $struct->{'mult'} = 2;
   $struct->{'print'} = \&print;
 

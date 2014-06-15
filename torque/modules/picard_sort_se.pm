@@ -3,11 +3,9 @@ use warnings;
 
 package picard_sort_se;
 
-my $task = 'picard_sort_se';
-
 sub new {
   my $struct = {};
-  $struct->{'task'} = $task;
+  $struct->{'task'} = __PACKAGE__;
   $struct->{'mult'} = 1;
   $struct->{'print'} = \&print;
 

@@ -3,11 +3,9 @@ use warnings;
 
 package target_coverage;
 
-my $task = 'target_coverage';
-
 sub new {
   my $struct = {};
-  $struct->{'task'} = $task;
+  $struct->{'task'} = __PACKAGE__;
   $struct->{'mult'} = 8;
   $struct->{'print'} = \&print;
 

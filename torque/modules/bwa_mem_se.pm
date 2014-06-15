@@ -3,11 +3,9 @@ use warnings;
 
 package bwa_mem_se;
 
-my $task = 'bwa_mem_se';
-
 sub new {
   my $struct = {};
-  $struct->{'task'} = $task;
+  $struct->{'task'} = __PACKAGE__;
   $struct->{'mult'} = 1;
   $struct->{'print'} = \&print;
 

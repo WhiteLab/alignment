@@ -3,11 +3,9 @@ use warnings;
 
 package picard_rmdup_se;
 
-my $task = 'picard_rmdup_se';
-
 sub new {
   my $struct = {};
-  $struct->{'task'} = $task;
+  $struct->{'task'} = __PACKAGE__;
   $struct->{'mult'} = 2;
   $struct->{'print'} = \&print;
 

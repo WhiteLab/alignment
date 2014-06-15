@@ -3,11 +3,9 @@ use warnings;
 
 package picard_merge;
 
-my $task = 'picard_merge';
-
 sub new {
   my $struct = {};
-  $struct->{'task'} = $task;
+  $struct->{'task'} = __PACKAGE__;
   $struct->{'mult'} = 8;
   $struct->{'print'} = \&print;
 
