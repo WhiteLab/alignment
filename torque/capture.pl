@@ -42,9 +42,23 @@ my @GENERATORS = (
   target_coverage::new(),
 );
 
+# Parse command line arguments
+if(scalar @ARGV < 3) { print "Usage: <job_name_prefix> <max_nodes> [<file>]+\n" and exit; }
+our $JOB_NAME = shift;
+our $MAX_NODES = shift;
+our %SAMPLES = ();
+foreach my $sample (@ARGV) { # e.g. 2011-1502_111228_SN673_0122_AC028YACXX_1_1_sequence.txt.gz
+  if($sample =~ /^(\S+)_1_sequence\.txt\.gz$/) {
+    print "$sample\n";
+    $SAMPLES{$1}{f1} = $1."_1_sequence.txt.gz";
+    $SAMPLES{$1}{f2} = $1."_2_sequence.txt.gz";
+  }
+}
+
 # Global namespace definitions
 our $LOGS_DIR    = 'logs';
 our $SCRIPTS_DIR = 'scripts';
+our $JAVA        = "/glusterfs/users/mark/src/jdk1.7.0_45/bin/java";
 our $FASTX       = "/usr/local/tools/fastx_toolkit-0.0.13/src/fastx_quality_stats/fastx_quality_stats";
 our $BWA         = "/glusterfs/users/mark/src/bwa-0.7.8/bwa";
 our $SAMTOOLS    = "/glusterfs/users/mark/src/samtools/samtools";
@@ -58,36 +72,12 @@ our $PIGZ        = "/glusterfs/users/jgrundst/bin/pigz";
 our $PICARD_TMP  = "PICARD_TMP";
 our $MAXMEM      = 2000000000;
 
-# Override for Java RE and default PATH resolution for blank.
-our $JAVA = "/glusterfs/users/mark/src/jdk1.7.0_45/bin/java";
-$JAVA = $JAVA ? $JAVA : `which java`;
-
-
-# Parse command line arguments
-if(scalar @ARGV < 3) { print "Usage: <job_name_prefix> <max_nodes> [<file>]+\n" and exit; }
-our $JOB_NAME = shift;
-$BOT->job_name($JOB_NAME);
-our $MAX_NODES = shift;
-our %SAMPLES = ();
-foreach my $sample (@ARGV) { # e.g. 2011-1502_111228_SN673_0122_AC028YACXX_1_1_sequence.txt.gz
-  if($sample =~ /^(\S+)_1_sequence\.txt\.gz$/) {
-    print "$sample\n";
-    $SAMPLES{$1}{f1} = $1."_1_sequence.txt.gz";
-    $SAMPLES{$1}{f2} = $1."_2_sequence.txt.gz";
-  }
-}
-
-
 # Ensure directories exist or complain
 if ( ! -d $LOGS_DIR ) { mkdir $LOGS_DIR or die $!; }
 if ( ! -d $SCRIPTS_DIR ) { mkdir $SCRIPTS_DIR or die $!; }
 
-# --- REUSED VARIABLES ---
-my $task;
-my @cmds;
-
-
 # Call generators in order specified.
+$BOT->job_name($JOB_NAME);
 foreach(@GENERATORS) {
   our $gen = $_;
   our @cmds = ();
