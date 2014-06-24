@@ -16,6 +16,7 @@ sub print {
   my @HGACID = split(/_/,$main::sample);
   my $RGRP = "\@RG\\tID:$main::sample\\tLB:$HGACID[0]\\tSM:$HGACID[0]\\tPL:illumina";
 
+  my $task = __PACKAGE__;
   my $script = sprintf "$main::SCRIPTS_DIR/$task.%s.sh", scalar @main::cmds;
   open SCRIPT, '>', $script or die $!;
 

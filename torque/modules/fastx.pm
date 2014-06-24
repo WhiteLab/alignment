@@ -16,6 +16,7 @@ sub print {
   my $f1 = $main::SAMPLES{$main::sample}{f1};
   my $f2 = $main::SAMPLES{$main::sample}{f2};
 
+  my $task = __PACKAGE__;
   my $script = sprintf "$main::SCRIPTS_DIR/$task.%s.sh", scalar @main::cmds;
   open SCRIPT, '>', $script or die $!;
 

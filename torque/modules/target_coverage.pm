@@ -13,6 +13,7 @@ sub new {
 }
 
 sub print {
+  my $task = __PACKAGE__;
   my $script = sprintf "$main::SCRIPTS_DIR/$task.%s.sh", scalar @main::cmds;
   open SCRIPT, '>', $script or die $!;
 
