@@ -24,11 +24,9 @@ B2ARGS+=(--phred33) # Utilizing Phred33 quality scores.
 B2ARGS+=(--threads $PBS_NUM_PPN) # Number of threads to utilize.
 B2ARGS+=(--non-deterministic) # Seed random number generator with current time.
 
-# Decide on FASTQ arguments.
-FQARGS=$([ -z "$F2" ]                           \
-  && echo \'-U <(zcat ${F1})\'                  \
-  || echo \'-1 <(zcat ${F1}) -2 <(zcat ${F2})\' \
-)
-
 cd $PBS_O_WORKDIR
-$BOWTIE $B2ARGS -x $GENEDB $FQARGS
+if [ -z "$F2" ]; then
+  $BOWTIE $B2ARGS -x $GENEDB -U <(zcat ${F1})
+else
+  $BOWTIE $B2ARGS -x $GENEDB -1 <(zcat ${F1}) -2 <(${F2})
+fi
