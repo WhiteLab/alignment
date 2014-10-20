@@ -32,7 +32,7 @@ our %SAMPLES = ();
 foreach my $sample (@ARGV) { # e.g. 2011-1502_111228_SN673_0122_AC028YACXX_1_1_sequence.txt.gz
   if($sample =~ /^(\S+).sp.rmdup.srt.bam$/) {
     print "$sample\n";
-    $SAMPLES{$1}{f1} = $1".sp.rmdup.srt.bam";
+    $SAMPLES{$1}{f1} = $1.".sp.rmdup.srt.bam";
   }
 }
 
