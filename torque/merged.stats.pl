@@ -21,7 +21,7 @@ use target_coverage;
 
 my @GENERATORS = (
   flagstats::new(),
-  target_coverage::new(),
+  genome_coverage::new(),
 );
 
 # Parse command line arguments
