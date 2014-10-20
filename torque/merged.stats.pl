@@ -17,7 +17,7 @@ my $BOT = new SubmitterBot;
 
 # List generators in order of execution.
 use flagstats;
-use target_coverage;
+use genome_coverage;
 
 my @GENERATORS = (
   flagstats::new(),
