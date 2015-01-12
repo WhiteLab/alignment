@@ -23,7 +23,7 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::JAVA -Xmx8g -jar $main::PICARD/MarkDuplicates.jar CREATE_INDEX=true TMP_DIR=$main::PICARD_TMP REMOVE_DUPLICATES=true ASSUME_SORTED=true MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=$main::sample.me.srt.bam OUTPUT=$main::sample.me.rmdup.srt.bam METRICS_FILE=$main::sample.me.rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT > $main::LOGS_DIR/$main::sample.picard.rmdup.se.log 2>&1\n";
+  print SCRIPT "$main::JAVA -Xmx8g -jar $main::PICARD MarkDuplicates CREATE_INDEX=true TMP_DIR=$main::PICARD_TMP REMOVE_DUPLICATES=true ASSUME_SORTED=true MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=$main::sample.me.srt.bam OUTPUT=$main::sample.me.rmdup.srt.bam METRICS_FILE=$main::sample.me.rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT > $main::LOGS_DIR/$main::sample.picard.rmdup.se.log 2>&1\n";
 
   close SCRIPT;
   return $script;

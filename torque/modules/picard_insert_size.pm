@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-package picard_merge;
+package picard_insert_size;
 
 sub new {
   my $struct = {};
@@ -23,7 +23,7 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::JAVA -Xmx2g -jar $main::PICARD MergeSamFiles CREATE_INDEX=true MAX_RECORDS_IN_RAM=6000000 TMP_DIR=$main::PICARD_TMP  O=$main::sample.sp.rmdup.srt.bam  I=$main::sample.me.rmdup.srt.bam I=$main::sample.clip.rmdup.srt.bam SO=coordinate AS=true USE_THREADING=true VALIDATION_STRINGENCY=LENIENT > $main::LOGS_DIR/$main::sample.picard.merge.log 2>&1\n"; # NOTE Was using SILENT stringency
+  print SCRIPT "$main::JAVA -Xmx2g -jar $main::PICARD CollectInsertSizeMetrics I=$main::sample.rmdup.srt.bam H=$main::sample.insert_metrics.hist O=$main::sample.insert_metrics.txt > $main::LOGS_DIR/$main::sample.picard.insert_size.log 2>&1\n"; # NOTE Was using SILENT stringency
 
   close SCRIPT;
   return $script;
