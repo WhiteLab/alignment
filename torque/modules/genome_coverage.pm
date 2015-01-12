@@ -23,7 +23,7 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::BEDTOOLS genomecov -ibam $main::sample.sp.rmdup.srt.bam -g $main::REFSEQ_BED | grep genome > $main::sample.hist\n";
+  print SCRIPT "$main::BEDTOOLS genomecov -ibam $main::sample.sp.rmdup.srt.bam -g $main::GENOME_BED | grep genome > $main::sample.hist\n";
 
   close SCRIPT;
   return $script;
