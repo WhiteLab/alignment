@@ -17,28 +17,18 @@ my $BOT = new SubmitterBot;
 
 # List generators in order of execution.
 use fastx;
-use seqprep;
-use bwa_mem_se;
 use bwa_mem_pe;
-use picard_sort_se;
 use picard_sort_pe;
-use picard_rmdup_se;
 use picard_rmdup_pe;
-use picard_merge;
 use flagstats;
 use genome_coverage;
 use exome_coverage;
 
 my @GENERATORS = (
   fastx::new(),
-  seqprep::new(),
-  bwa_mem_se::new(),
   bwa_mem_pe::new(),
-  picard_sort_se::new(),
   picard_sort_pe::new(),
-  picard_rmdup_se::new(),
   picard_rmdup_pe::new(),
-  picard_merge::new(),
   flagstats::new(),
   exome_coverage::new(),
   genome_coverage::new(),
@@ -60,7 +50,7 @@ foreach my $sample (@ARGV) { # e.g. 2011-1502_111228_SN673_0122_AC028YACXX_1_1_s
 # Global namespace definitions
 our $LOGS_DIR    = 'logs';
 our $SCRIPTS_DIR = 'scripts';
-our $JAVA        = "/glusterfs/users/mark/src/jdk1.7.0_45/bin/java";
+our $JAVA        = "/glusterfs/users/jgrundst/TOOLS/jdk1.7.0_45/bin/java";
 our $FASTX       = "/usr/local/tools/fastx_toolkit-0.0.13/src/fastx_quality_stats/fastx_quality_stats";
 our $BWA         = "/glusterfs/users/mark/src/bwa-0.7.8/bwa";
 our $SAMTOOLS    = "/glusterfs/users/mark/src/samtools/samtools";
