@@ -23,7 +23,11 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::JAVA -Xmx2g -jar $main::PICARD CollectInsertSizeMetrics I=$main::sample.rmdup.srt.bam H=$main::sample.insert_metrics.hist O=$main::sample.insert_metrics.txt > $main::LOGS_DIR/$main::sample.picard.insert_size.log 2>&1\n"; # NOTE Was using SILENT stringency
+  print SCRIPT "$main::JAVA -Xmx2g -jar $main::PICARD ",
+  	"CollectInsertSizeMetrics I=$main::sample.rmdup.srt.bam ",
+	"H=$main::sample.insert_metrics.hist ",
+	"O=$main::sample.insert_metrics.txt > ",
+	"$main::LOGS_DIR/$main::sample.picard.insert_size.log 2>&1\n"; # NOTE Was using SILENT stringency
 
   close SCRIPT;
   return $script;
