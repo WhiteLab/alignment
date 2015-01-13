@@ -23,7 +23,7 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::BEDTOOS coverage -abam $main::sample.sp.rmdup.srt.bam -b $main::EXOME_REFSEQ_BED | grep all > $main::sample.hist\n";
+  print SCRIPT "$main::BEDTOOS coverage -abam $main::sample.rmdup.srt.bam -b $main::EXOME_REFSEQ_BED | grep all > $main::sample.exome.hist\n";
 
   close SCRIPT;
   return $script;

@@ -23,9 +23,8 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::SAMTOOLS flagstat $main::sample.me.bam > $main::sample.me.flagstats\n";
-  print SCRIPT "$main::SAMTOOLS flagstat $main::sample.clip.bam > $main::sample.clip.flagstats\n";
-  print SCRIPT "$main::SAMTOOLS flagstat $main::sample.sp.rmdup.srt.bam > $main::sample.sp.rmdup.srt.flagstats\n";
+  print SCRIPT "$main::SAMTOOLS flagstat $main::sample.srt.bam > $main::sample.srt.flagstats\n";
+  print SCRIPT "$main::SAMTOOLS flagstat $main::sample.rmdup.srt.bam > $main::sample.rmdup.srt.flagstats\n";
 
   close SCRIPT;
   return $script;

@@ -17,27 +17,17 @@ my $BOT = new SubmitterBot;
 
 # List generators in order of execution.
 use fastx;
-use seqprep;
-use bwa_mem_se;
 use bwa_mem_pe;
-use picard_sort_se;
 use picard_sort_pe;
-use picard_rmdup_se;
 use picard_rmdup_pe;
-use picard_merge;
 use flagstats;
 use target_coverage;
 
 my @GENERATORS = (
   fastx::new(),
-  seqprep::new(),
-  bwa_mem_se::new(),
   bwa_mem_pe::new(),
-  picard_sort_se::new(),
   picard_sort_pe::new(),
-  picard_rmdup_se::new(),
   picard_rmdup_pe::new(),
-  picard_merge::new(),
   flagstats::new(),
   target_coverage::new(),
 );
@@ -67,7 +57,7 @@ our $PICARD      = "/raid/users/jgrundst/TOOLS/picard/dist/picard.jar";
 our $SEQPREP     = "/glusterfs/users/mark/src/seqprep/SeqPrep";
 our $BWA_REF_FA  = "/glusterfs/users/mark/data/hg19/bwa/0.7.8/hg19.fa";
 our $SAM_REF_FA  = "/glusterfs/users/mark/data/hg19/samtools/hg19.fa";
-our $REFSEQ_BED  = "/glusterfs/users/mark/data/hg19/targets/nimblegen.merged.bed";
+our $CAPTURE_REFSEQ_BED  = "/glusterfs/users/mark/data/hg19/targets/nimblegen.merged.bed";
 our $PIGZ        = "/glusterfs/users/jgrundst/bin/pigz";
 our $PICARD_TMP  = "PICARD_TMP";
 our $MAXMEM      = 2000000000;
