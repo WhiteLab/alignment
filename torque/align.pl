@@ -50,7 +50,7 @@ foreach my $sample (@ARGV) { # e.g. 2011-1502_111228_SN673_0122_AC028YACXX_1_1_s
 # Global namespace definitions
 our $LOGS_DIR    = 'logs';
 our $SCRIPTS_DIR = 'scripts';
-our $JAVA        = "/glusterfs/users/jgrundst/TOOLS/jdk1.7.0_45/bin/java";
+our $JAVA        = "/raid/users/jgrundst/TOOLS/jdk1.7.0_45/bin/java";
 our $FASTX       = "/usr/local/tools/fastx_toolkit-0.0.13/src/fastx_quality_stats/fastx_quality_stats";
 our $BWA         = "/glusterfs/users/mark/src/bwa-0.7.8/bwa";
 our $SAMTOOLS    = "/glusterfs/users/mark/src/samtools/samtools";
