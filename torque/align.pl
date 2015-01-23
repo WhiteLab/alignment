@@ -22,6 +22,7 @@ use picard_sort_pe;
 use picard_rmdup_pe;
 use flagstats;
 use genome_coverage;
+use target_coverage;
 use exome_coverage;
 
 my @GENERATORS = (
@@ -31,6 +32,7 @@ my @GENERATORS = (
   picard_rmdup_pe::new(),
   flagstats::new(),
   exome_coverage::new(),
+  target_coverage::new(),
   genome_coverage::new(),
 );
 
@@ -61,6 +63,7 @@ our $BWA_REF_FA  = "/glusterfs/users/mark/data/hg19/bwa/0.7.8/hg19.fa";
 our $SAM_REF_FA  = "/glusterfs/users/mark/data/hg19/samtools/hg19.fa";
 our $GENOME_BED  = "/glusterfs/users/mark/data/hg19/targets/hg19.bed";
 our $EXOME_REFSEQ_BED  = "/raid/users/jgrundst/REF/refseq.Hs19.coding_regions.merged.bed";
+our $CAPTURE_REFSEQ_BED = "/raid/users/jgrundst/REF/capture_panel_2.0.bed";
 our $PIGZ        = "/glusterfs/users/jgrundst/bin/pigz";
 our $PICARD_TMP  = "PICARD_TMP";
 our $MAXMEM      = 2000000000;
