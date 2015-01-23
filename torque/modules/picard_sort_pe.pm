@@ -23,7 +23,7 @@ sub print {
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";
-  print SCRIPT "$main::JAVA -Xmx8g -jar $main::PICARD SortSam CREATE_INDEX=true TMP_DIR=$main::PICARD_TMP INPUT=$main::sample.clip.bam OUTPUT=$main::sample.clip.srt.bam SORT_ORDER=coordinate VALIDATION_STRINGENCY=LENIENT > $main::LOGS_DIR/$main::sample.picard.sort.pe.log 2>&1\n";
+  print SCRIPT "$main::JAVA -Xmx8g -jar $main::PICARD SortSam CREATE_INDEX=true TMP_DIR=$main::PICARD_TMP INPUT=$main::sample.bam OUTPUT=$main::sample.srt.bam SORT_ORDER=coordinate VALIDATION_STRINGENCY=LENIENT > $main::LOGS_DIR/$main::sample.picard.sort.pe.log 2>&1\n";
 
   close SCRIPT;
   return $script;
