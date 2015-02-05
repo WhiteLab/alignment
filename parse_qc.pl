@@ -4,7 +4,6 @@ use warnings;
 
 my %files = archiveLookup();
 
-#print "BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\ttota_reads\tpost_align_readst\tfraction_aligned\tRmDupAlignedReads\tFracDup\tOnTargetBases\tReadLength\tFracOnTarget\tTargetEnrichment\tBasesCov>=8x\tTargetBases\t%Cov>=8x\n";
 print "BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\taverage_ot_cov\tcoverage1\tcoverage2\tcoverage8\tfraction_coverage1\tfraction_coverage2\tfraction_coverage8\taligned_target_enrichment\tsequenced_target_enrichment\n";
 my %destinations;
 my %runs;
