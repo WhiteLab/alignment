@@ -26,6 +26,7 @@ sub output_stats
     my @samples = sort (keys %data);
     foreach my $sample (@samples) {
 
+		print STDERR "processing output for $sample\n";
 		my @annot = split (/\_/, $sample);
 		my $db_id = $annot[0];
 	    my $date = $annot[1];
@@ -96,14 +97,18 @@ sub directory_search
     my @dir = `ls $_[0]`;
     foreach my $file (@dir) {
 		chomp $file;
-		if ($file =~ /(.+[1-8])\.rmdup.srt.bam.flagstats$/ || $file =~ /(.+[1-8]).rmdup.accepted_hits.bam.flagstats$/) {
+		if ($file =~ /(.+[1-8])\.rmdup\.srt\.bam\.flagstats$/ ||
+			$file =~ /(.+[1-8])\.rmdup\.srt\.flagstats$/ ||
+			$file =~ /(.+[1-8])\.rmdup\.accepted_hits\.bam\.flagstats$/) {
 			my $sample = $1;
 			%{$data{$sample}{RMDUP}} = parseFS("$_[0]/$file");
 			my @name = split (/_/, $sample);
 			$data{$name[0]}{RUNS}{$_[0]}{$name[5]}++;
 				
 		}
-		elsif ($file =~ /(.+[1-8])\.srt\.bam\.flagstats$/ || $file =~ /(.+[1-8]).accepted_hits.bam.flagstats$/) {
+		elsif ($file =~ /(.+[1-8])\.srt\.bam\.flagstats$/ || 
+			   $file =~ /(.+[1-8])\.srt\.flagstats$/ || 
+			   $file =~ /(.+[1-8]).accepted_hits.bam.flagstats$/) {
 			my $sample = $1;
 			%{$data{$sample}{RAW}} = parseFS("$_[0]/$file");
 		}

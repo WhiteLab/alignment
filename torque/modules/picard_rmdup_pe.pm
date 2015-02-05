@@ -6,7 +6,7 @@ package picard_rmdup_pe;
 sub new {
   my $struct = {};
   $struct->{'task'} = __PACKAGE__;
-  $struct->{'mult'} = 2;
+  $struct->{'mult'} = 1;
   $struct->{'print'} = \&print;
 
   return bless $struct;
@@ -19,7 +19,7 @@ sub print {
 
   print SCRIPT "#!/usr/bin/env bash\n";
   print SCRIPT "#PBS -N $main::JOB_NAME.$task\n";
-  print SCRIPT "#PBS -l nodes=1:ppn=4\n";
+  print SCRIPT "#PBS -l nodes=1:ppn=8\n";
   print SCRIPT "#PBS -j oe\n";
   print SCRIPT "#PBS -o $main::LOGS_DIR\n";
   print SCRIPT "cd \$PBS_O_WORKDIR\n";

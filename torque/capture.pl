@@ -58,7 +58,6 @@ our $SEQPREP     = "/glusterfs/users/mark/src/seqprep/SeqPrep";
 our $BWA_REF_FA  = "/glusterfs/users/mark/data/hg19/bwa/0.7.8/hg19.fa";
 our $SAM_REF_FA  = "/glusterfs/users/mark/data/hg19/samtools/hg19.fa";
 our $CAPTURE_REFSEQ_BED  = "/glusterfs/users/mark/data/hg19/targets/nimblegen.merged.bed";
-our $PIGZ        = "/glusterfs/users/jgrundst/bin/pigz";
 our $PICARD_TMP  = "PICARD_TMP";
 our $MAXMEM      = 2000000000;
 

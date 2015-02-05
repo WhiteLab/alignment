@@ -21,19 +21,15 @@ use bwa_mem_pe;
 use picard_sort_pe;
 use picard_rmdup_pe;
 use flagstats;
-use genome_coverage;
 use target_coverage;
-use exome_coverage;
 
 my @GENERATORS = (
-  fastx::new(),
-  bwa_mem_pe::new(),
-  picard_sort_pe::new(),
-  picard_rmdup_pe::new(),
-  flagstats::new(),
-  exome_coverage::new(),
-  target_coverage::new(),
-  genome_coverage::new(),
+	fastx::new(),
+	bwa_mem_pe::new(),
+	picard_sort_pe::new(),
+  	picard_rmdup_pe::new(),
+  	flagstats::new(),
+  	target_coverage::new(),
 );
 
 # Parse command line arguments
@@ -54,17 +50,15 @@ our $LOGS_DIR    = 'logs';
 our $SCRIPTS_DIR = 'scripts';
 our $JAVA        = "/raid/users/jgrundst/TOOLS/jdk1.7.0_45/bin/java";
 our $FASTX       = "/usr/local/tools/fastx_toolkit-0.0.13/src/fastx_quality_stats/fastx_quality_stats";
-our $BWA         = "/glusterfs/users/mark/src/bwa-0.7.8/bwa";
-our $SAMTOOLS    = "/glusterfs/users/mark/src/samtools/samtools";
+our $BWA         = "/raid/users/jgrundst/TOOLS/bwa-0.7.8/bwa";
+our $SAMTOOLS    = "/raid/users/jgrundst/TOOLS/samtools-0.1.19/samtools";
 our $BEDTOOLS    = "/raid/users/jgrundst/TOOLS/bedtools2/bin/bedtools";
 our $PICARD      = "/raid/users/jgrundst/TOOLS/picard/dist/picard.jar";
-our $SEQPREP     = "/glusterfs/users/mark/src/seqprep/SeqPrep";
-our $BWA_REF_FA  = "/glusterfs/users/mark/data/hg19/bwa/0.7.8/hg19.fa";
-our $SAM_REF_FA  = "/glusterfs/users/mark/data/hg19/samtools/hg19.fa";
-our $GENOME_BED  = "/glusterfs/users/mark/data/hg19/targets/hg19.bed";
+our $BWA_REF_FA  = "/raid/users/jgrundst/REF/bwa/0.7.8/hg19.fa";
+our $SAM_REF_FA  = "/raid/users/jgrundst/REF/samtools/0.1.19/hg19.fa";
+our $GENOME_BED  = "/raid/users/jgrundst/REF/hg19_Ordered.bed";
 our $EXOME_REFSEQ_BED  = "/raid/users/jgrundst/REF/refseq.Hs19.coding_regions.merged.bed";
 our $CAPTURE_REFSEQ_BED = "/raid/users/jgrundst/REF/capture_panel_2.0.bed";
-our $PIGZ        = "/glusterfs/users/jgrundst/bin/pigz";
 our $PICARD_TMP  = "PICARD_TMP";
 our $MAXMEM      = 2000000000;
 
