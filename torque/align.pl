@@ -21,6 +21,8 @@ use bwa_mem_pe;
 use picard_sort_pe;
 use picard_rmdup_pe;
 use flagstats;
+use genome_coverage;
+use exome_coverage;
 use target_coverage;
 
 my @GENERATORS = (
@@ -29,7 +31,9 @@ my @GENERATORS = (
 	picard_sort_pe::new(),
   	picard_rmdup_pe::new(),
   	flagstats::new(),
-  	target_coverage::new(),
+  	exome_coverage::new(),
+	genome_coverage::new(),
+	target_coverage::new(),
 );
 
 # Parse command line arguments
