@@ -1,0 +1,33 @@
+curl -XPUT 'http://localhost:9200/pancan/qc_stats/{bionimbus_id}' -d'
+{
+	"Run_attrib":{
+		"Run": {},
+		"Date": {},
+		"Machine": {},
+		"BarCode": {},
+		"Lane": {},
+		"read_length": {},
+		"total_reads": {},
+		},
+	"align_stats":{
+		"post_align_reads": {},
+		"fraction_aligned": {},
+		"post_rmdup_reads": {},
+		"fraction_rmduped": {},
+		"target_size": {},
+		"aligned_bp_ot": {},
+		"fraction_aligned_bp_ot": {},
+		"fraction_sequenced_bp_ot": {},
+		},
+	"coverage_stats":{
+		"average_ot_cov": {},
+		"coverage1": {},
+		"coverage2": {},
+		"coverage8": {},
+		"fraction_coverage1": {},
+		"fraction_coverage2": {},
+		"fraction_coverage8": {},
+		"aligned_target_enrichment": {},
+		"sequenced_target_enrichment": {},
+		},
+}
