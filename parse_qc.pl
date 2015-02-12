@@ -2,7 +2,13 @@
 use strict;
 use warnings;
 
+if(@ARGV != 1){
+    print STDERR "Usage: $0 {output flag 0 - table, 1 - curl/jason command/output 2 - both\n";
+    exit(1);
+}
+my $flag=$ARGV[0];
 my %files = archiveLookup();
+my $tbl.="BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\taverage_ot_cov\tcoverage1\tcoverage2\tcoverage8\tfraction_coverage1\tfraction_coverage2\tfraction_coverage8\taligned_target_enrichment\tsequenced_target_enrichment\n";
 
 my %destinations;
 my %runs;
@@ -17,11 +23,16 @@ foreach my $sample (@samples) {
     
 }
 my %data = directory_search(".");
-output_stats(\%data);
-
+output_stats(\%data,\$flag);
+if($flag == 0 || $flag == 2){
+    open(TBL, ">","qc_stats.txt");
+    print TBL $tbl;
+    close TBL;
+}
 sub output_stats
 {
     my $data_ref = $_[0];
+    my $f=$$_[1];
     my %data = %$data_ref;
     my @samples = sort (keys %data);
     foreach my $sample (@samples) {
@@ -40,6 +51,8 @@ sub output_stats
 	}
 	if ($data{$sample}{RAW}{MAP}) {
 	    # add DB ID, Run date, machine SN, run #, flow cell barcode, lane
+	    $tbl.="$db_id\t$date\t$machine\t$run\t$barcode\t$lane\t";
+	    
 	    # aggregate arguments and structure for curl/JSON command output
 	    my $json = "curl -XPUT \'http://$hostname:$post/pancan/qc_stats/'";
 	    $json.="\"$db_id\"\' -d\'\n{\n\t\"Run_attrib\":{\n\t\t\"Run\":";
@@ -71,32 +84,40 @@ sub output_stats
 	    my $sequenced_target_enrichment = sprintf ("%.2f", $frac_sizes / $frac_sequenced_reads);
 	    
 	    #HEADER: read_length total_reads post_align_reads fraction_aligned post_rmdup_reads fraction_rmduped target_size aligned_bp_ot fraction_aligned_bp_ot fraction_sequenced_bp_ot average_ot_cov coverage1 coverage2 coverage8 fraction_coverage1 fraction_coverage2 fraction_coverage8 aligned_target_enrichment sequenced_target_enrichment\n";
-#	    print "$data{$sample}{LEN}\t";			# read_length
-#	    print "$data{$sample}{RAW}{TOTAL}\t";	# total_reads
-#	    print "$data{$sample}{RAW}{MAP}\t";		# post_align_reads
-#	    print "$ali_frac\t";					# fraction_aligned
-#	    print "$data{$sample}{RMDUP}{MAP}\t";	# post_rmdup_reads
-#	    print "$dup_frac\t";					# fraction_rmduped
-#	    print "$data{$sample}{COV}{TARGET}\t";	# target_size
-#	    print "$data{$sample}{COV}{TOTAL}\t";	# aligned_bp_ot
-#	    print "$frac_aligned_bp_ot\t";			# fraction_aligned_bp_ot
-#	    print "$frac_sequenced_bp_ot\t";		# fraction_sequenced_bp_ot
-	    # add coverage stats to json
-#	    print "$average_ot_coverage\t";			# average_ot_cov
+	    $tbl.="$data{$sample}{LEN}\t";			# read_length
+	    $tbl.="$data{$sample}{RAW}{TOTAL}\t";	# total_reads
+	    $tbl.="$data{$sample}{RAW}{MAP}\t";		# post_align_reads
+	    $tbl.="$ali_frac\t";					# fraction_aligned
+	    $tbl.="$data{$sample}{RMDUP}{MAP}\t";	# post_rmdup_reads
+	    $tbl.="$dup_frac\t";					# fraction_rmduped
+	    $tbl.="$data{$sample}{COV}{TARGET}\t";	# target_size
+	    $tbl.="$data{$sample}{COV}{TOTAL}\t";	# aligned_bp_ot
+	    $tbl.="$frac_aligned_bp_ot\t";			# fraction_aligned_bp_ot
+	    $tbl.="$frac_sequenced_bp_ot\t";		# fraction_sequenced_bp_ot
+	    $tbl.="$average_ot_coverage\t";			# average_ot_cov
+				# add coverage stats to json
 	    $json.="\t\"coverage_stats\":{\n\t\t\"average_ot_coverage\": \"$average_ot_coverage\",\n\t\t";
 	    for('1','2','8') {            			# cov 1x 2x 8x
-#		print $data{$sample}{COV}{"RS$_"} . "\t";
+		$tbl.= $data{$sample}{COV}{"RS$_"} . "\t";
 		my $key="RS$_";
 		$json.="\"coverage$_\": \"$data{$sample}{COV}{$key}\",\n\t\t";
 	    }
 	    for('1','2','8') {						# frac cov 1x 2x 8x
 		my $fc = sprintf ("%.4f", $data{$sample}{COV}{"RS$_"} / $data{$sample}{COV}{TARGET});
+		$tbl.= $fc;
 		$json.="\"fraction_coverage$_\": \"$fc\",\n\t\t";
 	    }
-#	    print "$aligned_target_enrichment\t";
-#	    print "$sequenced_target_enrichment\n";
-	    $json.="\"aligned_target_enrichment\": \"$aligned_target_enrichment\",\n\t\t\"sequenced_target_enrichment\": \"$sequenced_target_enrichment\",\n\t\t},\n}";
-	    system($json);
+	    if($f==0||$f==2){
+		$tbl.= "$aligned_target_enrichment\t";
+		$tbl.= "$sequenced_target_enrichment\n";
+	    }
+	    $json.="\"aligned_target_enrichment\": \"$aligned_target_enrichment\",\n\t\t\"sequenced_target_enrichment\": \"$sequenced_target_enrichment\",\n\t\t},\n}\n";
+	    #	    system($json);
+	    if($f == 1 || $f == 2){
+		open(CJ, ">", "curl-json.txt");
+		print CJ $curl;
+		close CJ;
+	    }
 	}
     }
 }
