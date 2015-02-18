@@ -11,6 +11,7 @@ from fastx import fastx
 from bwa_mem_pe import bwa_mem_pe
 from picard_sort_pe import picard_sort_pe
 from picard_rmdup import picard_rmdup
+from picard_insert_size import picard_insert_size
 from flagstats import flagstats
 from coverage import *
 from subprocess import call
@@ -74,13 +75,14 @@ exome_coverage(bedtools2_tool,sample,exome_bed_ref,wait_flag) # flag determines 
 genome_coverage(bedtools2_tool,sample,genome_bed_ref,wait_flag) # flag determines whether to run independently or hold up the rest of the pipe until completion
 wait_flag=1
 target_coverage(bedtools2_tool,sample,capture_bed_ref,wait_flag) # flag determines whether to run independently or hold up the rest of the pipe until completion
+picard_insert_size(java_tool,picard_tool,sample,log_dir) # get insert size metrics.  run last since picard tools usually slowest
 
 # check to see if last expected file was generated search for .capture.hist suffix
 flist=os.listdir('./')
 f=0
-suffix='.capture.hist'
+suffix='insert_metrics.hist'
 for fn in flist:
-    if fn[-13:] == suffix:
+    if fn[-19:] == suffix:
         f=1
         break
 if f==1:
