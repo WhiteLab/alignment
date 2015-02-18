@@ -48,18 +48,19 @@ mk_log_dir='mkdir ' + log_dir
 sys.stderr.write(date_time() + 'Made log directory ' + log_dir + "\n")
 call(mk_log_dir,shell=True)
 
+ref_mnt="REFS_" + HGACID[0]
 fastx_tool='fastx_quality_stats'
 bwa_tool='/home/ubuntu/TOOLS/bwa-0.7.8/bwa'
-bwa_ref='/mnt/cinder/REFS/bwa-0.7.8/hg19.fa'
+bwa_ref='/mnt/cinder/' + ref_mnt + '/REFS/bwa-0.7.8/hg19.fa'
 samtools_tool='/home/ubuntu/TOOLS/samtools-0.1.19/samtools'
-samtools_ref='/mnt/cinder/REFS/samtools-0.1.19/hg19.fa'
+samtools_ref='/mnt/cinder/' + ref_mnt + '/REFS/samtools-0.1.19/hg19.fa'
 java_tool='/home/ubuntu/TOOLS/jdk1.7.0_45/bin/java'
 picard_tool='/home/ubuntu/TOOLS/picard/dist/picard.jar'
 picard_tmp='picard_tmp'
 bedtools2_tool='/home/ubuntu/TOOLS/bedtools2/bin/bedtools'
-exome_bed_ref='/mnt/cinder/REFS/BED/refseq.Hs19.coding_regions.merged.bed'
-genome_bed_ref='/mnt/cinder/REFS/BED/hg19_complete_sorted.bed'
-capture_bed_ref='/mnt/cinder/REFS/BED/capture_panel_2.0.bed'
+exome_bed_ref='/mnt/cinder/' + ref_mnt + '/REFS/BED/refseq.Hs19.coding_regions.merged.bed'
+genome_bed_ref='/mnt/cinder/' + ref_mnt + '/REFS/BED/hg19_complete_sorted.bed'
+capture_bed_ref='/mnt/cinder/' + ref_mnt + '/REFS/BED/capture_panel_2.0.bed'
 parse_qc_stats='/home/ubuntu/TOOLS/Scripts/parse_qc_stats.pl'
 
 wait_flag=0
@@ -83,6 +84,8 @@ for fn in flist:
         f=1
         break
 if f==1:
+    from upload_to_swift import upload_to_swift
+    upload_to_swift(HGACID[0],sample)
     sys.stderr.write(date_time() + "Pipeline process completed!\n")
 else:
     sys.stderr.write(date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
