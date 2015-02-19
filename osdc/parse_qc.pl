@@ -8,7 +8,7 @@ if(@ARGV != 1){
 }
 my $flag=$ARGV[0];
 my %files = archiveLookup();
-my $tbl.="BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\taverage_ot_cov\tcoverage1\tcoverage2\tcoverage8\tfraction_coverage1\tfraction_coverage2\tfraction_coverage8\taligned_target_enrichment\tsequenced_target_enrichment\n";
+my $tbl.="BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\taverage_ot_cov\tcoverage1\tcoverage2\tcoverage8\tfraction_coverage1\tfraction_coverage2\tfraction_coverage8\taligned_target_enrichment\tsequenced_target_enrichment\tmedian_insert_size\tmedian_absolute_deviation\tmean_insert_size\tinsert_standard_devation\n";
 
 my %destinations;
 my %runs;
@@ -104,12 +104,13 @@ sub output_stats
 		$json.="\"coverage$_\": \"$data{$sample}{COV}{$key}\",\n\t\t";
 	    }
 	    for('1','2','8') {						# frac cov 1x 2x 8x
-		my $fc = sprintf ("%.4f", $data{$sample}{COV}{"RS$_"} / $data{$sample}{COV}{TARGET});
+		my $fc = sprintf ("%.4f", $data{$sample}{COV}{"RS$_"} / $data{$sample}{COV}{TARGET})."\t";
 		$tbl.= $fc;
 		$json.="\"fraction_coverage$_\": \"$fc\",\n\t\t";
 	    }
 	    $tbl.= "$aligned_target_enrichment\t";
-	    $tbl.= "$sequenced_target_enrichment\n";
+	    $tbl.= "$sequenced_target_enrichment\t";
+	    $tbl.="$data{$sample}{MI}\t$data{$sample}{MA}\t".sprintf("%.2f",$data{$sample}{XI})."\t".sprintf("%.2f",$data{$sample}{SI})."\n";
 	    $json.="\"aligned_target_enrichment\": \"$aligned_target_enrichment\",\n\t\t\"sequenced_target_enrichment\": \"$sequenced_target_enrichment\",\n\t\t},\n}\'\n";
 	    #	    system($json);
 	    if($f == 1 || $f == 2){
@@ -147,6 +148,10 @@ sub directory_search
 	    chomp $temp;
 	    my $length = length($temp);
 	    $data{$sample}{LEN} = $length;
+	}
+	elsif ($file=~/(.+[1-8])\.insert_metrics.hist$/){
+	    my $sample=$1;
+	    ($data{$sample}{MI},$data{$sample}{MA},$data{$sample}{XI},$data{$sample}{SI})=parseIns($file);
 	}
 	
     }
@@ -199,6 +204,21 @@ sub parseCoverage
 	}
     }
     return($total_bases, $rs1_bases, $rs2_bases, $rs8_bases, $target_size);
+}
+
+sub parseIns
+{
+    my ($f)=@_;
+    open(INS, $f) or die "Can't open insert histogram file $f\n";
+    while(my $line=<INS>){
+	chomp $line;
+	if($line=~/^MEDIAN/){
+	    my $stats=<INS>;
+	    close INS;
+	    my @stats= split /\t/,$stats;
+	    return($stats[0],$stats[1],$stats[4],$stats[5]);
+	}
+    }
 }
 sub annotIn
 {
