@@ -33,7 +33,7 @@ class Setup():
             sid=self.config_data['cinder_ref']['id']
             size=self.config_data['cinder_ref']['size']
             sys.stderr.write("Attaching cinder volume...\n")
-            vol=attach_cinder(sid,vid,self.bid,size,self.wait)
+            vol=attach_cinder(sid,vid,self.bid,size,vip,self.wait)
             sys.stderr.write("Volume attached.  Go play and have fun!\n")
         else:
             sys.stderr.write("VM setup time out for " + vm + "Check connection settings or increase wait time and try again\n")

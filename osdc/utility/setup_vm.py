@@ -7,10 +7,10 @@ import re
 def setup_vm(bid,image,flavor,key,wait):
     sys.stderr.write(date_time() + "Starting vm qc for sample set " + bid + "\n")
     # need build variables to call nova successfully
-    src_cmd='. /home/ubuntu/.novarc'
-    subprocess.call(src_cmd,shell=True)
+    src_cmd='. /home/ubuntu/.novarc;'
     vm = "vm_pipe_" + bid
-    vm_boot="nova boot " + vm + " --image " + image + " --flavor " + flavor + " --key_name " + key
+    vm_boot=src_cmd + "nova boot " + vm + " --image " + image + " --flavor " + flavor + " --key_name " + key
+    sys.stderr.write(date_time() + "Booting up vm\n" + vm_boot + "\n")
     subprocess.call(vm_boot, shell=True)
     
     # check status of vm until finshed spawing every 30s                                                                                                                         
@@ -26,7 +26,7 @@ def setup_vm(bid,image,flavor,key,wait):
             break
         else:
             sys.stderr.write(date_time() + "Checking success of vm boot. " + str(n) + " seconds have passed\n")
-            check='nova list'
+            check=src_cmd + 'nova list'
             p=subprocess.check_output(check,shell=True)
             for line in re.findall('(.*)\n',p):
                 line=line.rstrip('\n')

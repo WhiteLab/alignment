@@ -4,13 +4,12 @@ import subprocess
 import os
 import re
 
-def attach_cinder(sid,vid,bid,size,wait):
+def attach_cinder(sid,vid,bid,size,vip,wait):
     cname = "REFS_" + bid
     sys.stderr.write(date_time() + "Creating cinder volume " + cname + " using snapshot ID " + sid + "to vm with ID " + vid + "\n")
     # need build variables to call nova successfully
-    src_cmd='. /home/ubuntu/.novarc'
-    subprocess.call(src_cmd,shell=True)
-    vol_cmd="cinder create " + size + " --snapshot-id " + sid + " --display_name " + cname
+    src_cmd='. /home/ubuntu/.novarc;'
+    vol_cmd=src_cmd+"cinder create " + size + " --snapshot-id " + sid + " --display_name " + cname
     subprocess.call(vol_cmd, shell=True)
     
     # check status of vm until finshed spawing every 30s                                                                                                                         
@@ -25,7 +24,7 @@ def attach_cinder(sid,vid,bid,size,wait):
             break
         else:
             sys.stderr.write(date_time() + "Checking success of volume creation. " + str(n) + " seconds have passed\n")
-            check='cinder list'
+            check=src_cmd+'cinder list'
             p=subprocess.check_output(check,shell=True)
             for line in re.findall('(.*)\n',p):
                 line=line.rstrip('\n')
@@ -42,9 +41,12 @@ def attach_cinder(sid,vid,bid,size,wait):
         n=n+i
     if(flag==1):
         sys.stderr.write("VM setup for " + cname + " with ID " + cid + " successful.  Attaching to vm\n")
-        attach_vm="nova volume-attach " + vid + " " + cid
+        attach_vm=src_cmd+"nova volume-attach " + vid + " " + cid
         sys.stderr.write(date_time() + attach_vm + "\n")
         subprocess.call(attach_vm,shell=True)
+        mount_cmd="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@" + vip + " \"sh -s\" < /home/ubuntu/TOOLS/Scripts/utility/mount.sh \"REFS_" + bid + "\""
+        sys.stderr.write(date_time() + mount_cmd + "\n")
+        subprocess.call(mount_cmd,shell=True)
     else:
         sys.stderr.write("Volume setup timeout for " + cname + "Check connection settings or increase wait time and try again\n")
     return flag
@@ -56,8 +58,9 @@ if __name__ == "__main__":
     parser.add_argument('-sid','--snapshot-id',action='store',dest='sid',help='ID of snapshot.  Use cinder to find')
     parser.add_argument('-vid','--virt-mach',action='store',dest='vid',help='Virtual machine id.  Use Nova to find')
     parser.add_argument('-id','--BID',action='store',dest='bid',help='Bionimbpus project id')
-    parser.add_argument('-w','--wait',action='store',dest='wait',help='Wait time before giving up on spawning an image.  Recommended value 300 (in seconds)')
     parser.add_argument('-s','--size',action='store',dest='size',help='Cinder reference size.  Recommended value 200 (in GB)')
+    parser.add_argument('-ip','--ip_add',action='store',dest='ip',help='VM IP address')
+    parser.add_argument('-w','--wait',action='store',dest='wait',help='Wait time before giving up on spawning an image.  Recommended value 300 (in seconds)')
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
@@ -69,4 +72,4 @@ if __name__ == "__main__":
     size=inputs.size
     wait=inputs.wait
 
-    attach_cinder(sid,vid,bid,size,wait)
+    attach_cinder(sid,vid,bid,size,vip,wait)
