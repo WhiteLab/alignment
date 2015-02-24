@@ -1,0 +1,18 @@
+{
+    "tools":{
+	"fastx":"fastx_quality_stats",
+	"bwa":"/home/ubuntu/TOOLS/bwa-0.7.8/bwa",
+	"samtools":"/home/ubuntu/TOOLS/samtools-0.1.19/samtools",
+	"java":"/home/ubuntu/TOOLS/jdk1.7.0_45/bin/java",
+	"picard":"/home/ubuntu/TOOLS/picard/dist/picard.jar",
+	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools"
+    },
+
+    "refs":{
+	"bwa":"REFS/bwa-0.7.8/hg19.fa",
+	"samtools":"REFS/samtools-0.1.19/hg19.fa",
+	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
+	"genome":"REFS/BED/hg19_complete_sorted.bed",
+	"target":"REFS/BED/capture_panel_2.0.bed"
+    }
+}
