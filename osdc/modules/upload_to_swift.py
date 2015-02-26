@@ -1,21 +1,30 @@
 import sys
+import re
 from date_time import date_time
 from subprocess import call
+from subprocess import check_output
+import subprocess 
 
 def upload_to_swift(bid,sample):
     ONE_GB = 1073741824
-    src_cmd=". /home/ubuntu/.novarc"
-    sf_rm="rm " + sample + "_1_sequence.txt.gz " + sample + "_2_sequence.txt.gz"
-#    call(sf_rm, shell=True)
+    src_cmd=". /home/ubuntu/.novarc;"
+    # get the head of the sf and move so that it can be used at the end for qc stats
+    mv_sf="zcat " + sample + "_1_sequence.txt.gz | head | gzip -c > ../" + sample + "_1_sequence.txt.gz "
+    call(mv_sf,shell=True)
+    mv_sf="zcat " + sample + "_2_sequence.txt.gz | head | gzip -c > ../" + sample + "_2_sequence.txt.gz "
+    call(mv_sf,shell=True)
     p_tmp_rm="rm -rf picard_tmp"
     call(p_tmp_rm,shell=True)
-    swift_cmd=src_cmd + "swift upload PANCAN ./ --object-name ALIGN_TEST/" + bid + " -S " + str(ONE_GB)
+    swift_cmd=src_cmd + "swift upload PANCAN ./ --skip-identical --object-name ALIGN_TEST/" + bid + " -S " + str(ONE_GB)
     sys.stderr.write(date_time() + swift_cmd + "\n")
-    call(swift_cmd,shell=True)
-    cleanup_cmd="rm *.qs *bam* *.hist *.metrics *.txt *.bai"
-#    sys.stderr.write(date_time() + cleanup_cmd + "\n")
-#    call(cleanup_cmd, shell=True)
-
+    try:
+        check=check_output(swift_cmd,shell=True,stderr=subprocess.PIPE)
+    except:
+        sys.stderr.write(date_time() + "Upload for " + sample + " failed\n")
+        exit(1)
+    sf_rm="rm " + sample + "_1_sequence.txt.gz " + sample + "_2_sequence.txt.gz"
+    call(sf_rm, shell=True)
+    return 0
 if __name__ == "__main__":
     import argparse
     parser=argparse.ArgumentParser(description='Last poart of pipeline.  Uploads results to swift and clears current volume')

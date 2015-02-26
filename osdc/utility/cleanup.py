@@ -23,7 +23,7 @@ def cleanup(cid,vid,bid,vip):
 if __name__ == "__main__":
     import argparse
 
-    parser=argparse.ArgumentParser(description='Attaches cinder volume with references to existing vm')
+    parser=argparse.ArgumentParser(description='Breaks down a vm built with the standard of having the bionimbus project ID as part of it\'s name and attached to a reference')
     parser.add_argument('-cid','--cinder-id',action='store',dest='cid',help='ID of attached cinder volume.  Use cinder to find')
     parser.add_argument('-vid','--virt-mach',action='store',dest='vid',help='Virtual machine id.  Use Nova to find')
     parser.add_argument('-id','--BID',action='store',dest='bid',help='Bionimbpus project id')

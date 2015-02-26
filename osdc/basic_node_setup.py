@@ -40,7 +40,7 @@ class Setup():
 
 
 def main():
-    parser=argparse.ArgumentParser(description='VM spawner for pipeline processes.  Sets up vm for sample analysis and attaches sotrage references')
+    parser=argparse.ArgumentParser(description='VM spawner for pipeline processes.  Sets up vm for sample analysis and attaches storage references')
     parser.add_argument('-id','--BID',action='store',dest='bid',help='Project Bionimbus ID')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with snapshot ids and set up params')
     parser.add_argument('-w','--wait',action='store',dest='wait',help='Wait time before giving up on spawning an image.  Reommended value 300 (in seconds)')

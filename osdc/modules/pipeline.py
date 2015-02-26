@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
@@ -86,12 +87,16 @@ class Pipeline():
                 break
         if f==1:
             from upload_to_swift import upload_to_swift
-#            upload_to_swift(self.bid,self.sample)
-            sys.stderr.write(date_time() + "Pipeline process completed!\n")
-            return 1
+            check=upload_to_swift(self.bid,self.sample)
+            if check==0:
+                sys.stderr.write(date_time() + "Pipeline process completed!\n")
+                return 0
+            else:
+                sys.stderr.write(date_time() + "All but file upload succeeded\n")
+                return 1
         else:
             sys.stderr.write(date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
-            return 0
+            return 1
 
 def main():
     import argparse
