@@ -13,6 +13,8 @@
 	"samtools":"REFS/samtools-0.1.19/hg19.fa",
 	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
 	"genome":"REFS/BED/hg19_complete_sorted.bed",
-	"target":"REFS/BED/capture_panel_2.0.bed"
+	"target":"REFS/BED/capture_panel_2.0.bed",
+	"obj":"PANCAN",
+	"cont":"ALIGN_TEST"
     }
 }

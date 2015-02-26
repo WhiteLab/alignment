@@ -44,7 +44,7 @@ def attach_cinder(sid,vid,bid,size,vip,wait):
         attach_vm=src_cmd+"nova volume-attach " + vid + " " + cid
         sys.stderr.write(date_time() + attach_vm + "\n")
         subprocess.call(attach_vm,shell=True)
-        mount_cmd="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@" + vip + " \"sh -s\" < /home/ubuntu/TOOLS/Scripts/utility/mount.sh \"REFS_" + bid + "\""
+        mount_cmd="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@" + vip + " \"sh -s\" < /home/ubuntu/TOOLS/Scripts/utility/mount.sh \"REFS_" + bid + "\" exit;"
         sys.stderr.write(date_time() + mount_cmd + "\n")
         subprocess.call(mount_cmd,shell=True)
     else:

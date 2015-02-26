@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
@@ -13,6 +12,7 @@ from picard_insert_size import picard_insert_size
 from flagstats import flagstats
 import coverage
 from subprocess import call
+import subprocess
 import json
 import pdb
 
@@ -24,6 +24,11 @@ class Pipeline():
         self.end2=end2
         self.seqtype=seqtype
         self.parse_config()
+
+    def log(self,string):
+        log_file=open('LOGS/' + self.sample + '.pipe.log','a')
+        log_file.write(string)
+        log_file.close()
 
     def parse_config(self):
         self.config_data = json.loads(open(self.json_config, 'r').read())
@@ -42,10 +47,18 @@ class Pipeline():
         self.picard_tmp='picard_tmp'
         self.bedtools2_tool=self.config_data['tools']['bedtools']
         self.bed_ref=self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
+        self.obj=self.config_data['refs']['obj']
+        self.cont=self.config_data['refs']['cont']
         self.pipeline()
 
     def pipeline(self):
-        sys.stderr.write(date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
+        log_dir='LOGS/'
+        if os.path.isdir(log_dir) == False:
+            mk_log_dir='mkdir ' + log_dir
+            call(mk_log_dir,shell=True)
+            self.log(date_time() + 'Made log directory ' + log_dir + "\n")
+
+        self.log(date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
         #inputs
         
         SAMPLES={}
@@ -56,17 +69,10 @@ class Pipeline():
         
         #tools and refs
     
-        log_dir='LOGS/'
-        mk_log_dir='mkdir ' + log_dir
-        sys.stderr.write(date_time() + 'Made log directory ' + log_dir + "\n")
-        call(mk_log_dir,shell=True)
-
-        parse_qc_stats='/home/ubuntu/TOOLS/Scripts/parse_qc_stats.pl'
-        
         wait_flag=1
     
-        fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
         bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir) # rest won't run until completed
+        fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
         picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
         picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir)  # rest won't run until emopleted
         flagstats(self.samtools_tool,self.sample) # flag determines whether to run independently or hold up the rest of the pipe until completion
@@ -86,16 +92,27 @@ class Pipeline():
                 f=1
                 break
         if f==1:
+            # get the head of the sf and move so that it can be used at the end for qc stats                                                                                          
+            mv_sf="gzip -dc " + self.end1 + " | head | gzip -c > ../" + self.end1 
+            call(mv_sf,shell=True)
+            mv_sf="gzip -dc " + self.end2 + " | head | gzip -c > ../" + self.end2
+            call(mv_sf,shell=True)
+            p_tmp_rm="rm -rf picard_tmp"
+            call(p_tmp_rm,shell=True)
+            
             from upload_to_swift import upload_to_swift
-            check=upload_to_swift(self.bid,self.sample)
+            cont=self.cont + "/" + self.bid
+            check=upload_to_swift(self.obj,cont)
             if check==0:
-                sys.stderr.write(date_time() + "Pipeline process completed!\n")
+                self.log(date_time() + "Pipeline process completed!  Cleaning up large files for next run\n")
+                clean='rm *.bam ' + self.end1 + ' ' + self.end2
+                subprocess.call(clean,shell=True)
                 return 0
             else:
-                sys.stderr.write(date_time() + "All but file upload succeeded\n")
+                self.log(date_time() + "All but file upload succeeded\n")
                 return 1
         else:
-            sys.stderr.write(date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
+            self.log(date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
             return 1
 
 def main():
@@ -115,8 +132,6 @@ def main():
     end2=inputs.end2
     seqtype=inputs.seqtype
     config_file=inputs.config_file
-#    pdb.set_trace()
     Pipeline(end1,end2,seqtype,config_file)
-#    return pipe
 if __name__ == "__main__":
     main()
