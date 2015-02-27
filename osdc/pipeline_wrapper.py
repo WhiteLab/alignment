@@ -10,6 +10,7 @@ from date_time import date_time
 import subprocess
 from download_from_swift import download_from_swift
 from pipeline import Pipeline
+import pdb
 
 parser=argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f','--file',action='store',dest='fn',help='File with bionimbus ID, seqtype and sample list')
@@ -93,16 +94,15 @@ for line in fh:
                         subprocess.call('mkdir ' + l_dir, shell=True)
                 except:
                     sys.stderr.write(date_time() + 'Could not change to new directory ' + cur_dir + ' Skipping and removing sequencing files\n')
-                    rm_sf='rm ' + cur_dir + '/' + sf1 + ' ' + cur_dir + '/' +  sf2
+                    rm_sf='rm ' + cur_dir + '/' + end1 + ' ' + cur_dir + '/' +  end2
                     subprocess.call(rm_sf,shell=True)
                     os.chdir(cwd)
                     exit(3)
-                # if pipeline fails, abandon process as a larger error might come up
+                    # if pipeline fails, abandon process as a larger error might come up
                 sys.stderr.write(date_time() + 'Running pipeline process \n')
                 try:
                     p=Pipeline(end1,end2,seqtype,pipe_cfg)
-                    p.pipeline()
-                    if p==1:
+                    if p!=1:
                         sys.stderr.write("Pipeline process for sample " + seqfile + " failed!\n")
                         samp_status[samp]['sf'][seqfile]='Pipeline failed'
                         samp_status[samp]['s']='Failures detected'
@@ -124,7 +124,7 @@ for line in fh:
             sys.stderr.write(samp + '\t' + sf + '\t' + samp_status[samp]['sf'][sf] + '\n')
     os.chdir(cur_dir)
     mv_gz='mv ../*.gz .'
-    subprocess.call(mv_gz,sgell=True)
+    subprocess.call(mv_gz,shell=True)
     qc_cmd='/home/ubuntu/Scripts/parse_qc.pl 0'
     subprocess.call(qc_cmd)
     upload_to_swift(obj,cont)

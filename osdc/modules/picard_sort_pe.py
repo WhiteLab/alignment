@@ -1,11 +1,17 @@
 import sys
 from date_time import date_time
 from subprocess import call
+import subprocess
 
 def picard_sort_pe(java_tool,picard_tool,picard_tmp,sample,log_dir):
     picard_sort_pe_cmd=java_tool + " -Xmx8g -jar " + picard_tool + " SortSam CREATE_INDEX=true TMP_DIR=" + picard_tmp + " INPUT=" + sample + ".bam OUTPUT=" + sample + ".srt.bam SORT_ORDER=coordinate VALIDATION_STRINGENCY=LENIENT > " + log_dir + sample + ".picard.sort.pe.log 2>&1"
     sys.stderr.write(date_time() + picard_sort_pe_cmd + "\n")
-    call(picard_sort_pe_cmd,shell=True) 
+    try:
+        subprocess.check_output(picard_sort_pe_cmd,shell=True) 
+    except:
+        sys.stderr.write('Picard sort failed for sample ' + sample + '.  Check for borg!\n')
+        exit(1)
+    return 0
 
 if __name__ == "__main__":
     import argparse

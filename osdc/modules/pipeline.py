@@ -70,10 +70,16 @@ class Pipeline():
         #tools and refs
     
         wait_flag=1
-    
-        bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir) # rest won't run until completed
+        # check certain key processes
+        check=bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir) # rest won't run until completed
+        if(check != 0):
+            sys.stderr.write(date_time() + 'BWA failure for ' + self.sample + '\n')
+            exit(1)
         fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
-        picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
+        check=picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
+        if(check != 0):
+            sys.stderr.write(date_time() + 'Picard sort failure for ' + self.sample + '\n')
+            exit(1)
         picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir)  # rest won't run until emopleted
         flagstats(self.samtools_tool,self.sample) # flag determines whether to run independently or hold up the rest of the pipe until completion
         
