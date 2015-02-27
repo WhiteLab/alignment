@@ -1,4 +1,4 @@
-DNAseq Paired End pipeline.
+DNAseq Paired End pipeline
 ===========================
 Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
 
