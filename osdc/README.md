@@ -1,8 +1,9 @@
-DNAseq Paired End pipeline.  Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
+====== DNAseq Paired End pipeline.
+Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
 
-MAIN:
+## MAIN:
 
-basic_node_setup.py
+#### basic_node_setup.py
 usage: basic_node_setup.py [-h] [-id BID] [-j CONFIG_FILE] [-w WAIT]
 
 VM spawner for pipeline processes. Sets up vm for sample analysis and attaches
@@ -16,9 +17,9 @@ optional arguments:
   -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
                         Reommended value 300 (in seconds)
 
-parse_qc.pl - run at end of pipeline to gather qc stats
+#### parse_qc.pl - run at end of pipeline to gather qc stats
 
-pipeline_wrapper.py 
+#### pipeline_wrapper.py 
 usage: pipeline_wrapper.py [-h] [-f FN]
 
 Pipeline wrapper script to process multiple paired end set serially
@@ -27,11 +28,11 @@ optional arguments:
   -h, --help        show this help message and exit
   -f FN, --file FN  File with bionimbus ID, seqtype and sample list
 
-MODULES:
-date_time.py
-Simply helper module that prints the current timestamp
+## MODULES:
+#### date_time.py
+Simple helper module that prints the current timestamp
 
-pipeline.py
+#### pipeline.py
 usage: pipeline.py [-h] [-f1 END1] [-f2 END2] [-t SEQTYPE] [-j CONFIG_FILE]
 
 DNA alignment paired-end QC pipeline
@@ -48,7 +49,7 @@ optional arguments:
   -j CONFIG_FILE, --json CONFIG_FILE
                         JSON config file containing tool and reference
                         locations
-Runs the following submodules in order:
+##### Runs the following submodules in order:
 1. fastx
 2. bwa_mem_pe
 3. picard_sort_pe
@@ -58,8 +59,8 @@ Runs the following submodules in order:
 7. coverage
 8. upload_to_swift
 
-pipeline submodule descriptions:
-fastx.py
+## Pipeline submodule descriptions:
+####fastx.py
 usage: fastx.py [-h] [-f FASTX_TOOL] [-sa SAMPLE] [-f1 END1] [-f2 END2]
 
 FASTX quality stats module. Provides quality stats for fastq file and is
@@ -77,7 +78,7 @@ optional arguments:
   -f2 END2, --file2 END2
                         Second of paired-end fastq file
 
-bwa_mem_pe.py
+#### bwa_mem_pe.py
 usage: bwa_mem_pe.py [-h] [-b BWA_TOOL] [-rg RGRP] [-br BWA_REF] [-f1 END1]
                      [-f2 END2] [-s SAMTOOLS_TOOL] [-sr SAMTOOLS_REF]
                      [-sa SAMPLE] [-l LOG_DIR]
@@ -106,7 +107,7 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-picard_sort_pe.py
+#### picard_sort_pe.py
 usage: picard_sort_pe.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
                          [-sa SAMPLE] [-l LOG_DIR]
 
@@ -125,7 +126,7 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-picard_rmdup.py
+#### picard_rmdup.py
 usage: picard_rmdup.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
                        [-sa SAMPLE] [-l LOG_DIR]
 
@@ -145,7 +146,7 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-flagstats.py
+#### flagstats.py
 usage: flagstats.py [-h] [-s SAMTOOLS_TOOL] [-sa SAMPLE]
 
 Flag stats from samtools module. Assumes bwa alignent and picard tools have
@@ -158,7 +159,7 @@ optional arguments:
   -sa SAMPLE, --sample SAMPLE
                         Sample/project name prefix
 
-picard_insert_size.py
+#### picard_insert_size.py
 usage: picard_insert_size.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-sa SAMPLE]
                              [-l LOG_DIR]
 
@@ -176,7 +177,7 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-coverage.py
+#### coverage.py
 usage: coverage.py [-h] [-bt BEDTOOLS2_TOOL] [-sa SAMPLE] [-c COVERAGE]
                    [-bf BED_FILE]
 
@@ -197,19 +198,19 @@ optional arguments:
                         format 'exome,genome,capture'. Else, just list the one
                         bed file
 
-upload_to_swift.py
-usage: upload_to_swift.py [-h] [-id BID] [-sa SAMPLE]
+#### upload_to_swift.py
+usage: upload_to_swift.py [-h] [-o OBJ] [-c CONT]
 
-Last poart of pipeline. Uploads results to swift and clears current volume
+Uploads current directory contents to specified object and container
 
 optional arguments:
   -h, --help            show this help message and exit
-  -id BID, --bid BID    Bionimbus id
-  -sa SAMPLE, --sample SAMPLE
-                        Sample/project name prefix
-
-UTILITY:
-s/utility$ python attach_cinder.py
+  -o OBJ, --object OBJ  Swift object name to uplaod to. i.e. PANCAN
+  -c CONT, --container CONT
+                        Swfit container name to upload to. i.e.
+                        ALIGN/2015-1234
+## UTILITY:
+#### attach_cinder.py
 usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]
                         [-ip IP] [-w WAIT]
 
@@ -227,7 +228,7 @@ optional arguments:
   -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
                         Recommended value 300 (in seconds)
 
-cleanup.py                                                                                                                                               
+#### cleanup.py                                                                                                                                               
 usage: cleanup.py [-h] [-cid CID] [-vid VID] [-id BID] [-ip VIP]
 
 Breaks down a vm built with the standard of having the bionimbus project ID as
@@ -243,13 +244,13 @@ optional arguments:
   -ip VIP, --ip_add VIP
                         VM IP address
 
-hg19_pe_config.json
+##### hg19_pe_config.json
 JSON config file with standard references and tools locations
 
-mount.sh
+#### mount.sh
 Command basic_node_setup.py uses to mount a reference to a vm.
 
-setup_vm.py
+#### setup_vm.py
 usage: setup_vm.py [-h] [-id BID] [-im IMAGE] [-w WAIT] [-f FLAVOR] [-k KEY]
 
 VM spawner for pipeline processes
@@ -265,8 +266,8 @@ optional arguments:
                         Image "flavor" to spawn
   -k KEY, --key KEY     Image key-pair to use
 
-std_vm_config.json
+##### std_vm_config.json
 JSON configuration parameters for creating a pipeline vm and attaching reference storage to it
 
-unmount.sh
+#### unmount.sh
 Command cleanup.py uses to unmount a reference from a vm.
