@@ -18,7 +18,7 @@ def upload_to_swift(obj,cont):
     return 0
 if __name__ == "__main__":
     import argparse
-    parser=argparse.ArgumentParser(description='Last poart of pipeline.  Uploads results to swift and clears current volume')
+    parser=argparse.ArgumentParser(description='Uploads current directory contents to specified object and container')
     parser.add_argument('-o','--object',action='store',dest='obj',help='Swift object name to uplaod to.  i.e. PANCAN')
     parser.add_argument('-c','--container',action='store',dest='cont',help='Swfit container name to upload to.  i.e. ALIGN/2015-1234')
 
