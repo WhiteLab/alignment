@@ -1,10 +1,11 @@
 import sys
 from date_time import date_time
 from subprocess import call
+from log import log
 
 def picard_insert_size(java_tool,picard_tool,sample,log_dir):
     picard_insert_size_cmd=java_tool + " -Xmx2g -jar " + picard_tool + " CollectInsertSizeMetrics I=" + sample + ".rmdup.srt.bam H=" + sample + ".insert_metrics.pdf O=" + sample + ".insert_metrics.hist  > " + log_dir + sample + ".picard.insert_size.log 2>&1"
-    sys.stderr.write(date_time() + picard_insert_size_cmd + "\n")
+    log(log_dir + sample + ".picard.insert_size.log",date_time() + picard_insert_size_cmd + "\n")
     call(picard_insert_size_cmd,shell=True)
 
 if __name__ == "__main__":

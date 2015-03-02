@@ -14,26 +14,22 @@ import coverage
 from subprocess import call
 import subprocess
 import json
-import pdb
+from log import log
 
 class Pipeline():
-    
     def __init__(self,end1,end2,seqtype,json_config):
         self.json_config = json_config
         self.end1=end1
         self.end2=end2
         self.seqtype=seqtype
+        self.f=0
         self.parse_config()
-
-    def log(self,string):
-        log_file=open('LOGS/' + self.sample + '.pipe.log','a')
-        log_file.write(string)
-        log_file.close()
 
     def parse_config(self):
         self.config_data = json.loads(open(self.json_config, 'r').read())
         s=re.match('^(\S+)_1_sequence\.txt\.gz$',self.end1)
         self.sample=s.group(1)
+        self.loc='LOGS/' + self.sample + '.pipe.log'
         HGACID=self.sample.split("_")
         self.bid=HGACID[0]
         self.ref_mnt="/mnt/cinder/REFS_" + self.bid
@@ -56,9 +52,9 @@ class Pipeline():
         if os.path.isdir(log_dir) == False:
             mk_log_dir='mkdir ' + log_dir
             call(mk_log_dir,shell=True)
-            self.log(date_time() + 'Made log directory ' + log_dir + "\n")
+            log(self.loc,date_time() + 'Made log directory ' + log_dir + "\n")
 
-        self.log(date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
+        log(self.loc,date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
         #inputs
         
         SAMPLES={}
@@ -73,31 +69,35 @@ class Pipeline():
         # check certain key processes
         check=bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir) # rest won't run until completed
         if(check != 0):
-            sys.stderr.write(date_time() + 'BWA failure for ' + self.sample + '\n')
+            log(self.loc,date_time() + 'BWA failure for ' + self.sample + '\n')
             exit(1)
+        log(self.loc,date_time() + 'Getting fastq quality score stats\n')
         fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
+        log(self.loc,date_time() + 'Sorting BAM file\n')
         check=picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
         if(check != 0):
-            sys.stderr.write(date_time() + 'Picard sort failure for ' + self.sample + '\n')
+            log(self.loc,date_time() + 'Picard sort failure for ' + self.sample + '\n')
             exit(1)
+        log(self.loc,date_time() + 'Removing PCR duplicates\n')
         picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir)  # rest won't run until emopleted
+        log(self.loc,date_time() + 'Gathering SAM flag stats\n')
         flagstats(self.samtools_tool,self.sample) # flag determines whether to run independently or hold up the rest of the pipe until completion
-        
+        log(self.loc,date_time() + 'Calculating insert sizes\n')
         picard_insert_size(self.java_tool,self.picard_tool,self.sample,log_dir) # get insert size metrics. 
         #figure out which coverage method to call using seqtype
+        log(self.loc,date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method=getattr(coverage,(self.seqtype+'_coverage'))
 
         method(self.bedtools2_tool,self.sample,self.bed_ref,wait_flag) # run last since this step slowest of the last
-        
+        log(self.loc,date_time() + 'Checking outputs and uploading results\n')
         # check to see if last expected file was generated search for seqtype + .hist suffix
         flist=os.listdir('./')
-        f=0
         suffix=self.seqtype+'.hist'
         for fn in flist:
             if fn==(self.sample +'.' + suffix):
-                f=1
+                self.f=1
                 break
-        if f==1:
+        if self.f==1:
             # get the head of the sf and move so that it can be used at the end for qc stats                                                                                          
             mv_sf="gzip -dc " + self.end1 + " | head | gzip -c > ../" + self.end1 
             call(mv_sf,shell=True)
@@ -110,17 +110,18 @@ class Pipeline():
             cont=self.cont + "/" + self.bid
             check=upload_to_swift(self.obj,cont)
             if check==0:
-                self.log(date_time() + "Pipeline process completed!  Cleaning up large files for next run\n")
+                log(self.loc,date_time() + "Pipeline process completed!  Cleaning up large files for next run\n")
                 clean='rm *.bam ' + self.end1 + ' ' + self.end2
                 subprocess.call(clean,shell=True)
-                return 0
+                self.f= 0
             else:
-                self.log(date_time() + "All but file upload succeeded\n")
-                return 1
+                log(self.loc,date_time() + "All but file upload succeeded\n")
+                self.f= 1
         else:
-            self.log(date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
-            return 1
-
+            (self.loc,date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
+            self.f= 1
+    def __repr__(self):
+        return repr(self.f)
 def main():
     import argparse
     parser=argparse.ArgumentParser(description='DNA alignment paired-end QC pipeline')
