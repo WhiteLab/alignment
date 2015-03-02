@@ -248,6 +248,19 @@ optional arguments:
 ##### hg19_pe_config.json
 JSON config file with standard references and tools locations
 
+#### log.py
+usage: log.py [-h] [-l LOC] [-s STRING]
+
+Tiny tool to direct log output of modules. Really meant to be used within and
+not on its own
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LOC, --location LOC
+                        Location to write output to
+  -s STRING, --string STRING
+                        String to output
+
 #### mount.sh
 Command basic_node_setup.py uses to mount a reference to a vm.
 

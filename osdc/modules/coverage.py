@@ -2,6 +2,7 @@ import sys
 from date_time import date_time
 from subprocess import Popen
 from subprocess import call
+from log import log
 
 def exome_coverage(bedtools2_tool,sample,exome_bed_ref,wait_flag):
     exome_coverage_cmd=bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + exome_bed_ref + " | grep all > " + sample + ".exome.hist" 

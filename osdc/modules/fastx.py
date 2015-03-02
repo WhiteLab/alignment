@@ -1,6 +1,7 @@
 import sys
 from date_time import date_time
 from subprocess import Popen
+
 def fastx(fastx_tool,sample,end1,end2):
 
     fastx_cmd='gzip -dc ' + end1 + ' | ' + fastx_tool + ' -N -o ' + sample + '_1.qs'
