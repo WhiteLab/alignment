@@ -15,6 +15,7 @@ from subprocess import call
 import subprocess
 import json
 from log import log
+import pdb
 
 class Pipeline():
     def __init__(self,end1,end2,seqtype,json_config):
@@ -22,7 +23,7 @@ class Pipeline():
         self.end1=end1
         self.end2=end2
         self.seqtype=seqtype
-        self.f=0
+        self.status=0
         self.parse_config()
 
     def parse_config(self):
@@ -45,6 +46,7 @@ class Pipeline():
         self.bed_ref=self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
         self.obj=self.config_data['refs']['obj']
         self.cont=self.config_data['refs']['cont']
+        self.qc_stats=self.config_data['tools']['qc_stats']
         self.pipeline()
 
     def pipeline(self):
@@ -53,7 +55,17 @@ class Pipeline():
             mk_log_dir='mkdir ' + log_dir
             call(mk_log_dir,shell=True)
             log(self.loc,date_time() + 'Made log directory ' + log_dir + "\n")
-
+        # create BAM and QC directories if they don't exist already
+        bam_dir='BAM/'
+        qc_dir='QC/'
+        if os.path.isdir(bam_dir) == False:
+            mk_bam_dir='mkdir ' + bam_dir
+            call(mk_bam_dir,shell=True)
+            log(self.loc,date_time() + 'Made bam directory ' + bam_dir + "\n")
+        if os.path.isdir(qc_dir) == False:
+            mk_qc_dir='mkdir ' + qc_dir
+            call(mk_qc_dir,shell=True)
+            log(self.loc,date_time() + 'Made qc directory ' + qc_dir + "\n")
         log(self.loc,date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
         #inputs
         
@@ -95,33 +107,39 @@ class Pipeline():
         suffix=self.seqtype+'.hist'
         for fn in flist:
             if fn==(self.sample +'.' + suffix):
-                self.f=1
+                self.status=1
                 break
-        if self.f==1:
+        if self.status==1:
             # get the head of the sf and move so that it can be used at the end for qc stats                                                                                          
-            mv_sf="gzip -dc " + self.end1 + " | head | gzip -c > ../" + self.end1 
-            call(mv_sf,shell=True)
-            mv_sf="gzip -dc " + self.end2 + " | head | gzip -c > ../" + self.end2
-            call(mv_sf,shell=True)
+#            mv_sf="gzip -dc " + self.end1 + " | head | gzip -c > ../" + self.end1 
+#            call(mv_sf,shell=True)
+#            mv_sf="gzip -dc " + self.end2 + " | head | gzip -c > ../" + self.end2
+#            call(mv_sf,shell=True)
             p_tmp_rm="rm -rf picard_tmp"
             call(p_tmp_rm,shell=True)
-            
+            # move files into approriate place and run qc_stats
+            log(self.loc,date_time() + 'Calculating qc stats and prepping files for uplaod\n')
+            mv_bam='mv *.bam *.bai BAM/'
+            subprocess.call(mv_bam,shell=True)
+            qc_cmd=self.qc_stats + ' 2 ' + self.sample
+            subprocess.call(qc_cmd,shell=True)
+            rm_sf='rm ' + self.end1 + ' ' + self.end2
+            subprocess.call(rm_sf,shell=True)
+            mv_rest='find . -maxdepth 1 -type f -exec mv {} QC \;'
+            subprocess.call(mv_rest, shell=True)
             from upload_to_swift import upload_to_swift
             cont=self.cont + "/" + self.bid
             check=upload_to_swift(self.obj,cont)
             if check==0:
-                log(self.loc,date_time() + "Pipeline process completed!  Cleaning up large files for next run\n")
-                clean='rm *.bam ' + self.end1 + ' ' + self.end2
-                subprocess.call(clean,shell=True)
-                self.f= 0
+                log(self.loc,date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
+                self.status = 0
             else:
                 log(self.loc,date_time() + "All but file upload succeeded\n")
-                self.f= 1
+                self.status = 1
         else:
             (self.loc,date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
-            self.f= 1
-    def __repr__(self):
-        return repr(self.f)
+            self.status = 1
+
 def main():
     import argparse
     parser=argparse.ArgumentParser(description='DNA alignment paired-end QC pipeline')
