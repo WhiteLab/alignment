@@ -14,7 +14,7 @@ import pdb
 from log import log
 
 parser=argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
-parser.add_argument('-f','--file',action='store',dest='fn',help='File with bionimbus ID, seqtype and sample list')
+parser.add_argument('-f','--file',action='store',dest='fn',help='File with bionimbus ID, seqtype and sample lane list')
 
 if len(sys.argv)==1:
     parser.print_help()
@@ -25,6 +25,7 @@ fh=open(inputs.fn,'r')
 src_cmd='. ~/.novarc;'
 obj='PANCAN'
 cont='ALIGN_TEST'
+
 # paired-end config file to use for pipeline
 pipe_cfg='/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json'
 
@@ -53,7 +54,7 @@ for line in fh:
     for lane in lane_csv.split(', '):
         lane_status[lane]='Initializing'
         swift_cmd=src_cmd + 'swift list ' + obj + ' --prefix ' + contain + lane
-        log(loc,date_time() + 'Getting sequence files for lane ' + lane + '\n' + swift_cmd + '\n')
+        log(loc,date_time() + 'Getting sequence files for sample ' + lane + '\n' + swift_cmd + '\n')
         try:
             contents=subprocess.check_output(swift_cmd,shell=True)
         except:
@@ -102,20 +103,24 @@ for line in fh:
             exit(3)
             # if pipeline fails, abandon process as a larger error might come up
         log(loc,date_time() + 'Running pipeline process for lane ' + lane + '\n')
+        #check class status flag
         p=Pipeline(end1,end2,seqtype,pipe_cfg)
-        if str(p)!='0':
-            log(loc,date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(p) + " \n")
+        if p.status != 0:
+            log(loc,date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(p.status) + " \n")
             lane_status[lane]='Pipeline return status failed'
             log(loc,lane + '\t' + lane_status[lane] + '\n')
             exit(3)
         # change back to parent directory so that new sequencing files can be downloaded in same place
         os.chdir(cwd)
-        lane_status[lane]='Success!'
-        log(loc,lane + '\t' + lane_status[lane] + '\n')
+        # clean out files for next run
+        cleanup='rm -rf ' + cur_dir + '/*'
+        subprocess.call(cleanup,shell=True)
+        lane_status[lane]='Pipeline run and data uplaoded'
+        log(loc,date_time() + lane + '\t' + lane_status[lane] + '\n')
     os.chdir(cur_dir)
-    mv_gz='mv ../*.gz .'
-    subprocess.call(mv_gz,shell=True)
-    qc_cmd='/home/ubuntu/Scripts/parse_qc.pl 0'
-    subprocess.call(qc_cmd)
-    upload_to_swift(obj,cont)
+#    mv_gz='mv ../*.gz .'
+#    subprocess.call(mv_gz,shell=True)
+#    qc_cmd=parse_qc + '  0'
+#    subprocess.call(qc_cmd)
+#    upload_to_swift(obj,cont)
 sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")
