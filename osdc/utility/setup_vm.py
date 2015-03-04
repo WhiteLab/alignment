@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 from date_time import date_time
 import subprocess
@@ -44,9 +45,15 @@ def setup_vm(bid,image,flavor,key,wait):
                         break
         n=n+i
     if(flag==1):
-        sys.stderr.write("VM setup for " + vm + " with IP address " + vip + " with ID " + vid + " successful\n")
+        # upload openstack variables from head vm
+        delay='sleep 10s'
+        subprocess.call(delay,shell=True)
+        nova_var='ssh-keyscan ' + vip + ' >> ~/.ssh/known_hosts;rsync /home/ubuntu/.novarc ubuntu@' + vip + ':/home/ubuntu'
+        sys.stderr.write(date_time() + 'Copying openstack variables to vm\n' + nova_var + '\n')
+        subprocess.call(nova_var,shell=True)
+        sys.stderr.write(date_time() + "VM setup for " + vm + " with IP address " + vip + " with ID " + vid + " successful\n")
     else:
-        sys.stderr.write("VM setup time out for " + vm + "Check connection settings or increase wait time and try again\n")
+        sys.stderr.write(date_time() + "VM setup time out for " + vm + "Check connection settings or increase wait time and try again\n")
     return (flag,vid,vip)
                             
 if __name__ == "__main__":

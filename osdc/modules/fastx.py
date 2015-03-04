@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 from date_time import date_time
 from subprocess import Popen
