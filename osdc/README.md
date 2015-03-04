@@ -61,7 +61,7 @@ optional arguments:
 8. upload_to_swift
 
 ## Pipeline submodule descriptions:
-####fastx.py
+#### fastx.py
 usage: fastx.py [-h] [-f FASTX_TOOL] [-sa SAMPLE] [-f1 END1] [-f2 END2]
 
 FASTX quality stats module. Provides quality stats for fastq file and is
@@ -210,6 +210,20 @@ optional arguments:
   -c CONT, --container CONT
                         Swfit container name to upload to. i.e.
                         ALIGN/2015-1234
+
+#### merge_qc_stats.py 
+usage: merge_qc_stats.py [-h] [-o OBJ] [-c CONT] [-l LANE_LIST]
+
+Uses pipeline lane list to create a summary table of qc stats
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OBJ, --object OBJ  Swift object name, i.e. PANCAN
+  -c CONT, --container CONT
+                        Swift container prefix, i.e. RAW/2015-1234
+  -l LANE_LIST, --lane_list LANE_LIST
+                        Original lane list used to run pipeline
+
 ## UTILITY:
 #### attach_cinder.py
 usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]
