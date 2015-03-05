@@ -53,7 +53,8 @@ optional arguments:
 ##### Runs the following submodules in order:
 1. fastx
 2. bwa_mem_pe
-3. picard_sort_pe
+3. novosort_sort_pe
+(picard_sort_pe - deprecated in favor of novosort, but still avaialable)
 4. picard_rmdup
 5. flagstats
 6. picard_insert_size 
@@ -107,8 +108,21 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
+#### novosort_sort_pe.py 
+usage: novosort_sort_pe.py [-h] [-n NOVOSORT] [-sa SAMPLE] [-l LOG_DIR]
 
-#### picard_sort_pe.py
+novosort tool to sort BAM module.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n NOVOSORT, --novosort NOVOSORT
+                        novosort binary location
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/project name prefix
+  -l LOG_DIR, --log LOG_DIR
+                        LOG directory location
+
+##### picard_sort_pe.py - available, but deprecated in favor of novosort
 usage: picard_sort_pe.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
                          [-sa SAMPLE] [-l LOG_DIR]
 
@@ -224,6 +238,21 @@ optional arguments:
   -l LANE_LIST, --lane_list LANE_LIST
                         Original lane list used to run pipeline
 
+novosort_merge_pe.py                                                                                                          
+usage: novosort_merge_pe.py [-h] [-sa SAMPLE] [-o OBJ] [-j CONFIG_FILE]
+                            [-w WAIT]
+
+novosort tool to merge BAM files module.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/project name prefix
+  -o OBJ, --obj OBJ     Swift object name
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and ref locations
+  -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
+                        recommended
 ## UTILITY:
 #### attach_cinder.py
 usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]

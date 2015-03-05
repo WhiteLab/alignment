@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
@@ -6,7 +7,8 @@ import re
 from date_time import date_time
 from fastx import fastx
 from bwa_mem_pe import bwa_mem_pe
-from picard_sort_pe import picard_sort_pe
+#from picard_sort_pe import picard_sort_pe
+from novosort_sort_pe import novosort_sort_pe
 from picard_rmdup import picard_rmdup
 from picard_insert_size import picard_insert_size
 from flagstats import flagstats
@@ -41,6 +43,7 @@ class Pipeline():
         self.samtools_ref=self.ref_mnt + '/' + self.config_data['refs']['samtools']
         self.java_tool=self.config_data['tools']['java']
         self.picard_tool=self.config_data['tools']['picard']
+        self.novosort=self.config_data['tools']['novosort']
         self.picard_tmp='picard_tmp'
         self.bedtools2_tool=self.config_data['tools']['bedtools']
         self.bed_ref=self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
@@ -86,9 +89,14 @@ class Pipeline():
         log(self.loc,date_time() + 'Getting fastq quality score stats\n')
         fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
         log(self.loc,date_time() + 'Sorting BAM file\n')
-        check=picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
+#        check=picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
+#        if(check != 0):
+#            log(self.loc,date_time() + 'Picard sort failure for ' + self.sample + '\n')
+#            exit(1)
+
+        check=novosort_sort_pe(self.novosort,self.sample,log_dir) # rest won't run until completed
         if(check != 0):
-            log(self.loc,date_time() + 'Picard sort failure for ' + self.sample + '\n')
+            log(self.loc,date_time() + 'novosort sort failure for ' + self.sample + '\n')
             exit(1)
         log(self.loc,date_time() + 'Removing PCR duplicates\n')
         picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir)  # rest won't run until emopleted
