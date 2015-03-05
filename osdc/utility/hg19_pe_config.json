@@ -5,6 +5,7 @@
 	"samtools":"/home/ubuntu/TOOLS/samtools-0.1.19/samtools",
 	"java":"/home/ubuntu/TOOLS/jdk1.7.0_45/bin/java",
 	"picard":"/home/ubuntu/TOOLS/picard/dist/picard.jar",
+	"novosort":"/home/ubuntu/TOOLS/novo/novosort",
 	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
 	"qc_stats":"/home/ubuntu/TOOLS/Scripts/parse_qc.pl"
     },
