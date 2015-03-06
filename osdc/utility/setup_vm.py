@@ -10,20 +10,28 @@ def setup_vm(bid,image,flavor,key,wait):
     # need build variables to call nova successfully
     src_cmd='. /home/ubuntu/.novarc;'
     vm = "vm_pipe_" + bid
+    vid=''
     vm_boot=src_cmd + "nova boot " + vm + " --image " + image + " --flavor " + flavor + " --key_name " + key
     sys.stderr.write(date_time() + "Booting up vm\n" + vm_boot + "\n")
-    subprocess.call(vm_boot, shell=True)
-    
+    v=subprocess.check_output(vm_boot, shell=True)
+    # get id of vm in the event another has the same display name
+    for line in re.findall('(.*)\n',v):
+        line=line.rstrip('\n')
+        m=re.match('\|\s+(\S+)\s+\|\s+(\S+)\s+\|',line)
+        if m:
+            if m.group(1)='id':
+                vid=m.group(2)
+                break
     # check status of vm until finshed spawing every 30s                                                                                                                         
     i=30
     sleep='sleep ' + str(i) + 's'
     n=i
     flag=0
     vip=''
-    vid=''
+
     while flag==0:
         subprocess.call(sleep, shell=True)
-        if n > wait:
+        if n > int(wait):
             break
         else:
             sys.stderr.write(date_time() + "Checking success of vm boot. " + str(n) + " seconds have passed\n")
@@ -31,10 +39,9 @@ def setup_vm(bid,image,flavor,key,wait):
             p=subprocess.check_output(check,shell=True)
             for line in re.findall('(.*)\n',p):
                 line=line.rstrip('\n')
-                if(re.search(vm,line)):
+                if(re.search(vid,line)):
                     line=re.sub(r"\|",r"",line)
                     info=line.split()
-                    vid=info[0]
                     vname=info[1]
                     vstatus=info[2]
                     sys.stderr.write('Status of ' + vname + ' is ' + vstatus + ' with id ' + vid + '\n')
@@ -46,7 +53,7 @@ def setup_vm(bid,image,flavor,key,wait):
         n=n+i
     if(flag==1):
         # upload openstack variables from head vm
-        delay='sleep 10s'
+        delay='sleep 20s'
         subprocess.call(delay,shell=True)
         nova_var='ssh-keyscan ' + vip + ' >> ~/.ssh/known_hosts;rsync /home/ubuntu/.novarc ubuntu@' + vip + ':/home/ubuntu'
         sys.stderr.write(date_time() + 'Copying openstack variables to vm\n' + nova_var + '\n')

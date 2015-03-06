@@ -58,7 +58,7 @@ sub output_stats
 	    
 	    # aggregate arguments and structure for curl/JSON command output
 	    my $json.="{\n\t\"Run_attrib\":{\n\t\t\"Bionimbus_id\": \"$db_id\",\n\t\t\"Run\":";
-	    $json.=" \"$run\",\n\t\t\"Date\": \"$date\",\n\t\t\"Machine\": \"$machine\",\n\t\t\"BarCode\": \"$barcode\",\n\t\t\"Lane\": \"$lane\",\n\t\t\"read_length\": \"$data{$sample}{LEN}\",\n\t\t\"total_reads\": \"$data{$sample}{RAW}{TOTAL}\"\n\t\t}\n";
+	    $json.=" \"$run\",\n\t\t\"Date\": \"$date\",\n\t\t\"Machine\": \"$machine\",\n\t\t\"BarCode\": \"$barcode\",\n\t\t\"Lane\": \"$lane\",\n\t\t\"read_length\": \"$data{$sample}{LEN}\",\n\t\t\"total_reads\": \"$data{$sample}{RAW}{TOTAL}\"\n\t\t},\n";
 	    # get Total reads, Aligned reads, rmdup aligned reads, Fraction duplicate reads
 	    my $ali_frac = sprintf ("%.4f", $data{$sample}{RAW}{MAP}/$data{$sample}{RAW}{TOTAL});
 	    my $dup_frac = sprintf ("%.4f", 1 - ($data{$sample}{RMDUP}{MAP} / $data{$sample}{RAW}{TOTAL}));
@@ -72,7 +72,7 @@ sub output_stats
 	    my $frac_sequenced_bp_ot = sprintf ("%.4f", $on_target_bp / $total_bp);
 	    # add alignment stats to JSON statement
 	    # median_insert_size\tmedian_absolute_deviation\tmean_insert_size\tinsert_standard_devation
-	    $json.="\t\"align_stats\":{\n\t\t\"post_align_reads\": \"$data{$sample}{RAW}{MAP}\",\n\t\t\"fraction_aligned\": \"$ali_frac\",\n\t\t\"post_rmdup_reads\": \"$data{$sample}{RMDUP}{MAP}\",\n\t\t\"fraction_rmduped\": \"$dup_frac\",\n\t\t\"target_size\": \"$data{$sample}{COV}{TARGET}\",\n\t\t\"aligned_bp_ot\": \"$data{$sample}{COV}{TOTAL}\",\n\t\t\"frac_aligned_bp_ot\": \"$frac_aligned_bp_ot\",\n\t\t\"fraction_sequenced_bp_ot\": \"$frac_sequenced_bp_ot\",\n\t\t\"median_insert_size\": \"$data{$sample}{MI}\",\n\t\t\"tmedian_absolute_deviation\": \"$data{$sample}{MA}\",\n\t\t\"tmean_insert_size\": \"".sprintf("%.2f",$data{$sample}{XI})."\",\n\t\t\"insert_standard_devation:\"".sprintf("%.2f",$data{$sample}{SI})."\"\n\t\t},\n";
+	    $json.="\t\"align_stats\":{\n\t\t\"post_align_reads\": \"$data{$sample}{RAW}{MAP}\",\n\t\t\"fraction_aligned\": \"$ali_frac\",\n\t\t\"post_rmdup_reads\": \"$data{$sample}{RMDUP}{MAP}\",\n\t\t\"fraction_rmduped\": \"$dup_frac\",\n\t\t\"target_size\": \"$data{$sample}{COV}{TARGET}\",\n\t\t\"aligned_bp_ot\": \"$data{$sample}{COV}{TOTAL}\",\n\t\t\"frac_aligned_bp_ot\": \"$frac_aligned_bp_ot\",\n\t\t\"fraction_sequenced_bp_ot\": \"$frac_sequenced_bp_ot\",\n\t\t\"median_insert_size\": \"$data{$sample}{MI}\",\n\t\t\"tmedian_absolute_deviation\": \"$data{$sample}{MA}\",\n\t\t\"tmean_insert_size\": \"".sprintf("%.2f",$data{$sample}{XI})."\",\n\t\t\"insert_standard_devation\":\"".sprintf("%.2f",$data{$sample}{SI})."\"\n\t\t},\n";
 	    
 	    my $average_ot_coverage = sprintf ("%.2f", $on_target_bp / $data{$sample}{COV}{TARGET});
 	    my $on_target_frac = sprintf ("%.4f", $on_target_reads / $data{$sample}{RMDUP}{MAP} );

@@ -27,5 +27,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs=parser.parse_args()
-    (novosort,sample,log_dir)=(inputs.novosort_tool,inputs.sample,inputs.log_dir)    
+    (novosort,sample,log_dir)=(inputs.novosort,inputs.sample,inputs.log_dir)    
     novosort_sort_pe(novosort,sample,log_dir)

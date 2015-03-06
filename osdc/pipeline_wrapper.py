@@ -15,6 +15,7 @@ from log import log
 
 parser=argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f','--file',action='store',dest='fn',help='File with bionimbus ID, seqtype and sample lane list')
+parser.add_argument('-o','--object',action='store',dest='obj',help='Object where to get and store data')
 
 if len(sys.argv)==1:
     parser.print_help()
@@ -23,7 +24,7 @@ if len(sys.argv)==1:
 inputs=parser.parse_args()
 fh=open(inputs.fn,'r')
 src_cmd='. ~/.novarc;'
-obj='PANCAN'
+obj=inputs.obj
 cont='ALIGN_TEST'
 
 # paired-end config file to use for pipeline

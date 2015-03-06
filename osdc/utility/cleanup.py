@@ -15,6 +15,8 @@ def cleanup(cid,vid,bid,vip):
     detach_vm=src_cmd+"nova volume-detach " + vid + " " + cid
     sys.stderr.write(date_time() + detach_vm + "\n")
     subprocess.call(detach_vm,shell=True)
+    sleep_cmd='sleep 30s'
+    subprocess.call(sleep_cmd,shell=True)
     delete_vol=src_cmd+"cinder delete " + cid
     sys.stderr.write(date_time() + "Deleting cinder volume " + cname + "with id " + cid + "\n")
     subprocess.call(delete_vol,shell=True)
