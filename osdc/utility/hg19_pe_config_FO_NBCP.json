@@ -16,8 +16,8 @@
 	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
 	"genome":"REFS/BED/hg19_complete_sorted.bed",
 	"target":"REFS/BED/capture_panel_2.0.bed",
-	"obj":"PANCAN",
+	"obj":"FO_NBCP",
 	"cont":"ALIGN_TEST",
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config_FO_NBCP.json"
     }
 }
