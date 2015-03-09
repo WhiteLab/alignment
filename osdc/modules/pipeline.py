@@ -153,7 +153,7 @@ def main():
     parser=argparse.ArgumentParser(description='DNA alignment paired-end QC pipeline')
     parser.add_argument('-f1','--file1',action='store',dest='end1',help='First fastq file')
     parser.add_argument('-f2','--file2',action='store',dest='end2',help='Second fastq file')
-    parser.add_argument('-t','--seqtype',action='store',dest='seqtype',help='Type of sequencing peformed.  Likely choices are genome, exome, and target for capture')
+    parser.add_argument('-t','--seqtype',action='store',dest='seqtype',help='Type of sequencing peformed.  Likely choices are genome, exome, and capture')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file containing tool and reference locations')
     if len(sys.argv)==1:
         parser.print_help()
