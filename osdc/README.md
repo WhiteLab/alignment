@@ -21,13 +21,16 @@ optional arguments:
 #### parse_qc.pl - run at end of pipeline to gather qc stats
 
 #### pipeline_wrapper.py 
-usage: pipeline_wrapper.py [-h] [-f FN]
+usage: pipeline_wrapper.py [-h] [-f FN] [-j CONFIG]
 
-Pipeline wrapper script to process multiple paired end set serially
+Pipeline wrapper script to process multiple paired end set serially.
 
 optional arguments:
-  -h, --help        show this help message and exit
-  -f FN, --file FN  File with bionimbus ID, seqtype and sample lane list
+  -h, --help            show this help message and exit
+  -f FN, --file FN      File with bionimbus ID, seqtype and sample lane list
+  -j CONFIG, --json CONFIG
+                        JSON config file with tool locations, reference
+                        locations, and data staging informationlane list
 
 ## MODULES:
 #### date_time.py

@@ -19,7 +19,7 @@ def setup_vm(bid,image,flavor,key,wait):
         line=line.rstrip('\n')
         m=re.match('\|\s+(\S+)\s+\|\s+(\S+)\s+\|',line)
         if m:
-            if m.group(1)='id':
+            if m.group(1)=='id':
                 vid=m.group(2)
                 break
     # check status of vm until finshed spawing every 30s                                                                                                                         

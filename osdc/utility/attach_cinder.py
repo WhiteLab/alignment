@@ -18,7 +18,7 @@ def attach_cinder(sid,vid,bid,size,vip,wait):
         line=line.rstrip('\n')
         m=re.match('\|\s+(\S+)\s+\|\s+(\S+)\s+\|',line)
         if m:
-            if m.group(1)='id':
+            if m.group(1)=='id':
                 cid=m.group(2)
                 break
 
