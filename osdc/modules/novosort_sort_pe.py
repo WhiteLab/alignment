@@ -6,14 +6,17 @@ import subprocess
 from log import log
 
 def novosort_sort_pe(novosort,sample,log_dir):
-    novosort_sort_pe_cmd=novosort + " --threads 8 --ram 28G --output " + sample + ".srt.bam --index  " + sample + ".bam > " + log_dir + sample + ".novosort.sort.pe.log 2>&1"
+    novosort_sort_pe_cmd='mkdir novosort_tmp;' + novosort + " --threads 8 --ram 28G --tmpdir novosort_tmp --output " + sample + ".srt.bam --index  " + sample + ".bam > " + log_dir + sample + ".novosort.sort.pe.log 2>&1"
     log(log_dir + sample + ".novosort.sort.pe.log",date_time() + novosort_sort_pe_cmd + "\n")
+    f=0
     try:
-        subprocess.check_output(novosort_sort_pe_cmd,shell=True) 
+        f=subprocess.call(novosort_sort_pe_cmd,shell=True)
+        rm_tmp='rm -rf novosort_tmp'
+        subprocess.call(rm_tmp,shell=True)
     except:
         log(log_dir + sample + ".novosort.sort.pe.log",'novosort sort failed for sample ' + sample + '\n')
         exit(1)
-    return 0
+    return f
 
 if __name__ == "__main__":
     import argparse
