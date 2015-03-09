@@ -49,10 +49,11 @@ optional arguments:
                         Second fastq file
   -t SEQTYPE, --seqtype SEQTYPE
                         Type of sequencing peformed. Likely choices are
-                        genome, exome, and target for capture
+                        genome, exome, and capture
   -j CONFIG_FILE, --json CONFIG_FILE
                         JSON config file containing tool and reference
                         locations
+
 ##### Runs the following submodules in order:
 1. fastx
 2. bwa_mem_pe
@@ -195,7 +196,7 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-#### coverage.py
+#### coverage.py 
 usage: coverage.py [-h] [-bt BEDTOOLS2_TOOL] [-sa SAMPLE] [-c COVERAGE]
                    [-bf BED_FILE]
 
@@ -210,7 +211,7 @@ optional arguments:
                         Sample/project name prefix
   -c COVERAGE, --coverage COVERAGE
                         Name of submodule to run. Choose from genome, exome,
-                        target or all.
+                        capture or all.
   -bf BED_FILE, --bed_file BED_FILE
                         Bedfile list. If running all, list as string in order
                         format 'exome,genome,capture'. Else, just list the one
