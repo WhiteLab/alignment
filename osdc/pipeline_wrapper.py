@@ -6,6 +6,7 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 import os
 import re
 import argparse
+import json
 from date_time import date_time
 import subprocess
 from download_from_swift import download_from_swift
@@ -15,7 +16,7 @@ from log import log
 
 parser=argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f','--file',action='store',dest='fn',help='File with bionimbus ID, seqtype and sample lane list')
-parser.add_argument('-o','--object',action='store',dest='obj',help='Object where to get and store data')
+parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with tools, references, and data storage locations')
 
 if len(sys.argv)==1:
     parser.print_help()
@@ -24,12 +25,12 @@ if len(sys.argv)==1:
 inputs=parser.parse_args()
 fh=open(inputs.fn,'r')
 src_cmd='. ~/.novarc;'
-obj=inputs.obj
-cont='ALIGN_TEST'
 
-# paired-end config file to use for pipeline
-pipe_cfg='/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config_FO_NBCP.json'
+def parse_config(config_file):
+    config_data=json.loads(open(config_file, 'r').read())
+    return (config_data['refs']['obj'],config_data['refs']['cont'],config_data['refs']['config'])
 
+(obj,cont,pipe_cfg)=parse_config(inputs.config_file)
 
 for line in fh:
     line=line.rstrip('\n')
