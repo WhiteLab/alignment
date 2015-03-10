@@ -17,6 +17,7 @@ from log import log
 parser=argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f','--file',action='store',dest='fn',help='File with bionimbus ID, seqtype and sample lane list')
 parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with tools, references, and data storage locations')
+parser.add_argument('-m','--mount',action='store',dest='ref_mnt',help='Reference drive mount location.  Example would be /mnt/cinder/REFS_XXX')
 
 if len(sys.argv)==1:
     parser.print_help()
@@ -25,7 +26,7 @@ if len(sys.argv)==1:
 inputs=parser.parse_args()
 fh=open(inputs.fn,'r')
 src_cmd='. ~/.novarc;'
-
+ref_mnt=inputs.ref_mnt
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
     return (config_data['refs']['obj'],config_data['refs']['cont'],config_data['refs']['config'])
@@ -35,7 +36,7 @@ def parse_config(config_file):
 for line in fh:
     line=line.rstrip('\n')
     (bid,seqtype,lane_csv)=line.split('\t')
-    cwd='/mnt/cinder/REFS_' + bid + '/SCRATCH'
+    cwd=ref_mnt + '/SCRATCH'
     loc=cwd[:-7] + bid + '.run.log'
     log(loc,date_time() + 'Initializing scratch directory for ' + bid + '\n')
     # All files for current bid to be stored in cwd
@@ -106,7 +107,7 @@ for line in fh:
             # if pipeline fails, abandon process as a larger error might come up
         log(loc,date_time() + 'Running pipeline process for lane ' + lane + '\n')
         #check class status flag
-        p=Pipeline(end1,end2,seqtype,pipe_cfg)
+        p=Pipeline(end1,end2,seqtype,pipe_cfg,ref_mnt)
         if p.status != 0:
             log(loc,date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(p.status) + " \n")
             lane_status[lane]='Pipeline return status failed'
