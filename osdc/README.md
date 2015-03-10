@@ -31,6 +31,9 @@ optional arguments:
   -j CONFIG, --json CONFIG
                         JSON config file with tool locations, reference
                         locations, and data staging informationlane list
+  -m REF_MNT, --mount REF_MNT
+                        Reference drive mount location. Example would be
+                        /mnt/cinder/REFS_XXX
 
 ## MODULES:
 #### date_time.py
@@ -53,6 +56,9 @@ optional arguments:
   -j CONFIG_FILE, --json CONFIG_FILE
                         JSON config file containing tool and reference
                         locations
+  -m REF_MNT, --mount REF_MNT
+                        Drive mount location. Example would be
+                        /mnt/cinder/REFS_XXX
 
 ##### Runs the following submodules in order:
 1. fastx
