@@ -7,7 +7,8 @@
 	"picard":"/home/ubuntu/TOOLS/picard/dist/picard.jar",
 	"novosort":"/home/ubuntu/TOOLS/nova/novosort",
 	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
-	"qc_stats":"/home/ubuntu/TOOLS/Scripts/parse_qc.pl"
+	"qc_stats":"/home/ubuntu/TOOLS/Scripts/parse_qc.pl",
+	"mutect":"/home/ubuntu/TOOLS/muTect-1.1.4/muTect-1.1.4.jar"
     },
 
     "refs":{
@@ -16,6 +17,8 @@
 	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
 	"genome":"REFS/BED/hg19_complete_sorted.bed",
 	"capture":"REFS/BED/capture_panel_2.0.bed",
+	"intervals":"REFS/INTERVAL/hg19_ordered_interval.txt",
+	"fa_ordered":"REFS/FASTA/hg19_ordered.fa",
 	"obj":"PANCAN",
 	"cont":"ALIGN_TEST",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
