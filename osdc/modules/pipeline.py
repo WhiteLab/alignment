@@ -20,12 +20,13 @@ from log import log
 import pdb
 
 class Pipeline():
-    def __init__(self,end1,end2,seqtype,json_config):
+    def __init__(self,end1,end2,seqtype,json_config,ref_mnt):
         self.json_config = json_config
         self.end1=end1
         self.end2=end2
         self.seqtype=seqtype
         self.status=0
+        self.ref_mnt=ref_mnt
         self.parse_config()
 
     def parse_config(self):
@@ -35,7 +36,6 @@ class Pipeline():
         self.loc='LOGS/' + self.sample + '.pipe.log'
         HGACID=self.sample.split("_")
         self.bid=HGACID[0]
-        self.ref_mnt="/mnt/cinder/REFS_" + self.bid
         self.fastx_tool=self.config_data['tools']['fastx']
         self.bwa_tool=self.config_data['tools']['bwa']
         self.bwa_ref=self.ref_mnt + '/' + self.config_data['refs']['bwa']
@@ -155,6 +155,7 @@ def main():
     parser.add_argument('-f2','--file2',action='store',dest='end2',help='Second fastq file')
     parser.add_argument('-t','--seqtype',action='store',dest='seqtype',help='Type of sequencing peformed.  Likely choices are genome, exome, and capture')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file containing tool and reference locations')
+    parser.add_argument('-m','--mount',action='store',dest='ref_mnt',help='Drive mount location.  Example would be /mnt/cinder/REFS_XXX')
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
@@ -165,6 +166,7 @@ def main():
     end2=inputs.end2
     seqtype=inputs.seqtype
     config_file=inputs.config_file
-    Pipeline(end1,end2,seqtype,config_file)
+    ref_mnt=inputs.ref_mnt
+    Pipeline(end1,end2,seqtype,config_file,ref_mnt)
 if __name__ == "__main__":
     main()
