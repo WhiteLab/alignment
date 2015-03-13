@@ -248,21 +248,56 @@ optional arguments:
   -l LANE_LIST, --lane_list LANE_LIST
                         Original lane list used to run pipeline
 
-novosort_merge_pe.py                                                                                                          
-usage: novosort_merge_pe.py [-h] [-sa SAMPLE] [-o OBJ] [-j CONFIG_FILE]
-                            [-w WAIT]
+#### novosort_merge_pe.py 
+usage: novosort_merge_pe.py [-h] [-sl SAMPLE_LIST] [-j CONFIG_FILE] [-w WAIT]
 
 novosort tool to merge BAM files module.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -sa SAMPLE, --sample SAMPLE
-                        Sample/project name prefix
-  -o OBJ, --obj OBJ     Swift object name
+  -sl SAMPLE_LIST, --sample_list SAMPLE_LIST
+                        Sample/project name prefix list
   -j CONFIG_FILE, --json CONFIG_FILE
                         JSON config file with tool and ref locations
   -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
                         recommended
+
+#### picard_ksort.py 
+usage: picard_ksort.py [-h] [-b BAM_LIST] [-j CONFIG_FILE] [-o FLAG]
+                       [-r REF_MNT]
+
+Picard tool to reorder BAM file by karyotypic order, necessary for running
+muTect.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b BAM_LIST, --bam_list BAM_LIST
+                        BAM file list
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and ref locations
+  -o FLAG, --overwrite FLAG
+                        Enter 'y' or 'n.' Flag to overwrite original after
+                        reordering or not.
+  -r REF_MNT, --reference REF_MNT
+                        Directory references are mounted, i.e.
+                        /mnt/cinder/REFS_XXX
+ 
+#### mutect_pipe.py 
+usage: mutect_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS] [-r REF_MNT]
+
+muTect pipleine for variant calling. Need BAM and bai files ahead of time.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and reference locations
+  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
+                        Sample tumor/normal pairs
+  -r REF_MNT, --ref_mnt REF_MNT
+                        Reference drive path - i.e. /mnt/cinder/REFS_XXXX
+
+
+
 ## UTILITY:
 #### attach_cinder.py
 usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]

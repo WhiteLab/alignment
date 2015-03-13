@@ -8,17 +8,17 @@
 	"novosort":"/home/ubuntu/TOOLS/nova/novosort",
 	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
 	"qc_stats":"/home/ubuntu/TOOLS/Scripts/parse_qc.pl",
-	"mutect":"/home/ubuntu/TOOLS/muTect-1.1.4/muTect-1.1.4.jar"
+	"mutect":"/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar"
     },
 
     "refs":{
-	"bwa":"REFS/bwa-0.7.8/hg19.fa",
-	"samtools":"REFS/samtools-0.1.19/hg19.fa",
+	"bwa":"REFS/bwa-0.7.8/hg19_karyo_ordered.fa",
+	"samtools":"REFS/samtools-0.1.19/hg19_karyo_ordered.fa",
 	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
-	"genome":"REFS/BED/hg19_complete_sorted.bed",
+	"genome":"REFS/BED/hg19_karyo_ordered.bed",
 	"capture":"REFS/BED/capture_panel_2.0.bed",
-	"intervals":"REFS/INTERVAL/hg19_ordered_interval.txt",
-	"fa_ordered":"REFS/FASTA/hg19_ordered.fa",
+	"intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt",
+	"fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
 	"obj":"PANCAN",
 	"cont":"ALIGN_TEST",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"

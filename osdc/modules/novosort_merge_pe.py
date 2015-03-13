@@ -3,12 +3,10 @@ import sys
 import os
 import re
 import json
-from date_time import date_time
-from subprocess import call
 sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from upload_to_swift import upload_to_swift
-from download_from_swift import download_from_swift
+from date_time import date_time
+from subprocess import call
 import subprocess
 
 def parse_config(config_file):
@@ -23,20 +21,18 @@ def list_bam(obj,sample,wait,cont):
     # Use to check on download status
     p=[]
 
-    bam_list=''
-    bai_list=''
+    bam_list=[]
+    bai_list=[]
     for fn in re.findall('(.*)\n',flist):
         if re.match('^\S+_\d+\.rmdup.srt.ba[m|i]$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd='. /home/ubuntu/.novarc;swift download ' + obj + ' --skip-identical ' + fn
             p.append(subprocess.Popen(dl_cmd,shell=True))
             if fn[-3:] == 'bam':
-                bam_list=bam_list + fn + ' '
+                bam_list.append(fn)
                 ct=ct+1
             else:
-                bai_list=bai_list + fn + ' '
-    bam_list=bam_list.rstrip(' ')
-    bai_list=bai_list.rstrip(' ')
+                bai_list.append(fn)
     n=0
     f=0
     x=len(p)
@@ -67,8 +63,9 @@ def novosort_merge_pe(config_file,sample_list,wait):
     for sample in fh:
         sample=sample.rstrip('\n')
         (bam_list,bai_list,n)=list_bam(obj,sample,wait,cont)
+        bam_string=",".join(bam_list)
         if n > 1:
-            novosort_merge_pe_cmd=novosort + " --threads 8 --ram 28G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_list
+            novosort_merge_pe_cmd=novosort + " --threads 8 --ram 28G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
             try:
                 subprocess.check_output(novosort_merge_pe_cmd,shell=True) 
@@ -76,7 +73,7 @@ def novosort_merge_pe(config_file,sample_list,wait):
                 sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
                 exit(1)
         else:
-            rename_bam='cp ' + bam_list + ' ' + sample + '.merged.final.bam;cp ' + bai_list + ' ' + sample + '.merged.final.bai'
+            rename_bam='cp ' + bam_list[0] + ' ' + sample + '.merged.final.bam;cp ' + bai_list[0] + ' ' + sample + '.merged.final.bai'
             sys.stderr.write(date_time() + rename_bam + ' Only one associated bam file, renaming\n')
             subprocess.call(rename_bam,shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
