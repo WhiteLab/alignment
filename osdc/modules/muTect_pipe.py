@@ -8,11 +8,50 @@ def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
     return (config_data['tools']['java'],config_data['tools']['mutect'],config_data['refs']['intervals'],config_data['refs']['fa_ordered'])
 
-def job_manage(cmd_list):
-    
-    for cmd in cmd_list:
-        sys.stderr.write(cmd + '\n')
-
+def job_manage(cmd_list,out):
+    # num commands
+    x = len(cmd_list)
+    # cur position in command list
+    cur=0
+    #max threads
+    max_t=8
+    #running
+    r=0
+    #completed
+    comp=0
+    # initialize process list
+    p={}
+    sys.stderr.write(date_time() + 'Initializing run\n')
+    n=max_t
+    if n > x:
+        n=x
+    for i in xrange(0,n,1):
+        p[i]={}
+        p[i]['class']=subprocess.Popen(cmd_list[i],shell=True)
+        p[i]['cmd']=cmd_list[i]
+        sys.stderr.write(cmd_list[i]+ '\n')
+        cur+=1
+    s=0
+    j=1
+    m=30
+    while comp <= x:
+        if s % m == 0:
+            sys.stderr.write(date_time() + 'Checking job statuses. ' + str(comp) + ' of ' + str(x) + ' completed. ' + str(s) + ' seconds have passed\n')
+        for i in xrange(0,n,1):
+            check=p[i]['class'].poll()
+            if str(check) == '1':
+                sys.stderr.write(date_time() + 'Job returned an error while running ' + p[i]['cmd'] + '  aborting!\n')
+                exit(1)
+            if str(check) == '0':
+                comp+=1
+                if comp <= (x-n):
+                    p[i]['class']=subprocess.Popen(cmd_list[cur],shell=True)
+                    p[i]['cmd']=cmd_list[cur]
+                    cur+=1
+        s+=j
+        sleep_cmd='sleep ' + str(j) + 's'
+        subprocess.call(sleep_cmd,shell=True)
+    sys.stderr.write(date_time() + 'Jobs completed for ' + out + '\n')
 def muTect_pipe(config_file,sample_pairs,ref_mnt):
     (java,mutect,intervals,fa_ordered)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
@@ -30,18 +69,22 @@ def muTect_pipe(config_file,sample_pairs,ref_mnt):
         normal_bam=normal_id + '.merged.final.bam'
         sys.stderr.write(date_time() + 'Processing pair T: ' + tumor_bam + ' N: ' + normal_bam + '\n' )
         out=tumor_id + '_' + normal_id
+        # make result directory for current pair
+        mk_res='mkdir ' + out
+        subprocess.call(mk_res,shell=True)
         int_fh=open(intervals,'r')
         for interval in int_fh:
             cur=run_mut
-#            sys.stderr.write('interval: ->' + interval + '<-\n')
+            #            sys.stderr.write('interval: ->' + interval + '<-\n')
             interval=interval.rstrip('\n')
             (chrom,intvl)=interval.split(':')
             output_file=out + '.' + chrom + '_' + intvl + '.out'
             vcf_file=out + '.' + chrom  + '_' + intvl + '.vcf'
-            log_file=out + '.' + chrom + '_' + intvl + '.log'
-            cur=cur+ ' -T MuTect -R ' + fa_ordered + ' --intervals ' + interval + '  --input_file:normal ' + normal_bam + '  --input_file:tumor ' + tumor_bam + ' --out ' + output_file + ' -vcf ' + vcf_file + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file + '; cat ' + output_file + ' | grep -v REJECT > ' + output_file + '.keep; cat ' + vcf_file + ' | grep -v REJECT > ' + vcf_file + '.keep'
+            log_file='logs/' + out + '.' + chrom + '_' + intvl + '.log'
+            cur=cur+ ' -T MuTect -fixMisencodedQuals -R ' + fa_ordered + ' --intervals ' + interval + '  --input_file:normal ' + normal_bam + '  --input_file:tumor ' + tumor_bam + ' --out ' + out + '/' + output_file + ' -vcf ' + out + '/' + vcf_file + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file + ' >> ' + log_file + ' 2>> ' + log_file + '; cat ' + out + '/' + output_file + ' | grep -v REJECT > ' + out + '/' + output_file + '.keep; cat ' + out + '/' + vcf_file + ' | grep -v REJECT > ' + out + '/' + vcf_file + '.keep '
             cmd_list.append(cur)
-        job_manage(cmd_list)
+        job_manage(cmd_list,out)
+    sys.stderr.write(date_time() + 'Variant calling completed!\n')
 
             
         
