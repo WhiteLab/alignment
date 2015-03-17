@@ -2,7 +2,7 @@ DNAseq Paired End pipeline
 ===========================
 Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
 
-## MAIN:
+## UTILITY:
 
 #### basic_node_setup.py
 usage: basic_node_setup.py [-h] [-id BID] [-j CONFIG_FILE] [-w WAIT]
@@ -18,7 +18,71 @@ optional arguments:
   -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
                         Reommended value 300 (in seconds)
 
-#### parse_qc.pl - run at end of pipeline to gather qc stats
+#### date_time.py
+Simple helper module that prints the current timestamp
+#### attach_cinder.py
+usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]
+                        [-ip IP] [-w WAIT]
+
+Attaches cinder volume with references to existing vm
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -sid SID, --snapshot-id SID
+                        ID of snapshot. Use cinder to find
+  -vid VID, --virt-mach VID
+                        Virtual machine id. Use Nova to find
+  -id BID, --BID BID    Bionimbpus project id
+  -s SIZE, --size SIZE  Cinder reference size. Recommended value 200 (in GB)
+  -ip IP, --ip_add IP   VM IP address
+  -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
+                        Recommended value 300 (in seconds)
+
+#### cleanup.py                                                                                                                                               
+usage: cleanup.py [-h] [-cid CID] [-vid VID] [-id BID] [-ip VIP]
+
+Breaks down a vm built with the standard of having the bionimbus project ID as
+part of it's name and attached to a reference
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -cid CID, --cinder-id CID
+                        ID of attached cinder volume. Use cinder to find
+  -vid VID, --virt-mach VID
+                        Virtual machine id. Use Nova to find
+  -id BID, --BID BID    Bionimbpus project id
+  -ip VIP, --ip_add VIP
+                        VM IP address
+
+##### hg19_pe_config.json
+JSON config file with standard references and tools locations
+
+#### mount.sh
+Command basic_node_setup.py uses to mount a reference to a vm.
+
+#### setup_vm.py
+usage: setup_vm.py [-h] [-id BID] [-im IMAGE] [-w WAIT] [-f FLAVOR] [-k KEY]
+
+VM spawner for pipeline processes
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -id BID, --BID BID    Project Bionimbus ID
+  -im IMAGE, --image IMAGE
+                        Image id to spawn
+  -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
+                        Reommended value 300 (in seconds)
+  -f FLAVOR, --flavor FLAVOR
+                        Image "flavor" to spawn
+  -k KEY, --key KEY     Image key-pair to use
+
+##### std_vm_config.json
+JSON configuration parameters for creating a pipeline vm and attaching reference storage to it
+
+#### unmount.sh
+Command cleanup.py uses to unmount a reference from a vm.
+
+## ALIGNMENT:
 
 #### pipeline_wrapper.py 
 usage: pipeline_wrapper.py [-h] [-f FN] [-j CONFIG]
@@ -34,10 +98,6 @@ optional arguments:
   -m REF_MNT, --mount REF_MNT
                         Reference drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
-
-## MODULES:
-#### date_time.py
-Simple helper module that prints the current timestamp
 
 #### pipeline.py
 usage: pipeline.py [-h] [-f1 END1] [-f2 END2] [-t SEQTYPE] [-j CONFIG_FILE]
@@ -282,6 +342,10 @@ optional arguments:
                         Directory references are mounted, i.e.
                         /mnt/cinder/REFS_XXX
  
+#### parse_qc.pl - run at end of pipeline to gather qc stats
+
+## ANALYSIS:
+
 #### mutect_pipe.py 
 usage: mutect_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS] [-r REF_MNT]
 
@@ -296,67 +360,44 @@ optional arguments:
   -r REF_MNT, --ref_mnt REF_MNT
                         Reference drive path - i.e. /mnt/cinder/REFS_XXXX
 
+#### mutect_merge_sort.py 
+usage: mutect_merge_sort.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS]
+                            [-r REF_MNT]
 
-
-## UTILITY:
-#### attach_cinder.py
-usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]
-                        [-ip IP] [-w WAIT]
-
-Attaches cinder volume with references to existing vm
+Merge and sort output from mutect variant caller.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -sid SID, --snapshot-id SID
-                        ID of snapshot. Use cinder to find
-  -vid VID, --virt-mach VID
-                        Virtual machine id. Use Nova to find
-  -id BID, --BID BID    Bionimbpus project id
-  -s SIZE, --size SIZE  Cinder reference size. Recommended value 200 (in GB)
-  -ip IP, --ip_add IP   VM IP address
-  -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
-                        Recommended value 300 (in seconds)
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and reference locations
+  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
+                        Sample tumor/normal pairs
+  -r REF_MNT, --ref_mnt REF_MNT
+                        Reference drive path - i.e. /mnt/cinder/REFS_XXXX
 
-#### cleanup.py                                                                                                                                               
-usage: cleanup.py [-h] [-cid CID] [-vid VID] [-id BID] [-ip VIP]
+## ANNOTATION:
 
-Breaks down a vm built with the standard of having the bionimbus project ID as
-part of it's name and attached to a reference
+#### snpeff_pipe.py
+usage: snpeff_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS]
+
+muTect pipleine for variant calling. Need BAM and bai files ahead of time.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -cid CID, --cinder-id CID
-                        ID of attached cinder volume. Use cinder to find
-  -vid VID, --virt-mach VID
-                        Virtual machine id. Use Nova to find
-  -id BID, --BID BID    Bionimbpus project id
-  -ip VIP, --ip_add VIP
-                        VM IP address
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and reference locations
+  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
+                        Sample tumor/normal pairs
 
-##### hg19_pe_config.json
-JSON config file with standard references and tools locations
+report.py
+usage: report.py [-h] [-i INFILE] [-f]
 
-#### mount.sh
-Command basic_node_setup.py uses to mount a reference to a vm.
-
-#### setup_vm.py
-usage: setup_vm.py [-h] [-id BID] [-im IMAGE] [-w WAIT] [-f FLAVOR] [-k KEY]
-
-VM spawner for pipeline processes
+parse snpEff annotated output into a digestable report.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -id BID, --BID BID    Project Bionimbus ID
-  -im IMAGE, --image IMAGE
-                        Image id to spawn
-  -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
-                        Reommended value 300 (in seconds)
-  -f FLAVOR, --flavor FLAVOR
-                        Image "flavor" to spawn
-  -k KEY, --key KEY     Image key-pair to use
-
-##### std_vm_config.json
-JSON configuration parameters for creating a pipeline vm and attaching reference storage to it
-
-#### unmount.sh
-Command cleanup.py uses to unmount a reference from a vm.
+  -i INFILE, --infile INFILE
+                        snpEff annotated variant file
+  -f, --filter_missense_nonsense_only
+                        Apply a filter that only reports NONSENSE and MISSENSE
+                        vars

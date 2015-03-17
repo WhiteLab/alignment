@@ -3,7 +3,6 @@
 
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 import os
 import re
 import json
