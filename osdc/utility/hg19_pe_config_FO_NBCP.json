@@ -7,8 +7,9 @@
 	"picard":"/home/ubuntu/TOOLS/picard/dist/picard.jar",
 	"novosort":"/home/ubuntu/TOOLS/nova/novosort",
 	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
-	"qc_stats":"/home/ubuntu/TOOLS/Scripts/parse_qc.pl",
-	"mutect":"/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar"
+        "qc_stats":"/home/ubuntu/TOOLS/Scripts/alignment/parse_qc.pl",
+        "mutect":"/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
+        "snpEff":"/home/ubuntu/TOOLS/snpEff/run_snpeff.sh"
     },
 
     "refs":{
@@ -19,6 +20,7 @@
         "capture":"REFS/BED/capture_panel_2.0.bed",
         "intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt", 
         "fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
+	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
 	"obj":"FO_NBCP",
 	"cont":"ALIGN_TEST",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config_FO_NBCP.json"

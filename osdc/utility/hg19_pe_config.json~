@@ -10,7 +10,7 @@
 	"qc_stats":"/home/ubuntu/TOOLS/Scripts/alignment/parse_qc.pl",
 	"mutect":"/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
 	"snpEff":"/home/ubuntu/TOOLS/snpEff/run_snpeff.sh",
-	"report":"/home/ubuntu/TOOLS/Scripts/annotation/report.py"
+	"report":"/home/ubuntu/TOOLS/Scripts/analysis/report.py"
     },
 
     "refs":{

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
+sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
 import re
@@ -89,10 +89,6 @@ class Pipeline():
         log(self.loc,date_time() + 'Getting fastq quality score stats\n')
         fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
         log(self.loc,date_time() + 'Sorting BAM file\n')
-#        check=picard_sort_pe(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir) # rest won't run until completed
-#        if(check != 0):
-#            log(self.loc,date_time() + 'Picard sort failure for ' + self.sample + '\n')
-#            exit(1)
 
         check=novosort_sort_pe(self.novosort,self.sample,log_dir) # rest won't run until completed
         if(check != 0):
@@ -118,11 +114,6 @@ class Pipeline():
                 self.status=1
                 break
         if self.status==1:
-            # get the head of the sf and move so that it can be used at the end for qc stats                                                                                          
-#            mv_sf="gzip -dc " + self.end1 + " | head | gzip -c > ../" + self.end1 
-#            call(mv_sf,shell=True)
-#            mv_sf="gzip -dc " + self.end2 + " | head | gzip -c > ../" + self.end2
-#            call(mv_sf,shell=True)
             p_tmp_rm="rm -rf picard_tmp"
             call(p_tmp_rm,shell=True)
             # move files into approriate place and run qc_stats

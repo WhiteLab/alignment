@@ -3,7 +3,6 @@ import sys
 import os
 import re
 import json
-sys.path.append('/home/ubuntu/TOOLS/Scripts/modules')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from subprocess import call
