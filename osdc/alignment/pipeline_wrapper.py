@@ -30,9 +30,9 @@ src_cmd='. ~/.novarc;'
 ref_mnt=inputs.ref_mnt
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['refs']['obj'],config_data['refs']['cont'],config_data['refs']['config'])
+    return (config_data['refs']['cont'],config_data['refs']['obj'],config_data['refs']['config'])
 
-(obj,cont,pipe_cfg)=parse_config(inputs.config_file)
+(cont,obj,pipe_cfg)=parse_config(inputs.config_file)
 
 for line in fh:
     line=line.rstrip('\n')
@@ -50,14 +50,14 @@ for line in fh:
         log(loc,date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this sample set\n')
         continue
     
-    contain='RAW/' + bid + '/' + bid + '_'
+    obj1='RAW/' + bid + '/' + bid + '_'
     cur_dir=cwd + '/RAW/' + bid
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
     lane_status={}
     for lane in lane_csv.split(', '):
         lane_status[lane]='Initializing'
-        swift_cmd=src_cmd + 'swift list ' + obj + ' --prefix ' + contain + lane
+        swift_cmd=src_cmd + 'swift list ' + cont + ' --prefix ' + obj1 + lane
         log(loc,date_time() + 'Getting sequence files for sample ' + lane + '\n' + swift_cmd + '\n')
         try:
             contents=subprocess.check_output(swift_cmd,shell=True)
@@ -81,7 +81,7 @@ for line in fh:
 
         # attempt to download sequencing files
         try:
-            download_from_swift(obj,prefix)
+            download_from_swift(cont,prefix)
         except:
             log(loc,date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
             lane_status[lane]='Download failed'

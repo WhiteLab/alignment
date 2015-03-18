@@ -22,8 +22,8 @@
 	"intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt",
 	"fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
 	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
-	"obj":"PANCAN",
-	"cont":"ALIGN_TEST",
+	"cont":"PANCAN",
+	"obj":"ALIGN_TEST",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
     }
 }

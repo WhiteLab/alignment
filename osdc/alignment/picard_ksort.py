@@ -14,12 +14,14 @@ def ksort(config_file,bam_list,flag,ref_mnt):
     k_proc=[]
     c=0
     s=0
+    mk_log='mkdir LOGS'
+    subprocess.call(mk_log,shell=True)
     fh=open(bam_list,'r')
     blist=[]
     for bam in fh:
         bam=bam.rstrip('\n')
         blist.append(bam)
-        ksort_cmd=java + ' -Xmx4g -jar ' + picard + ' ReorderSam INPUT=' + bam + '  REFERENCE=' + ref_mnt + '/' + fa + ' OUTPUT=' + bam + '.reordered CREATE_INDEX=True'
+        ksort_cmd=java + ' -Xmx4g -jar ' + picard + ' ReorderSam INPUT=' + bam + '  REFERENCE=' + ref_mnt + '/' + fa + ' OUTPUT=' + bam + '.reordered CREATE_INDEX=True 2> LOGS/' + bam + '.log'
         sys.stderr.write(date_time() + 'Started reorder process for ' + bam + '\n' + ksort_cmd + '\n')
         k_proc.append(subprocess.Popen(ksort_cmd,shell=True))
     n=len(blist)

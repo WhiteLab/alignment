@@ -10,11 +10,11 @@ import subprocess
 
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['novosort'],config_data['refs']['obj'],config_data['refs']['cont'])
+    return (config_data['tools']['novosort'],config_data['refs']['cont'],config_data['refs']['obj'])
 
-def list_bam(obj,sample,wait,cont):
+def list_bam(cont,obj,sample,wait):
     ct=0
-    list_cmd='. /home/ubuntu/.novarc;swift list ' + obj + ' --prefix ' +  cont + '/' + sample
+    list_cmd='. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' +  obj + '/' + sample
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
     flist=subprocess.check_output(list_cmd,shell=True)
     # Use to check on download status
@@ -25,7 +25,7 @@ def list_bam(obj,sample,wait,cont):
     for fn in re.findall('(.*)\n',flist):
         if re.match('^\S+_\d+\.rmdup.srt.ba[m|i]$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
-            dl_cmd='. /home/ubuntu/.novarc;swift download ' + obj + ' --skip-identical ' + fn
+            dl_cmd='. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
             p.append(subprocess.Popen(dl_cmd,shell=True))
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
@@ -58,10 +58,10 @@ def list_bam(obj,sample,wait,cont):
 
 def novosort_merge_pe(config_file,sample_list,wait):
     fh=open(sample_list,'r')
-    (novosort,obj,cont)=parse_config(config_file)
+    (novosort,cont,obj)=parse_config(config_file)
     for sample in fh:
         sample=sample.rstrip('\n')
-        (bam_list,bai_list,n)=list_bam(obj,sample,wait,cont)
+        (bam_list,bai_list,n)=list_bam(cont,obj,sample,wait)
         bam_string=",".join(bam_list)
         if n > 1:
             novosort_merge_pe_cmd=novosort + " --threads 8 --ram 28G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
@@ -81,7 +81,7 @@ def novosort_merge_pe(config_file,sample_list,wait):
 if __name__ == "__main__":
     import argparse
     parser=argparse.ArgumentParser(description='novosort tool to merge BAM files module.')
-    parser.add_argument('-sl','--sample_list',action='store',dest='sample_list',help='Sample/project name prefix list')
+    parser.add_argument('-sl','--sample_list',action='store',dest='sample_list',help='Sample/project prefix list')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with tool and ref locations')
     parser.add_argument('-w','--wait',action='store',dest='wait',help='Wait time to download bam files.  900 (seconds) recommended')
 
