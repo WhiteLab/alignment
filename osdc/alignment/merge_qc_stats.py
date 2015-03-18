@@ -8,7 +8,7 @@ from subprocess import check_output
 from download_from_swift import download_from_swift
 import subprocess 
 
-def download_from_swift(obj,cont,lane_list):
+def download_from_swift(cont,obj,lane_list):
     src_cmd=". /home/ubuntu/.novarc;"
     lanes=open(lane_list, 'r')
     head=''
@@ -17,13 +17,13 @@ def download_from_swift(obj,cont,lane_list):
         line=line.rstrip('\n')
         (bid,seqtype,lane_csv)=line.split('\t')
         for lane in lane_csv.split(', '):
-            cur=cont + '/' + bid + '/QC/' + bid + '_' + lane + '.qc_stats.txt'
-            swift_cmd=src_cmd + "swift download " + obj + " --skip-identical --prefix " + cur 
+            cur=obj + '/' + bid + '/QC/' + bid + '_' + lane + '.qc_stats.txt'
+            swift_cmd=src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur 
             sys.stderr.write(date_time() + swift_cmd + "\n")
             try:
                 check=check_output(swift_cmd,shell=True,stderr=subprocess.PIPE)
             except:
-                sys.stderr.write(date_time() + "Download of " + cont + " from " + obj + " failed\n")
+                sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
                 exit(1)
             stat=open(cur,'r')
             head=next(stat)
@@ -37,13 +37,13 @@ def download_from_swift(obj,cont,lane_list):
 if __name__ == "__main__":
     import argparse
     parser=argparse.ArgumentParser(description='Uses pipeline lane list to create a summary table of qc stats')
-    parser.add_argument('-o','--object',action='store',dest='obj',help='Swift object name, i.e. PANCAN')
-    parser.add_argument('-c','--container',action='store',dest='cont',help='Swift container prefix, i.e. RAW/2015-1234')
+    parser.add_argument('-c','--container',action='store',dest='cont',help='Swift container prefix, i.e. PANCAN')
+    parser.add_argument('-o','--object',action='store',dest='obj',help='Swift object name/prefix, i.e. RAW/2015-1234')
     parser.add_argument('-l','--lane_list',action='store',dest='lane_list',help='Original lane list used to run pipeline')
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
 
     inputs=parser.parse_args()
-    (obj,cont,lane_list)=(inputs.obj,inputs.cont,inputs.lane_list)
-    download_from_swift(obj,cont,lane_list)
+    (cont,obj,lane_list)=(inputs.cont,inputs.obj,inputs.lane_list)
+    download_from_swift(cont,obj,lane_list)

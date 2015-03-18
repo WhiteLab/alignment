@@ -51,7 +51,7 @@ def job_manage(cmd_list,out,max_t):
         sleep_cmd='sleep ' + str(j) + 's'
         subprocess.call(sleep_cmd,shell=True)
     sys.stderr.write(date_time() + 'Jobs completed for ' + out + '\n')
-def muTect_pipe(config_file,sample_pairs,ref_mnt):
+def mutect_pipe(config_file,sample_pairs,ref_mnt):
     max_t=8
     (java,mutect,intervals,fa_ordered)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
@@ -59,6 +59,9 @@ def muTect_pipe(config_file,sample_pairs,ref_mnt):
     int_fh=open(intervals,'r')
     int_dict={}
     i=0
+    # create temp directory
+    tmp_cmd='mkdir temp'
+    subprocess.call(tmp_cmd,shell=True)
     # create sub-interval files
     for interval in int_fh:
         if i >= max_t:
@@ -74,7 +77,7 @@ def muTect_pipe(config_file,sample_pairs,ref_mnt):
     fa_ordered=ref_mnt+ '/' + fa_ordered
     fh=open(sample_pairs)
     run_mut=java + ' -Djava.io.tmpdir=' + ref_mnt + '/temp -Xmx2g -jar ' + mutect
-    mk_log_dir='mkdir logs'
+    mk_log_dir='mkdir LOGS'
     subprocess.call(mk_log_dir,shell=True)
     for line in fh:
         #array will store commands to run, next def will take care of job management using popen
@@ -95,15 +98,14 @@ def muTect_pipe(config_file,sample_pairs,ref_mnt):
             #            sys.stderr.write('interval: ->' + interval + '<-\n')
             output_file=out + '.part_' + str(i) + '.out'
             vcf_file=out + '.part_' + str(i) +  '.vcf'
-            log_file='logs/' + out + '.part_' + str(i) +  '.log'
+            log_file='logs/' + out + '.mut.part_' + str(i) +  '.log'
             cur=cur+ ' -T MuTect -fixMisencodedQuals -R ' + fa_ordered + ' --intervals ' + int_dict[intvl]['fn'] + '  --input_file:normal ' + normal_bam + '  --input_file:tumor ' + tumor_bam + ' --out ' + out + '/' + output_file + ' -vcf ' + out + '/' + vcf_file + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file + ' >> ' + log_file + ' 2>> ' + log_file + '; cat ' + out + '/' + output_file + ' | grep -v REJECT > ' + out + '/' + output_file + '.keep; cat ' + out + '/' + vcf_file + ' | grep -v REJECT > ' + out + '/' + vcf_file + '.keep '
             cmd_list.append(cur)
             i=i+1
         job_manage(cmd_list,out,max_t)
     sys.stderr.write(date_time() + 'Variant calling completed!\n')
+    return 0
 
-            
-        
 if __name__ == "__main__":
     import argparse
     parser=argparse.ArgumentParser(description='muTect pipleine for variant calling.  Need BAM and bai files ahead of time.')
@@ -117,4 +119,4 @@ if __name__ == "__main__":
 
     inputs=parser.parse_args()
     (config_file,sample_pairs,ref_mnt)=(inputs.config_file,inputs.sample_pairs,inputs.ref_mnt)
-    muTect_pipe(config_file,sample_pairs,ref_mnt)
+    mutect_pipe(config_file,sample_pairs,ref_mnt)

@@ -127,8 +127,8 @@ class Pipeline():
             mv_rest='find . -maxdepth 1 -type f -exec mv {} QC \;'
             subprocess.call(mv_rest, shell=True)
             from upload_to_swift import upload_to_swift
-            cont=self.cont + "/" + self.bid
-            check=upload_to_swift(self.obj,cont)
+            obj=self.obj + "/" + self.bid
+            check=upload_to_swift(self.cont,obj)
             if check==0:
                 log(self.loc,date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
                 self.status = 0

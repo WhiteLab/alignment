@@ -21,8 +21,8 @@
         "intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt", 
         "fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
 	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
-	"obj":"FO_NBCP",
-	"cont":"ALIGN_TEST",
+	"cont":"FO_NBCP",
+	"obj":"ALIGN_TEST",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config_FO_NBCP.json"
     }
 }

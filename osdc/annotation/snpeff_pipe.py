@@ -54,21 +54,21 @@ def snpeff_pipe(config_file,sample_pairs):
     max_t=8
     (snpeff,report)=parse_config(config_file)
     fh=open(sample_pairs)
-    mk_log_dir='mkdir logs'
+    mk_log_dir='mkdir LOGS'
     subprocess.call(mk_log_dir,shell=True)
     cmd_list=[]
     for line in fh:
         #array will store commands to run, next def will take care of job management using popen
         line=line.rstrip('\n')
         (sample,tumor_id,normal_id)=line.split('\t')
-        run_snp=snpeff + ' ' + sample + '.out.keep  2> logs/' + sample + '.snpeff.log;' + report + ' -i ' + sample + '.out.keep.eff.vcf > ' + sample + '.vcf.keep.eff.xls'  
+        run_snp=snpeff + ' ' + sample + '.out.keep  2> LOGS/' + sample + '.snpeff.log;' + report + ' -i ' + sample + '.out.keep.eff.vcf > ' + sample + '.vcf.keep.eff.xls'  
         cmd_list.append(run_snp)
     job_manage(cmd_list,max_t)
     sys.stderr.write(date_time() + 'SNP annotation  completed!\n')
-
+    return 0
 if __name__ == "__main__":
     import argparse
-    parser=argparse.ArgumentParser(description='muTect pipleine for variant calling.  Need BAM and bai files ahead of time.')
+    parser=argparse.ArgumentParser(description='SNP annotation.')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with tool and reference locations')
     parser.add_argument('-sp','--sample_pairs',action='store',dest='sample_pairs',help='Sample tumor/normal pairs')
 
