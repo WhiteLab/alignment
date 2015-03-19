@@ -33,7 +33,7 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt):
     if check==0:
         sys.stderr.write(date_time() + 'File download and merge complete!\n')
         # rm unmerged bams, no longer needed
-        rm_bam='rm -rf ' + cont
+        rm_bam='rm -rf ' + obj
         call(rm_bam,shell=True)
     else:
         sys.stderr.write(date_time() + 'File download and merge failed.\n')
@@ -49,6 +49,9 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt):
         else:
             sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files failed.\n')
             exit(1)
+
+    # cleanup container folder after files have been merged and sorted
+    call(rm_cont,shell=True)
     check=mutect_pipe(config_file,sample_pairs,ref_mnt)
     if check==0:
         sys.stderr.write(date_time() + 'Mutect variant calls successful\n')
