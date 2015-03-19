@@ -16,7 +16,7 @@ optional arguments:
   -j CONFIG_FILE, --json CONFIG_FILE
                         JSON config file with snapshot ids and set up params
   -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
-                        Reommended value 300 (in seconds)
+                        Reommended value 600 (in seconds)
 
 #### date_time.py
 Simple helper module that prints the current timestamp
@@ -82,9 +82,51 @@ JSON configuration parameters for creating a pipeline vm and attaching reference
 #### unmount.sh
 Command cleanup.py uses to unmount a reference from a vm.
 
+#### ownload_from_swift.py 
+usage: download_from_swift.py [-h] [-c CONT] [-o OBJ]
+
+Simple download module to get files from swift. Can use prefix or whole object
+name
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONT, --container CONT
+                        Swift container, i.e. PANCAN
+  -o OBJ, --object OBJ  Swift object name/prefix, i.e. RAW/2015-1234
+
+#### upload_variants_to_swift.py 
+usage: upload_variants_to_swift.py [-h] [-o OBJ] [-c CONT] [-sl SAMPLE_LIST]
+                                   [-sp SAMPLE_PAIRS]
+
+Uploads current directory contents to specified object and container
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OBJ, --object OBJ  Swift object name root to use for aligned merged bam
+                        files. i.e. ALIGN/2015-1234
+  -c CONT, --container CONT
+                        Swfit container name to upload to. i.e. PANCAN
+  -sl SAMPLE_LIST, --sample_list SAMPLE_LIST
+                        Sample list, one per line
+  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
+                        Sample tumor/normal pairs, tsv file with bid pair,
+                        sample1, sample2
+
+#### upload_to_swift.py 
+usage: upload_to_swift.py [-h] [-o OBJ] [-c CONT]
+
+Uploads current directory contents to specified object and container
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OBJ, --object OBJ  Swift object name to upload current directory contents
+                        to. i.e. ALIGN/2015-1234
+  -c CONT, --container CONT
+                        Swfit container to upload to. i.e. PANCAN
+
 ## ALIGNMENT:
 
-#### pipeline_wrapper.py 
+### pipeline_wrapper.py 
 usage: pipeline_wrapper.py [-h] [-f FN] [-j CONFIG]
 
 Pipeline wrapper script to process multiple paired end set serially.
@@ -283,18 +325,6 @@ optional arguments:
                         format 'exome,genome,capture'. Else, just list the one
                         bed file
 
-#### upload_to_swift.py
-usage: upload_to_swift.py [-h] [-o OBJ] [-c CONT]
-
-Uploads current directory contents to specified object and container
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -o OBJ, --object OBJ  Swift object name to uplaod to. i.e. PANCAN
-  -c CONT, --container CONT
-                        Swfit container name to upload to. i.e.
-                        ALIGN/2015-1234
-
 #### merge_qc_stats.py 
 usage: merge_qc_stats.py [-h] [-o OBJ] [-c CONT] [-l LANE_LIST]
 
@@ -346,6 +376,35 @@ optional arguments:
 
 ## ANALYSIS:
 
+### variant_annot_pipe.py 
+usage: variant_annot_pipe.py [-h] [-sp SAMPLE_PAIRS] [-j CONFIG_FILE]
+                             [-w WAIT] [-k KFLAG] [-r REF_MNT]
+
+Pipeline for variant calls and annotation using mutect and snpEff
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -sp SAMPLE_PAIRS, --sample-pairs SAMPLE_PAIRS
+                        Tumor/normal sample pair list
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and ref locations
+  -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
+                        recommended
+  -k KFLAG, --karyo KFLAG
+                        Flag to perform karyotypic reordering of BAM files.
+                        Only need if original reference used wasn't sorted in
+                        the manner. 'y' to do so
+  -r REF_MNT, --reference REF_MNT
+                        Directory references are mounted, i.e.
+                        /mnt/cinder/REFS_XXX
+
+Runs the following modules:
+1. novosort_merge_pe
+2. mutect_pipe
+3. mutect_merge_sort
+4. snpeff_pipe
+5. upload_variants_to_swift
+
 #### mutect_pipe.py 
 usage: mutect_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS] [-r REF_MNT]
 
@@ -389,7 +448,7 @@ optional arguments:
   -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
                         Sample tumor/normal pairs
 
-report.py
+#### report.py
 usage: report.py [-h] [-i INFILE] [-f]
 
 parse snpEff annotated output into a digestable report.

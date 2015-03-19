@@ -62,21 +62,20 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
     # create temp directory
     tmp_cmd='mkdir temp'
     subprocess.call(tmp_cmd,shell=True)
-    # create sub-interval files
+    # create sub-interval files - split by chromosome
     for interval in int_fh:
-        if i >= max_t:
-            i=0
+        (chrom,intvl)=interval.split(':')
         try:
-            int_dict[i]['fh'].write(interval)
+            int_dict[chrom]['fh'].write(interval)
         except:
-            int_dict[i]={}
-            int_dict[i]['fn']='intervals_part_' + (str(i+1)) + '.list'
-            int_dict[i]['fh']=open(int_dict[i]['fn'],'w')
-            int_dict[i]['fh'].write(interval)
+            int_dict[chrom]={}
+            int_dict[chrom]['fn']='intervals_' + chrom + '.list'
+            int_dict[chrom]['fh']=open(int_dict[chrom]['fn'],'w')
+            int_dict[chrom]['fh'].write(interval)
         i+=1
     fa_ordered=ref_mnt+ '/' + fa_ordered
     fh=open(sample_pairs)
-    run_mut=java + ' -Djava.io.tmpdir=' + ref_mnt + '/temp -Xmx2g -jar ' + mutect
+    run_mut=java + ' -Djava.io.tmpdir=./temp -Xmx2g -jar ' + mutect
     mk_log_dir='mkdir LOGS'
     subprocess.call(mk_log_dir,shell=True)
     for line in fh:
@@ -96,9 +95,9 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
             int_dict[intvl]['fh'].close()
             cur=run_mut
             #            sys.stderr.write('interval: ->' + interval + '<-\n')
-            output_file=out + '.part_' + str(i) + '.out'
-            vcf_file=out + '.part_' + str(i) +  '.vcf'
-            log_file='logs/' + out + '.mut.part_' + str(i) +  '.log'
+            output_file=out + '.' + intvl + '.out'
+            vcf_file=out + '.' + intvl +  '.vcf'
+            log_file='LOGS/' + out + '.mut.' + intvl +  '.log'
             cur=cur+ ' -T MuTect -fixMisencodedQuals -R ' + fa_ordered + ' --intervals ' + int_dict[intvl]['fn'] + '  --input_file:normal ' + normal_bam + '  --input_file:tumor ' + tumor_bam + ' --out ' + out + '/' + output_file + ' -vcf ' + out + '/' + vcf_file + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file + ' >> ' + log_file + ' 2>> ' + log_file + '; cat ' + out + '/' + output_file + ' | grep -v REJECT > ' + out + '/' + output_file + '.keep; cat ' + out + '/' + vcf_file + ' | grep -v REJECT > ' + out + '/' + vcf_file + '.keep '
             cmd_list.append(cur)
             i=i+1
