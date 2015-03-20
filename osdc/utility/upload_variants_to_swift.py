@@ -82,5 +82,5 @@ if __name__ == "__main__":
       sys.exit(1)
       
    inputs=parser.parse_args()
-   (cont,obj)=(inputs.cont,inputs.obj,inputs.sample_list,inputs.sample_pairs)
+   (cont,obj,sample_list,sample_pairs)=(inputs.cont,inputs.obj,inputs.sample_list,inputs.sample_pairs)
    upload_variants_to_swift(cont,obj,sample_list,sample_pairs)
