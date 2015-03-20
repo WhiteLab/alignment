@@ -21,6 +21,7 @@ def parse_config(config_file):
 
 def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt):
     # create eventual ouput location directories
+    
     mk_dir='mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir,shell=True)
     (novosort,obj,cont)=parse_config(config_file)
@@ -28,6 +29,7 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt):
     samp_cmd='cut -f 2 ' + sample_pairs + ' > sample_list.txt;' + 'cut -f 3 ' + sample_pairs + ' >> sample_list.txt'
     call(samp_cmd,shell=True)
     sample_list='sample_list.txt'
+    
     # download and merge (if necessary) bam files
     check=novosort_merge_pe(config_file,sample_list,wait)
     if check==0:
@@ -49,9 +51,7 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt):
         else:
             sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files failed.\n')
             exit(1)
-
-    # cleanup container folder after files have been merged and sorted
-    call(rm_cont,shell=True)
+    
     check=mutect_pipe(config_file,sample_pairs,ref_mnt)
     if check==0:
         sys.stderr.write(date_time() + 'Mutect variant calls successful\n')
