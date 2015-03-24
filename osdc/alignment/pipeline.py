@@ -17,6 +17,7 @@ from subprocess import call
 import subprocess
 import json
 from log import log
+from update_couchdb import update_couchdb
 import pdb
 
 class Pipeline():
@@ -130,8 +131,17 @@ class Pipeline():
             obj=self.obj + "/" + self.bid
             check=upload_to_swift(self.cont,obj)
             if check==0:
-                log(self.loc,date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
-                self.status = 0
+                create_list='ls QC/*qc_stats.json > QC/' + self.sample + '_qc_stats.list'
+                subprocess.call(create_list,shell=True)
+                uc=update_couchdb(self.sample + '_qc_stats.list')
+                if uc==0:
+                    log(self.loc,date_time() + 'Couchdb successfully updated\n')
+                    self.status = 0                    
+                    log(self.loc,date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
+                else:
+                    self.status = 1
+                    log(self.loc,date_time() + "CouchDB update failed! Check database server connection\n")
+                
             else:
                 log(self.loc,date_time() + "All but file upload succeeded\n")
                 self.status = 1
