@@ -124,6 +124,15 @@ optional arguments:
   -c CONT, --container CONT
                         Swfit container to upload to. i.e. PANCAN
 
+#### update_couchdb.py 
+usage: update_couchdb.py [-h] [-f FN]
+
+Update couch db with qc stats using a json object list file
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -f FN, --file FN  qc_stats.json document list
+
 ## ALIGNMENT:
 
 ### pipeline_wrapper.py 
