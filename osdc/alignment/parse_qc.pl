@@ -63,8 +63,8 @@ sub output_stats
 	    $tbl.="$db_id\t$date\t$machine\t$run\t$barcode\t$lane\t";
 	    
 	    # aggregate arguments and structure for curl/JSON command output
-	    my $json.="{\n\t\"Run_attrib\":{\n\t\t\"Bionimbus_id\": \"".$db_id."\",\n\t\t\"Run\":";
-	    $json.=" \"".$run."\",\n\t\t\"Date\": \"".$date."\",\n\t\t\"Machine\": \"".$machine."\",\n\t\t\"BarCode\": \"".$barcode."\",\n\t\t\"Lane\": \"".$lane."\",\n\t\t\"read_length\": \"".$data{$sample}{LEN}."\",\n\t\t\"total_reads\": \"".$data{$sample}{RAW}{TOTAL}."\"\n\t\t},\n";
+	    my $json.="{\n\t\"Bionimbus_id\": \"".$db_id."\",\n\t\"Run\":";
+	    $json.=" \"".$run."\",\n\t\"Date\": \"".$date."\",\n\t\"Machine\": \"".$machine."\",\n\t\"BarCode\": \"".$barcode."\",\n\t\"Lane\": \"".$lane."\",\n\t\"read_length\": \"".$data{$sample}{LEN}."\",\n\t\"total_reads\": \"".$data{$sample}{RAW}{TOTAL}."\",\n";
 	    # get Total reads, Aligned reads, rmdup aligned reads, Fraction duplicate reads
 	    my $ali_frac = sprintf ("%.4f", $data{$sample}{RAW}{MAP}/$data{$sample}{RAW}{TOTAL});
 	    my $dup_frac = sprintf ("%.4f", 1 - ($data{$sample}{RMDUP}{MAP} / $data{$sample}{RAW}{TOTAL}));
@@ -81,7 +81,7 @@ sub output_stats
 	    #add date to json object
 # Wed, 04 Mar 2015 01:41:44 GMT                                                                                                                                               
 	    my $cur_date=$days[$wday].", $mday ".$months[$mon]." ".($year+1900)." ".$hour.":".$min.":".$sec." GMT";
-	    $json.="\t\"align_stats\":{\n\t\t\"post_align_reads\": \"".$data{$sample}{RAW}{MAP}."\",\n\t\t\"fraction_aligned\": \"".$ali_frac."\",\n\t\t\"post_rmdup_reads\": \"".$data{$sample}{RMDUP}{MAP}."\",\n\t\t\"fraction_rmduped\": \"".$dup_frac."\",\n\t\t\"target_size\": \"".$data{$sample}{COV}{TARGET}."\",\n\t\t\"aligned_bp_ot\": \"".$data{$sample}{COV}{TOTAL}."\",\n\t\t\"frac_aligned_bp_ot\": \"".$frac_aligned_bp_ot."\",\n\t\t\"fraction_sequenced_bp_ot\": \"".$frac_sequenced_bp_ot."\",\n\t\t\"median_insert_size\": \"".$data{$sample}{MI}."\",\n\t\t\"median_absolute_deviation\": \"".$data{$sample}{MA}."\",\n\t\t\"mean_insert_size\": \"".sprintf("%.2f",$data{$sample}{XI})."\",\n\t\t\"insert_standard_deviation\": \"".sprintf("%.2f",$data{$sample}{SI})."\",\n\t\t\"date_aligned\": \"".$cur_date."\"\n\t\t},\n";
+	    $json.="\t\"post_align_reads\": \"".$data{$sample}{RAW}{MAP}."\",\n\t\"fraction_aligned\": \"".$ali_frac."\",\n\t\"post_rmdup_reads\": \"".$data{$sample}{RMDUP}{MAP}."\",\n\t\"fraction_rmduped\": \"".$dup_frac."\",\n\t\"target_size\": \"".$data{$sample}{COV}{TARGET}."\",\n\t\"aligned_bp_ot\": \"".$data{$sample}{COV}{TOTAL}."\",\n\t\"frac_aligned_bp_ot\": \"".$frac_aligned_bp_ot."\",\n\t\"fraction_sequenced_bp_ot\": \"".$frac_sequenced_bp_ot."\",\n\t\"median_insert_size\": \"".$data{$sample}{MI}."\",\n\t\"median_absolute_deviation\": \"".$data{$sample}{MA}."\",\n\t\"mean_insert_size\": \"".sprintf("%.2f",$data{$sample}{XI})."\",\n\t\"insert_standard_deviation\": \"".sprintf("%.2f",$data{$sample}{SI})."\",\n\t\"date_aligned\": \"".$cur_date."\",\n";
 	    
 	    my $average_ot_coverage = sprintf ("%.2f", $on_target_bp / $data{$sample}{COV}{TARGET});
 	    my $on_target_frac = sprintf ("%.4f", $on_target_reads / $data{$sample}{RMDUP}{MAP} );
@@ -108,21 +108,21 @@ sub output_stats
 	    $tbl.="$frac_sequenced_bp_ot\t";		# fraction_sequenced_bp_ot
 	    $tbl.="$average_ot_coverage\t";			# average_ot_cov
 				# add coverage stats to json
-	    $json.="\t\"coverage_stats\":{\n\t\t\"average_ot_coverage\": \"".$average_ot_coverage."\",\n\t\t";
+	    $json.="\t\"average_ot_coverage\": \"".$average_ot_coverage."\",\n\t";
 	    for('1','2','8') {            			# cov 1x 2x 8x
 		$tbl.= $data{$sample}{COV}{"RS$_"} . "\t";
 		my $key="RS$_";
-		$json.="\"coverage$_\": \"".$data{$sample}{COV}{$key}."\",\n\t\t";
+		$json.="\"coverage$_\": \"".$data{$sample}{COV}{$key}."\",\n\t";
 	    }
 	    for('1','2','8') {						# frac cov 1x 2x 8x
 		my $fc = sprintf ("%.4f", $data{$sample}{COV}{"RS$_"} / $data{$sample}{COV}{TARGET});
 		$tbl.= $fc."\t";
-		$json.="\"fraction_coverage$_\": \"".$fc."\",\n\t\t";
+		$json.="\"fraction_coverage$_\": \"".$fc."\",\n\t";
 	    }
 	    $tbl.= "$aligned_target_enrichment\t";
 	    $tbl.= "$sequenced_target_enrichment\t";
 	    $tbl.="$data{$sample}{MI}\t$data{$sample}{MA}\t".sprintf("%.2f",$data{$sample}{XI})."\t".sprintf("%.2f",$data{$sample}{SI})."\n";
-	    $json.="\"aligned_target_enrichment\": \"".$aligned_target_enrichment."\",\n\t\t\"sequenced_target_enrichment\": \"".$sequenced_target_enrichment."\"\n\t\t}\n}\n";
+	    $json.="\"aligned_target_enrichment\": \"".$aligned_target_enrichment."\",\n\t\"sequenced_target_enrichment\": \"".$sequenced_target_enrichment."\"\n}";
 	    #	    system($json);
 	    if($f == 1 || $f == 2){
 		open(CJ, ">>", "$prefix.qc_stats.json");

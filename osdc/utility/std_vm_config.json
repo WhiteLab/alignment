@@ -1,12 +1,12 @@
 {
     "vm_image":{
-	"id":"1f069f8e-0cd0-44ac-83ab-49c1c357eae3",
+	"id":"42ad6ba5-3929-48d8-a35b-fd0448c8499a",
 	"flavor":"13",
 	"key":"mb_inst"
     },
 
     "cinder_ref":{
-	"id":"64e23e05-6123-4b49-bd6f-7db5f1ebd7c7",
+	"id":"6802d1a3-f749-4a26-8d23-f2a892bf7448",
 	"size":"200"
     }
 }
