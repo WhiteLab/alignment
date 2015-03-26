@@ -25,7 +25,7 @@
 	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
 	"dbsnp":"REFS/VCF/dbsnp_138.hg19.vcf",
 	"cont":"PANCAN",
-	"obj":"ALIGN_TEST",
+	"obj":"ALIGN",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
     }
 }

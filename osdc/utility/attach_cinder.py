@@ -93,10 +93,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs=parser.parse_args()
-    sid=inputs.bid
+    sid=inputs.sid
     vid=inputs.vid
     bid=inputs.bid
     size=inputs.size
     wait=inputs.wait
-
+    vip=inputs.ip
     attach_cinder(sid,vid,bid,size,vip,wait)
