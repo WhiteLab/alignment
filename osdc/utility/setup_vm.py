@@ -53,7 +53,8 @@ def setup_vm(bid,image,flavor,key,wait):
         n=n+i
     if(flag==1):
         # upload openstack variables from head vm
-        delay='sleep 20s'
+        delay='sleep 60s'
+        sys.stderr.write(date_time() + 'Pausing 1 minute to give vm a chance to initialize\n')
         subprocess.call(delay,shell=True)
         nova_var='ssh-keyscan ' + vip + ' >> ~/.ssh/known_hosts;rsync /home/ubuntu/.novarc ubuntu@' + vip + ':/home/ubuntu'
         sys.stderr.write(date_time() + 'Copying openstack variables to vm\n' + nova_var + '\n')
