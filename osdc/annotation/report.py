@@ -34,7 +34,7 @@ class Reporter:
   def __identify_columns(self):
     self.columns = ['chr', 'pos', 'context', 'ref', 'alt', 'normal_ref_count',
                     'normal_alt_count', 'tumor_ref_count', 'tumor_alt_count',
-                    'gene', 'effect', 'coding', 'codon_change',
+                    'dbSnp_id','gene', 'effect', 'coding', 'codon_change',
                     'amino_acid_change', 'amino_acid_length', 'mutect_call']
 
 
@@ -63,7 +63,12 @@ class Reporter:
         report.append(line[column_refs.index('n_alt_count')]) # normal alternative count
         report.append(line[column_refs.index('t_ref_count')]) # tumor reference count
         report.append(line[column_refs.index('t_alt_count')]) # tumor alternative count
-
+        # parse context for dbSnp id
+        id_check=re.search('rs(\d+)',line[column_refs.index('context')])
+        if id_check:
+          report.append(id_check.group(1))
+        else:
+          report.append('NA')
         # Interpret the effects of the variant.
         for match in self.regex.finditer(line[7]):
           # NOTE this is a hack for Kevin's request
