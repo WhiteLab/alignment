@@ -7,7 +7,7 @@ import json
 
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['java'],config_data['tools']['mutect'],config_data['refs']['intervals'],config_data['refs']['fa_ordered'])
+    return (config_data['tools']['java'],config_data['tools']['mutect'],config_data['refs']['genome'],config_data['refs']['fa_ordered'])
 
 def job_manage(cmd_list,out,max_t):
     # num commands
@@ -55,7 +55,7 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
     max_t=8
     (java,mutect,intervals,fa_ordered)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
-    #break up intervals into max threads junks to runn all in parallel
+    #break up intervals into max threads junks to run all in parallel
     int_fh=open(intervals,'r')
     int_dict={}
     i=0
@@ -64,12 +64,15 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
     subprocess.call(tmp_cmd,shell=True)
     # create sub-interval files - split by chromosome
     for interval in int_fh:
-        (chrom,intvl)=interval.split(':')
+#        (chrom,intvl)=interval.split(':') switched to using bed file
+        (chrom,start,end)=interval.split('\t')
+        intvl=start + '-' + end # normally not need if using normal interval file
         try:
             int_dict[chrom]['fh'].write(interval)
         except:
             int_dict[chrom]={}
-            int_dict[chrom]['fn']='intervals_' + chrom + '.list'
+            #            int_dict[chrom]['fn']='intervals_' + chrom + '.list'
+            int_dict[chrom]['fn']='intervals_' + chrom + '.bed'
             int_dict[chrom]['fh']=open(int_dict[chrom]['fn'],'w')
             int_dict[chrom]['fh'].write(interval)
         i+=1
