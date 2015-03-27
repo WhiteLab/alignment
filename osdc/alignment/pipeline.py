@@ -133,7 +133,7 @@ class Pipeline():
             if check==0:
                 create_list='ls QC/*qc_stats.json > QC/' + self.sample + '_qc_stats.list'
                 subprocess.call(create_list,shell=True)
-                uc=update_couchdb(self.sample + '_qc_stats.list')
+                uc=update_couchdb('QC/' + self.sample + '_qc_stats.list')
                 if uc==0:
                     log(self.loc,date_time() + 'Couchdb successfully updated\n')
                     self.status = 0                    

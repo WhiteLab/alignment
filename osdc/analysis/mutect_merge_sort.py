@@ -148,6 +148,7 @@ def mutect_merge_sort(config_file,sample_pairs,ref_mnt):
                 suffix_dict[suffix].append(fn)
         merge_sort(suffix_dict,sp[0],fai_list)
     sys.stderr.write(date_time() + 'File merging completed\n')
+    return 0
 if __name__ == "__main__":
     import argparse
     parser=argparse.ArgumentParser(description='Merge and sort output from mutect variant caller.')
