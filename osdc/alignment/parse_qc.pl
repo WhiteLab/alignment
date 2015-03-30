@@ -46,12 +46,19 @@ sub output_stats
     my @samples = sort (keys %data);
     foreach my $sample (@samples) {
 	my @annot = split (/\_/, $sample);
-	my $db_id = $annot[0];
-	my $date = $annot[1];
-	my $machine = $annot[2];
-	my $run = $annot[3];
-	my $barcode = $annot[4];
-	my $lane = $annot[5];
+	my ($db_id,$date,$machine,$run,$barcode,$lane);
+	$db_id = $annot[0];
+	if($data{$sample}{SRC} eq 'HGAC'){
+	    $date = $annot[1];
+	    $machine = $annot[2];
+	    $run = $annot[3];
+	    $barcode = $annot[4];
+	    $lane = $annot[5];
+	}
+	else{
+	    ($date,$machine,$run,$barcode)=("NA","NA","NA","NA");
+	    $lane = $annot[-1];
+	}
 	unless ($data{$sample}{LEN}) {
 	    $data{$sample}{LEN} = 100;
 	}
@@ -153,12 +160,18 @@ sub directory_search
 	    my $sample = $1;
 	    ($data{$sample}{COV}{TOTAL}, $data{$sample}{COV}{RS1}, $data{$sample}{COV}{RS2}, $data{$sample}{COV}{RS8}, $data{$sample}{COV}{TARGET}) = parseCoverage("$_[0]/$file");
 	}
-	elsif ($file =~ /(.+[1-8])_[12]_sequence.txt.gz$/ || $file =~ /(.+[1-8])_sequence.txt.gz$/) {
+	elsif ($file =~ /(.+[1-8])_[12]_sequence.txt.gz$/ || $file =~ /(.+[1-8])_sequence.txt.gz$/ || $file=~ /(^\S+)_\D*\d\.f\w*q\.gz$/) {
 	    my $sample = $1;
 	    my $temp = `gzip -dc $_[0]/$file | head -n 2 | tail -n 1`;
 	    chomp $temp;
 	    my $length = length($temp);
 	    $data{$sample}{LEN} = $length;
+	    if($file=~/_sequence.txt.gz$/){
+		$data{$sample}{SRC}='HGAC';
+	    }
+	    else{
+		$data{$sample}{SRC}='other';
+	    }
 	}
 	elsif ($file=~/(.+[1-8])\.insert_metrics.hist$/){
 	    my $sample=$1;
@@ -252,6 +265,7 @@ sub archiveLookup
     my @dir = `ls .`;
     foreach my $file (@dir) {
 	chomp $file;
+	# add flexibility for fastq naming conventions
 	if ($file =~ /(.+)_sequence.txt(.gz)*/) {
 	    my @temp = split (/_/, $file);
 	    my $db_id = $temp[0];
@@ -264,6 +278,20 @@ sub archiveLookup
 		$day = $3;
 	    }
 	    $files{$db_id}{$file}++;
+	}
+	if($file =~/(^\S+)_\D*\d\.f\w*q\.gz$/){
+	    my @temp = split (/_/, $file);
+	    my $db_id = $temp[0];
+	    my $date = $temp[1];
+	    my $mid = $temp[2];
+	    my ($year, $month, $day) = (0,0,0);
+	    if ($date =~ /(\d\d)(\d\d)(\d\d)/) {
+		$year = $1;
+		$month = $2;
+		$day = $3;
+	    }
+	    $files{$db_id}{$file}++;
+	    
 	}
     }
     return(%files);

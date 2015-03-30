@@ -33,7 +33,11 @@ class Pipeline():
     def parse_config(self):
         self.config_data = json.loads(open(self.json_config, 'r').read())
         s=re.match('^(\S+)_1_sequence\.txt\.gz$',self.end1)
-        self.sample=s.group(1)
+        if s:
+            self.sample=s.group(1)
+        else:
+            s=re.match('(^\S+)_\D*\d\.f\w*q\.gz$',self.end1)
+            self.sample=s.group(1)
         self.loc='LOGS/' + self.sample + '.pipe.log'
         HGACID=self.sample.split("_")
         self.bid=HGACID[0]
