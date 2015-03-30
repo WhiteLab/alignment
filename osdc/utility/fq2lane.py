@@ -11,9 +11,17 @@ def fq2lane(fq_list,seqtype):
     for line in fh:
         line=line.rstrip('\n')
         f1=re.match('^(\d+-\d+)_(\S+)_\d+_sequence.txt.gz$',line)
+        bid=''
+        lane=''
+        if f1:
+            bid=f1.group(1)
+            lane=f1.group(2)
+        else:
+            f1=re.match('(^\S+)_\D*\d\.f\w*q\.gz$',os.path.basename(line))
+            info=f1.group(1).split('_')
+            bid=info[0]
+            lane='_'.join(info[1:])
         line=next(fh)
-        bid=f1.group(1)
-        lane=f1.group(2)
         if bid not in cur:
             cur[bid]=[]
         cur[bid].append(lane)

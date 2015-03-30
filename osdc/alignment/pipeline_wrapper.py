@@ -38,17 +38,17 @@ for line in fh:
     line=line.rstrip('\n')
     (bid,seqtype,lane_csv)=line.split('\t')
     cwd=ref_mnt + '/SCRATCH'
-    loc=cwd[:-7] + bid + '.run.log'
-    log(loc,date_time() + 'Initializing scratch directory for ' + bid + '\n')
-    # All files for current bid to be stored in cwd
     check_dir=os.path.isdir(cwd)
     if check_dir==False:
         subprocess.check_output('mkdir ' + cwd,shell=True)
     try:
         os.chdir(cwd)
     except:
-        log(loc,date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this sample set\n')
-        continue
+        sys.stderr.write(date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this sample set\n')
+        exit(1)
+    loc=cwd[:-7] + bid + '.run.log'
+    log(loc,date_time() + 'Initializing scratch directory for ' + bid + '\n')
+    # All files for current bid to be stored in cwd
     
     obj1='RAW/' + bid + '/' + bid + '_'
     cur_dir=cwd + '/RAW/' + bid
@@ -71,14 +71,13 @@ for line in fh:
 
         lane_status[lane]='Running'
         # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order - standard file naming should work with this
-        seqfile=re.match('^(\S+)\n(\S+)\n$',contents)
-        sf1=seqfile.group(1)
+        seqfile=re.findall('(\S+[sequence|f*q]*\.gz)',contents)
+        sf1=seqfile[0]
         end1=os.path.basename(sf1)
-        sf2=seqfile.group(2)
+        sf2=seqfile[1]
         end2=os.path.basename(sf2)
         lane_status[lane]='Downloading'
         prefix='RAW/' + bid + '/' + bid + '_' + lane
-
         # attempt to download sequencing files
         try:
             download_from_swift(cont,prefix)
