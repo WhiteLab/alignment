@@ -406,6 +406,9 @@ optional arguments:
   -r REF_MNT, --reference REF_MNT
                         Directory references are mounted, i.e.
                         /mnt/cinder/REFS_XXX
+  -wg WG, --whole-genome WG
+                        'y' or 'n' flag if whole genome or not. will determine
+                        whether to flag for on/off target
 
 Runs the following modules:
 1. novosort_merge_pe
@@ -456,6 +459,9 @@ optional arguments:
                         JSON config file with tool and reference locations
   -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
                         Sample tumor/normal pairs
+  -f CFLAG, --flag CFLAG
+                        'y' if whole genome,, 'n' if custom capture to mark
+                        on/off target
 
 #### report.py
 usage: report.py [-h] [-i INFILE] [-f]
@@ -466,6 +472,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -i INFILE, --infile INFILE
                         snpEff annotated variant file
+  -c C, --custom C      bed file to mark whether hit was on or off-target. if
+                        not desired, enter 'n'
   -f, --filter_missense_nonsense_only
                         Apply a filter that only reports NONSENSE and MISSENSE
                         vars

@@ -82,7 +82,7 @@ if __name__ == "__main__":
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with tool and reference locations')
     parser.add_argument('-sp','--sample_pairs',action='store',dest='sample_pairs',help='Sample tumor/normal pairs')
     parser.add_argument('-r','--ref_mnt',action='store',dest='ref_mnt',help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
-    parser.add_argument('-f','--flag',action='store',dest='cflag',help='\'y\' if whole genome,, \'n\' if custom capture to mark on/off target')
+    parser.add_argument('-f','--flag',action='store',dest='cflag',help='\'y\' if whole genome, \'n\' if custom capture to mark on/off target')
 
     if len(sys.argv)==1:
         parser.print_help()
