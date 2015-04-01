@@ -50,6 +50,9 @@ def setup_vm(bid,image,flavor,key,wait):
                         m=re.search("private=(.*)",info[5])
                         vip=m.group(1)
                         break
+                     if(vstatus=="ERROR"):
+                        flag=0
+                        break
         n=n+i
     if(flag==1):
         # upload openstack variables from head vm
@@ -61,7 +64,7 @@ def setup_vm(bid,image,flavor,key,wait):
         subprocess.call(nova_var,shell=True)
         sys.stderr.write(date_time() + "VM setup for " + vm + " with IP address " + vip + " with ID " + vid + " successful\n")
     else:
-        sys.stderr.write(date_time() + "VM setup time out for " + vm + "Check connection settings or increase wait time and try again\n")
+        sys.stderr.write(date_time() + "VM setup either timed out or produced ERROR for " + vm + ". Check connection settings, increase wait time and try again\n")
     return (flag,vid,vip)
                             
 if __name__ == "__main__":

@@ -149,7 +149,7 @@ sub directory_search
 	    my $sample = $1;
 	    %{$data{$sample}{RMDUP}} = parseFS("$_[0]/$file");
 	    my @name = split (/_/, $sample);
-	    $data{$name[0]}{RUNS}{$_[0]}{$name[5]}++;
+	    $data{$name[0]}{RUNS}{$_[0]}{$name[-1]}++;
 	    
 	}
 	elsif ($file =~ /(.+[1-8])\.srt\.bam\.flagstats$/ || $file =~ /(.+[1-8]).accepted_hits.bam.flagstats$/) {

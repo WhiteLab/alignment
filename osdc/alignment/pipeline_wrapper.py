@@ -78,6 +78,7 @@ for line in fh:
         end2=os.path.basename(sf2)
         lane_status[lane]='Downloading'
         prefix='RAW/' + bid + '/' + bid + '_' + lane
+
         # attempt to download sequencing files
         try:
             download_from_swift(cont,prefix)
@@ -116,7 +117,7 @@ for line in fh:
         # change back to parent directory so that new sequencing files can be downloaded in same place
         os.chdir(cwd)
         # clean out files for next run
-        cleanup='rm -rf ' + cur_dir + '/BAM'
+        cleanup='rm -rf ' + cur_dir + '/BAM ' + cur_dir + '/QC'
         subprocess.call(cleanup,shell=True)
         lane_status[lane]='Pipeline run and data uplaoded'
         log(loc,date_time() + lane + '\t' + lane_status[lane] + '\n')
