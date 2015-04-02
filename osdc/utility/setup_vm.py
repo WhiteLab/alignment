@@ -50,7 +50,7 @@ def setup_vm(bid,image,flavor,key,wait):
                         m=re.search("private=(.*)",info[5])
                         vip=m.group(1)
                         break
-                     if(vstatus=="ERROR"):
+                    if(vstatus=="ERROR"):
                         flag=0
                         break
         n=n+i
