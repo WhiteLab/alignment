@@ -31,7 +31,7 @@ if __name__ == "__main__":
     import argparse
     parser=argparse.ArgumentParser(description='Tool to take a list of swift objects from the same container and copy them server-side using curl commands')
     parser.add_argument('-c','--container',action='store',dest='cont',help='Swift container, i.e. PANCAN')
-    parser.add_argument('-f','--file',action='store',dest='fn',help='Swift object list - text document one per line')
+    parser.add_argument('-f','--file',action='store',dest='fn',help='Tab-separated renaming list old <tab> new.  New object must start with container name in the event that ones is trying to also switch containers')
 
     if len(sys.argv)==1:
         parser.print_help()

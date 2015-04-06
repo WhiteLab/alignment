@@ -29,7 +29,7 @@
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
     },
     "params":{
-	"threads":"8",
-	"ram":"24"
+	"threads":"16",
+	"ram":"56"
     }
 }

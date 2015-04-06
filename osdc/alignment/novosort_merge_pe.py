@@ -10,7 +10,7 @@ import subprocess
 
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['novosort'],config_data['refs']['cont'],config_data['refs']['obj'])
+    return (config_data['tools']['novosort'],config_data['refs']['cont'],config_data['refs']['obj'],config_data['params']['threads'],config_data['params']['ram'])
 
 def list_bam(cont,obj,sample,wait):
     ct=0
@@ -58,13 +58,13 @@ def list_bam(cont,obj,sample,wait):
 
 def novosort_merge_pe(config_file,sample_list,wait):
     fh=open(sample_list,'r')
-    (novosort,cont,obj)=parse_config(config_file)
+    (novosort,cont,obj,threads,ram)=parse_config(config_file)
     for sample in fh:
         sample=sample.rstrip('\n')
         (bam_list,bai_list,n)=list_bam(cont,obj,sample,wait)
         bam_string=",".join(bam_list)
         if n > 1:
-            novosort_merge_pe_cmd=novosort + " --threads 8 --ram 28G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
+            novosort_merge_pe_cmd=novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
             try:
                 subprocess.check_output(novosort_merge_pe_cmd,shell=True) 

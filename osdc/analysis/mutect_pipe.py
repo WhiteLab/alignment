@@ -7,7 +7,7 @@ import json
 
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['java'],config_data['tools']['mutect'],config_data['refs']['genome'],config_data['refs']['fa_ordered'])
+    return (config_data['tools']['java'],config_data['tools']['mutect'],config_data['refs']['genome'],config_data['refs']['fa_ordered'],config_data['params']['threads'],config_data['params']['ram'])
 
 def job_manage(cmd_list,out,max_t):
     # num commands
@@ -52,8 +52,7 @@ def job_manage(cmd_list,out,max_t):
         subprocess.call(sleep_cmd,shell=True)
     sys.stderr.write(date_time() + 'Jobs completed for ' + out + '\n')
 def mutect_pipe(config_file,sample_pairs,ref_mnt):
-    max_t=8
-    (java,mutect,intervals,fa_ordered)=parse_config(config_file)
+    (java,mutect,intervals,fa_ordered,max_t,ram)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
     #break up intervals into max threads junks to run all in parallel
     int_fh=open(intervals,'r')
@@ -76,9 +75,10 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
             int_dict[chrom]['fh']=open(int_dict[chrom]['fn'],'w')
             int_dict[chrom]['fh'].write(interval)
         i+=1
-    fa_ordered=ref_mnt+ '/' + fa_ordered
+    fa_ordered=ref_mnt + '/' + fa_ordered
     fh=open(sample_pairs)
-    run_mut=java + ' -Djava.io.tmpdir=./temp -Xmx2g -jar ' + mutect
+    job_ram=(int(ram)/int(max_t))
+    run_mut=java + ' -Djava.io.tmpdir=./temp -Xmx' + str(job_ram) + 'g -jar ' + mutect
     mk_log_dir='mkdir LOGS'
     subprocess.call(mk_log_dir,shell=True)
     for line in fh:

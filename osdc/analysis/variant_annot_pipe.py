@@ -29,7 +29,6 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt,wg):
     samp_cmd='cut -f 2 ' + sample_pairs + ' > sample_list.txt;' + 'cut -f 3 ' + sample_pairs + ' >> sample_list.txt'
 #    call(samp_cmd,shell=True)
     sample_list='sample_list.txt'
-    """
     # download and merge (if necessary) bam files
     check=novosort_merge_pe(config_file,sample_list,wait)
     if check==0:
@@ -71,7 +70,6 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt,wg):
         sys.stderr.write(date_time() + 'snpEff failed.\n')
         exit(1)
     # relocate sutff, then upload
-    """
     mv_cmds='mv *.bai *.bam BAM;mv *eff* *sift* ANNOTATION; mv *out* *vcf* ANALYSIS'
     call(mv_cmds,shell=True)
     check=upload_variants_to_swift(cont,obj,sample_list,sample_pairs)
