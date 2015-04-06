@@ -51,7 +51,7 @@ def setup_vm(bid,image,flavor,key,wait):
                         vip=m.group(1)
                         break
                     if(vstatus=="ERROR"):
-                        flag=0
+                        flag=2
                         break
         n=n+i
     if(flag==1):

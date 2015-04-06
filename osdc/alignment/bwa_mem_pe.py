@@ -6,8 +6,8 @@ from subprocess import call
 from log import log
 import subprocess
 
-def bwa_mem_pe(bwa_tool,RGRP,bwa_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir):
-    bwa_cmd="(" + bwa_tool + " mem -t 8 -R \"" + RGRP + "\" -v 2 " + bwa_ref + " " + end1 + " " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwa.pe.log 2>&1"
+def bwa_mem_pe(bwa_tool,RGRP,bwa_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir,threads):
+    bwa_cmd="(" + bwa_tool + " mem -t " + threads + " -R \"" + RGRP + "\" -v 2 " + bwa_ref + " " + end1 + " " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwa.pe.log 2>&1"
     loc=log_dir + sample + ".bwa.pe.log"
     log(loc,date_time() + bwa_cmd + "\n")
     try:
@@ -28,11 +28,12 @@ if __name__ == "__main__":
     parser.add_argument('-sr','--samtools_reference',action='store',dest='samtools_ref',help='Location of samtools reference')
     parser.add_argument('-sa','--sample',action='store',dest='sample',help='Sample/project name prefix')
     parser.add_argument('-l','--log',action='store',dest='log_dir',help='LOG directory location')
+    parser.add_argument('-t','--threads',action='store',dest='threads',help='Number of threads to use.  8 recommended for standard vm')
 
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
 
     inputs=parser.parse_args()
-    (bwa_tool,RGRP,bwa_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir)=(inputs.bwa_tool,inputs.RGRP,inputs.bwa_ref,inputs.end1,inputs.end2,inputs.samtools_tool,inputs.samtools_ref,inputs.sample,inputs.log_dir)
-    bwa_mem_pe(bwa_tool,RGRP,bwa_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir)
+    (bwa_tool,RGRP,bwa_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir,threads)=(inputs.bwa_tool,inputs.RGRP,inputs.bwa_ref,inputs.end1,inputs.end2,inputs.samtools_tool,inputs.samtools_ref,inputs.sample,inputs.log_dir,inputs.threads)
+    bwa_mem_pe(bwa_tool,RGRP,bwa_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir,threads)

@@ -55,6 +55,8 @@ class Pipeline():
         self.obj=self.config_data['refs']['obj']
         self.cont=self.config_data['refs']['cont']
         self.qc_stats=self.config_data['tools']['qc_stats']
+        self.threads=self.config_data['params']['threads']
+        self.ram=self.config_data['params']['ram']
         self.pipeline()
 
     def pipeline(self):
@@ -87,7 +89,7 @@ class Pipeline():
     
         wait_flag=1
         # check certain key processes
-        check=bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir) # rest won't run until completed
+        check=bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir,self.threads) # rest won't run until completed
         if(check != 0):
             log(self.loc,date_time() + 'BWA failure for ' + self.sample + '\n')
             exit(1)
@@ -95,16 +97,16 @@ class Pipeline():
         fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
         log(self.loc,date_time() + 'Sorting BAM file\n')
 
-        check=novosort_sort_pe(self.novosort,self.sample,log_dir) # rest won't run until completed
+        check=novosort_sort_pe(self.novosort,self.sample,log_dir,self.threads,self.ram) # rest won't run until completed
         if(check != 0):
             log(self.loc,date_time() + 'novosort sort failure for ' + self.sample + '\n')
             exit(1)
         log(self.loc,date_time() + 'Removing PCR duplicates\n')
-        picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir)  # rest won't run until emopleted
+        picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir,self.ram)  # rest won't run until emopleted
         log(self.loc,date_time() + 'Gathering SAM flag stats\n')
         flagstats(self.samtools_tool,self.sample) # flag determines whether to run independently or hold up the rest of the pipe until completion
         log(self.loc,date_time() + 'Calculating insert sizes\n')
-        picard_insert_size(self.java_tool,self.picard_tool,self.sample,log_dir) # get insert size metrics. 
+        picard_insert_size(self.java_tool,self.picard_tool,self.sample,log_dir,self.ram) # get insert size metrics. 
         #figure out which coverage method to call using seqtype
         log(self.loc,date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method=getattr(coverage,(self.seqtype+'_coverage'))
