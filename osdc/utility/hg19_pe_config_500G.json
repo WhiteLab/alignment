@@ -24,9 +24,9 @@
 	"fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
 	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
 	"dbsnp":"REFS/VCF/dbsnp_138.hg19.vcf",
-	"cont":"PANCAN",
+	"cont":"BGI",
 	"obj":"ALIGN",
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config_500G.json"
     },
     "params":{
 	"threads":"16",
