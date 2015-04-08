@@ -35,6 +35,7 @@ def list_bam(cont,obj,sample,wait):
     n=0
     f=0
     x=len(p)
+    
     while(n < wait):
         sys.stderr.write(date_time() + 'Checking status of download processes. ' + str(n) + ' seconds have passed\n')
         s=0
@@ -55,14 +56,14 @@ def list_bam(cont,obj,sample,wait):
     else:
         sys.stderr.write(date_time() + 'BAM download failed\n')
         exit(1)
-
+        
 def novosort_merge_pe(config_file,sample_list,wait):
     fh=open(sample_list,'r')
     (novosort,cont,obj,threads,ram)=parse_config(config_file)
     for sample in fh:
         sample=sample.rstrip('\n')
         (bam_list,bai_list,n)=list_bam(cont,obj,sample,wait)
-        bam_string=",".join(bam_list)
+        bam_string=" ".join(bam_list)
         if n > 1:
             novosort_merge_pe_cmd=novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
