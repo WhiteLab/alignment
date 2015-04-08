@@ -21,7 +21,7 @@ def job_manage(cmd_list,out,max_t):
     # initialize process list
     p={}
     sys.stderr.write(date_time() + 'Initializing run\n')
-    n=max_t
+    n=int(max_t)
     if n > x:
         n=x
     for i in xrange(0,n,1):

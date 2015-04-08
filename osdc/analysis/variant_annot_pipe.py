@@ -27,7 +27,7 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt,wg):
     (novosort,obj,cont)=parse_config(config_file)
     #create sample list
     samp_cmd='cut -f 2 ' + sample_pairs + ' > sample_list.txt;' + 'cut -f 3 ' + sample_pairs + ' >> sample_list.txt'
-#    call(samp_cmd,shell=True)
+    call(samp_cmd,shell=True)
     sample_list='sample_list.txt'
     # download and merge (if necessary) bam files
     check=novosort_merge_pe(config_file,sample_list,wait)
