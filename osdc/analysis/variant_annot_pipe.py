@@ -30,6 +30,7 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt,wg):
     call(samp_cmd,shell=True)
     sample_list='sample_list.txt'
     # download and merge (if necessary) bam files
+    
     check=novosort_merge_pe(config_file,sample_list,wait)
     if check==0:
         sys.stderr.write(date_time() + 'File download and merge complete!\n')

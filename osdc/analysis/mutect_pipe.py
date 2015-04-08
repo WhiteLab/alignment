@@ -33,7 +33,7 @@ def job_manage(cmd_list,out,max_t):
     s=0
     j=30
     m=30
-    while comp <= x:
+    while comp < x:
         if s % m == 0:
             sys.stderr.write(date_time() + 'Checking job statuses. ' + str(comp) + ' of ' + str(x) + ' completed. ' + str(s) + ' seconds have passed\n')
         for i in xrange(0,n,1):
@@ -50,7 +50,7 @@ def job_manage(cmd_list,out,max_t):
         s+=j
         sleep_cmd='sleep ' + str(j) + 's'
         subprocess.call(sleep_cmd,shell=True)
-    sys.stderr.write(date_time() + 'Jobs completed for ' + out + '\n')
+    sys.stderr.write(date_time() + comp + ' jobs completed for ' + out + '\n')
 def mutect_pipe(config_file,sample_pairs,ref_mnt):
     (java,mutect,intervals,fa_ordered,max_t,ram)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
@@ -63,14 +63,12 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
     subprocess.call(tmp_cmd,shell=True)
     # create sub-interval files - split by chromosome
     for interval in int_fh:
-#        (chrom,intvl)=interval.split(':') switched to using bed file
         (chrom,start,end)=interval.split('\t')
         intvl=start + '-' + end # normally not need if using normal interval file
         try:
             int_dict[chrom]['fh'].write(interval)
         except:
             int_dict[chrom]={}
-            #            int_dict[chrom]['fn']='intervals_' + chrom + '.list'
             int_dict[chrom]['fn']='intervals_' + chrom + '.bed'
             int_dict[chrom]['fh']=open(int_dict[chrom]['fn'],'w')
             int_dict[chrom]['fh'].write(interval)
@@ -97,7 +95,6 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
         for intvl in sorted(int_dict):
             int_dict[intvl]['fh'].close()
             cur=run_mut
-            #            sys.stderr.write('interval: ->' + interval + '<-\n')
             output_file=out + '.' + intvl + '.out'
             vcf_file=out + '.' + intvl +  '.vcf'
             log_file='LOGS/' + out + '.mut.' + intvl +  '.log'

@@ -33,7 +33,7 @@ def job_manage(cmd_list,max_t):
     s=0
     j=30
     m=30
-    while comp <= x:
+    while comp < x:
         if s % m == 0:
             sys.stderr.write(date_time() + 'Checking job statuses. ' + str(comp) + ' of ' + str(x) + ' completed. ' + str(s) + ' seconds have passed\n')
         for i in xrange(0,n,1):

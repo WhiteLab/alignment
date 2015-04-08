@@ -10,7 +10,7 @@ import subprocess
 
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['novosort'],config_data['refs']['cont'],config_data['refs']['obj'],config_data['params']['threads'],config_data['params']['ram'])
+    return (config_data['tools']['novosort'],config_data['tools']['java'],config_data['tools']['picard'],config_data['refs']['cont'],config_data['refs']['obj'],config_data['params']['threads'],config_data['params']['ram'])
 
 def list_bam(cont,obj,sample,wait):
     ct=0
@@ -59,7 +59,7 @@ def list_bam(cont,obj,sample,wait):
         
 def novosort_merge_pe(config_file,sample_list,wait):
     fh=open(sample_list,'r')
-    (novosort,cont,obj,threads,ram)=parse_config(config_file)
+    (novosort,java_tool,picard_tool,cont,obj,threads,ram)=parse_config(config_file)
     for sample in fh:
         sample=sample.rstrip('\n')
         (bam_list,bai_list,n)=list_bam(cont,obj,sample,wait)
@@ -69,13 +69,25 @@ def novosort_merge_pe(config_file,sample_list,wait):
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
             try:
                 subprocess.check_output(novosort_merge_pe_cmd,shell=True) 
+                # delete old bams to free up space
+                rm_bam='rm ' + bam_string
+                sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
+                subprocess.call(rm_bam,shell=True)
+                #rm dups
+                picard_tmp='picard_tmp'
+                picard_rmdup_cmd=java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true ASSUME_SORTED=true MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".merged.bam OUTPUT=" + sample + ".merged.final.bam METRICS_FILE=" + sample + ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT"
+                sys.stderr.write(date_time() + 'Removing dups\n' + picard_rmdup_cmd + '\n')
+                subprocess.call(picard_rmdup_cmd,shell=True)
+                # delete merged bam after removing dups
+                rm_merged_bam='rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
+                subprocess.call(rm_merged_bam)
             except:
                 sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
                 exit(1)
         else:
-            rename_bam='cp ' + bam_list[0] + ' ' + sample + '.merged.final.bam;cp ' + bai_list[0] + ' ' + sample + '.merged.final.bai'
+            mv_bam='mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam;mv ' + bai_list[0] + ' ' + sample + '.merged.final.bam.bai'
             sys.stderr.write(date_time() + rename_bam + ' Only one associated bam file, renaming\n')
-            subprocess.call(rename_bam,shell=True)
+            subprocess.call(mv_bam,shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
     return 0
 
