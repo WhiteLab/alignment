@@ -54,6 +54,7 @@ def snpeff_pipe(config_file,sample_pairs,ref_mnt,cflag):
     max_t=8
     (java,snpeff,snpsift,report,dbsnp,intervals)=parse_config(config_file)
     dbsnp=ref_mnt + '/' + dbsnp
+    intervals = ref_mnt + '/' + intervals
     fh=open(sample_pairs)
     mk_log_dir='mkdir LOGS'
     subprocess.call(mk_log_dir,shell=True)
