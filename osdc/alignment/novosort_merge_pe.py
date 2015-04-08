@@ -19,7 +19,7 @@ def list_bam(cont,obj,sample,wait):
     flist=subprocess.check_output(list_cmd,shell=True)
     # Use to check on download status
     p=[]
-
+    
     bam_list=[]
     bai_list=[]
     for fn in re.findall('(.*)\n',flist):
@@ -86,7 +86,7 @@ def novosort_merge_pe(config_file,sample_list,wait):
                 exit(1)
         else:
             mv_bam='mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam;mv ' + bai_list[0] + ' ' + sample + '.merged.final.bam.bai'
-            sys.stderr.write(date_time() + rename_bam + ' Only one associated bam file, renaming\n')
+            sys.stderr.write(date_time() + mv_bam + ' Only one associated bam file, renaming\n')
             subprocess.call(mv_bam,shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
     return 0
