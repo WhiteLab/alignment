@@ -23,7 +23,7 @@ def list_bam(cont,obj,sample,wait):
     bam_list=[]
     bai_list=[]
     for fn in re.findall('(.*)\n',flist):
-        if re.match('^\S+_\d+\.rmdup.srt.ba[m|i]$', fn):
+        if re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd='. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
             p.append(subprocess.Popen(dl_cmd,shell=True))
