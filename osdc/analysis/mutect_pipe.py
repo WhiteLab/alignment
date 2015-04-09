@@ -28,6 +28,7 @@ def job_manage(cmd_list,out,max_t):
         p[i]={}
         p[i]['class']=subprocess.Popen(cmd_list[i],shell=True)
         p[i]['cmd']=cmd_list[i]
+        p[i]['status']='Running'
         sys.stderr.write(cmd_list[i]+ '\n')
         cur+=1
     s=0
@@ -41,16 +42,19 @@ def job_manage(cmd_list,out,max_t):
             if str(check) == '1':
                 sys.stderr.write(date_time() + 'Job returned an error while running ' + p[i]['cmd'] + '  aborting!\n')
                 exit(1)
-            if str(check) == '0':
+            if str(check) == '0' and p[i]['status']  != str(check):
                 comp+=1
+                p[i]['status']=str(check)
                 if comp <= (x-n):
                     p[i]['class']=subprocess.Popen(cmd_list[cur],shell=True)
                     p[i]['cmd']=cmd_list[cur]
+                    p[i]['status']='Running'
                     cur+=1
+                
         s+=j
         sleep_cmd='sleep ' + str(j) + 's'
         subprocess.call(sleep_cmd,shell=True)
-    sys.stderr.write(date_time() + comp + ' jobs completed for ' + out + '\n')
+    sys.stderr.write(date_time() + str(comp) + ' jobs completed for ' + out + '\n')
 def mutect_pipe(config_file,sample_pairs,ref_mnt):
     (java,mutect,intervals,fa_ordered,max_t,ram)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
@@ -62,6 +66,8 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
     tmp_cmd='mkdir temp'
     subprocess.call(tmp_cmd,shell=True)
     # create sub-interval files - split by chromosome
+    mk_dir_bed='mkdir bed'
+    subprocess.call(mk_dir_bed,shell=True)
     for interval in int_fh:
         (chrom,start,end)=interval.split('\t')
         intvl=start + '-' + end # normally not need if using normal interval file
@@ -69,7 +75,7 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
             int_dict[chrom]['fh'].write(interval)
         except:
             int_dict[chrom]={}
-            int_dict[chrom]['fn']='intervals_' + chrom + '.bed'
+            int_dict[chrom]['fn']='bed/intervals_' + chrom + '.bed'
             int_dict[chrom]['fh']=open(int_dict[chrom]['fn'],'w')
             int_dict[chrom]['fh'].write(interval)
         i+=1
