@@ -28,6 +28,7 @@ def job_manage(cmd_list,max_t):
         p[i]={}
         p[i]['snp']=subprocess.Popen(cmd_list[i],shell=True)
         p[i]['cmd']=cmd_list[i]
+        p[i]['status']='Running'
         sys.stderr.write(cmd_list[i]+ '\n')
         cur+=1
     s=0
@@ -41,11 +42,13 @@ def job_manage(cmd_list,max_t):
             if str(check) == '1':
                 sys.stderr.write(date_time() + 'Job returned an error while running ' + p[i]['cmd'] + '  aborting!\n')
                 exit(1)
-            if str(check) == '0':
+            if str(check) == '0' and p[i]['status']  != str(check):
                 comp+=1
+                p[i]['status']=str(check)
                 if comp <= (x-n):
                     p[i]['snp']=subprocess.Popen(cmd_list[cur],shell=True)
                     p[i]['cmd']=cmd_list[cur]
+                    p[i]['status']='Running'
                     cur+=1
         s+=j
         sleep_cmd='sleep ' + str(j) + 's'
