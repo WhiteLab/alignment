@@ -37,12 +37,12 @@ class Reporter:
 
   def __identify_columns(self):
     self.columns = ['chr', 'pos', 'context', 'ref', 'alt', 'normal_ref_count',
-                    'normal_alt_count', 'tumor_ref_count', 'tumor_alt_count',
-                    'dbSnp_id','gene', 'effect', 'coding', 'codon_change',
+                    'normal_alt_count', '%_normal_alt', 'tumor_ref_count', 'tumor_alt_count',
+                    '%_tumor_alt', 'dbSnp_id','gene', 'effect', 'coding', 'codon_change',
                     'amino_acid_change', 'amino_acid_length', 'mutect_call']
     if self.c != 'n':
       self.columns.append('on/off-target')
-      sys.stderr.write(date_time() + 'Interval list giving - marking on/off target hits\n')
+      sys.stderr.write(date_time() + 'Interval list given - marking on/off target hits\n')
 
   def __index_intervals(self):
     self.index={}
@@ -67,7 +67,11 @@ class Reporter:
     if f==1:
       status="ON"
     return status
-
+    
+  def calc_pct(self,a,b):
+    res="{0:.2f}%".format(float(b)/(float(a)+float(b))*100)
+    return res
+    
   def parse_infile(self):
     self.outstring = '\t'.join(self.columns) + '\n'
 
@@ -96,8 +100,11 @@ class Reporter:
         report.append(line[column_refs.index('ALT_ALLELE')]) # alternative
         report.append(line[column_refs.index('n_ref_count')]) # normal reference count
         report.append(line[column_refs.index('n_alt_count')]) # normal alternative count
+        # calculate % normal and tumor coverage
+        report.append(self.calc_pct(line[column_refs.index('n_ref_count')],line[column_refs.index('n_alt_count')]))
         report.append(line[column_refs.index('t_ref_count')]) # tumor reference count
         report.append(line[column_refs.index('t_alt_count')]) # tumor alternative count
+        report.append(self.calc_pct(line[column_refs.index('t_ref_count')],line[column_refs.index('t_alt_count')]))
         # parse context for dbSnp id
         if id_check:
           report.append(id_check.group(2))
