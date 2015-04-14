@@ -9,52 +9,6 @@ def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
     return (config_data['tools']['java'],config_data['tools']['mutect'],config_data['refs']['genome'],config_data['refs']['fa_ordered'],config_data['params']['threads'],config_data['params']['ram'])
 
-def job_manage(cmd_list,out,max_t):
-    # num commands
-    x = len(cmd_list)
-    # cur position in command list
-    cur=0
-    #running
-    r=0
-    #completed
-    comp=0
-    # initialize process list
-    p={}
-    sys.stderr.write(date_time() + 'Initializing run\n')
-    n=int(max_t)
-    if n > x:
-        n=x
-    for i in xrange(0,n,1):
-        p[i]={}
-        p[i]['class']=subprocess.Popen(cmd_list[i],shell=True)
-        p[i]['cmd']=cmd_list[i]
-        p[i]['status']='Running'
-        sys.stderr.write(cmd_list[i]+ '\n')
-        cur+=1
-    s=0
-    j=30
-    m=30
-    while comp < x:
-        if s % m == 0:
-            sys.stderr.write(date_time() + 'Checking job statuses. ' + str(comp) + ' of ' + str(x) + ' completed. ' + str(s) + ' seconds have passed\n')
-        for i in xrange(0,n,1):
-            check=p[i]['class'].poll()
-            if str(check) == '1':
-                sys.stderr.write(date_time() + 'Job returned an error while running ' + p[i]['cmd'] + '  aborting!\n')
-                exit(1)
-            if str(check) == '0' and p[i]['status']  != str(check):
-                comp+=1
-                p[i]['status']=str(check)
-                if comp <= (x-n):
-                    p[i]['class']=subprocess.Popen(cmd_list[cur],shell=True)
-                    p[i]['cmd']=cmd_list[cur]
-                    p[i]['status']='Running'
-                    cur+=1
-                
-        s+=j
-        sleep_cmd='sleep ' + str(j) + 's'
-        subprocess.call(sleep_cmd,shell=True)
-    sys.stderr.write(date_time() + str(comp) + ' jobs completed for ' + out + '\n')
 def mutect_pipe(config_file,sample_pairs,ref_mnt):
     (java,mutect,intervals,fa_ordered,max_t,ram)=parse_config(config_file)
     intervals=ref_mnt + '/' + intervals
@@ -107,7 +61,13 @@ def mutect_pipe(config_file,sample_pairs,ref_mnt):
             cur=cur+ ' -T MuTect -fixMisencodedQuals -R ' + fa_ordered + ' --intervals ' + int_dict[intvl]['fn'] + '  --input_file:normal ' + normal_bam + '  --input_file:tumor ' + tumor_bam + ' --out ' + out + '/' + output_file + ' -vcf ' + out + '/' + vcf_file + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file + ' >> ' + log_file + ' 2>> ' + log_file + '; cat ' + out + '/' + output_file + ' | grep -v REJECT > ' + out + '/' + output_file + '.keep; cat ' + out + '/' + vcf_file + ' | grep -v REJECT > ' + out + '/' + vcf_file + '.keep '
             cmd_list.append(cur)
             i=i+1
-        job_manage(cmd_list,out,max_t)
+        # fix encode flag won't work if alread phred 33, if a job fails try without
+        try:
+            job_manager(cmd_list,max_t)
+        except:
+            for i in xrange(0,len(cmd_list),1):
+                cmd_list[i]=cmd_list[i].replace('-fixMisencodedQuals ','')
+            job_manager(cmd_list,max_t)
     sys.stderr.write(date_time() + 'Variant calling completed!\n')
     return 0
 
