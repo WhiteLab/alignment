@@ -2,6 +2,7 @@
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
+from job_manager import job_manager
 import subprocess
 import json
 
@@ -9,50 +10,6 @@ def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
     return (config_data['tools']['java'],config_data['tools']['snpEff'],config_data['tools']['snpsift'],config_data['tools']['report'],config_data['refs']['dbsnp'],config_data['refs']['intervals'])
 
-def job_manage(cmd_list,max_t):
-    # num commands
-    x = len(cmd_list)
-    # cur position in command list
-    cur=0
-    #running
-    r=0
-    #completed
-    comp=0
-    # initialize process list
-    p={}
-    sys.stderr.write(date_time() + 'Initializing run\n')
-    n=max_t
-    if n > x:
-        n=x
-    for i in xrange(0,n,1):
-        p[i]={}
-        p[i]['snp']=subprocess.Popen(cmd_list[i],shell=True)
-        p[i]['cmd']=cmd_list[i]
-        p[i]['status']='Running'
-        sys.stderr.write(cmd_list[i]+ '\n')
-        cur+=1
-    s=0
-    j=30
-    m=30
-    while comp < x:
-        if s % m == 0:
-            sys.stderr.write(date_time() + 'Checking job statuses. ' + str(comp) + ' of ' + str(x) + ' completed. ' + str(s) + ' seconds have passed\n')
-        for i in xrange(0,n,1):
-            check=p[i]['snp'].poll()
-            if str(check) == '1':
-                sys.stderr.write(date_time() + 'Job returned an error while running ' + p[i]['cmd'] + '  aborting!\n')
-                exit(1)
-            if str(check) == '0' and p[i]['status']  != str(check):
-                comp+=1
-                p[i]['status']=str(check)
-                if comp <= (x-n):
-                    p[i]['snp']=subprocess.Popen(cmd_list[cur],shell=True)
-                    p[i]['cmd']=cmd_list[cur]
-                    p[i]['status']='Running'
-                    cur+=1
-        s+=j
-        sleep_cmd='sleep ' + str(j) + 's'
-        subprocess.call(sleep_cmd,shell=True)
 def snpeff_pipe(config_file,sample_pairs,ref_mnt,cflag):
     max_t=8
     (java,snpeff,snpsift,report,dbsnp,intervals)=parse_config(config_file)
@@ -77,7 +34,7 @@ def snpeff_pipe(config_file,sample_pairs,ref_mnt,cflag):
         run_report+=' > ' + sample + '.vcf.keep.eff.xls'
         run_snp= run_snpsift  + ' ' + sample + '.out.keep > ' + sample + '.out.keep.sift.vcf 2> LOGS/' + sample + '.snpeff.log;'+ run_snpeff + ' ' + sample + '.out.keep.sift.vcf -v > ' + sample + '.out.keep.eff.vcf  2>> LOGS/' + sample + '.snpeff.log;' + run_report
         cmd_list.append(run_snp)
-    job_manage(cmd_list,max_t)
+    job_manager(cmd_list,max_t)
     sys.stderr.write(date_time() + 'SNP annotation  completed!\n')
     return 0
 if __name__ == "__main__":

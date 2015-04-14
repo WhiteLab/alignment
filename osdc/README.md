@@ -54,6 +54,34 @@ optional arguments:
   -ip VIP, --ip_add VIP
                         VM IP address
 
+#### cp_swift_object.py 
+usage: cp_swift_object.py [-h] [-c CONT] [-f FN]
+
+Tool to take a list of swift objects from the same container and copy them
+server-side using curl commands
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONT, --container CONT
+                        Swift container, i.e. PANCAN
+  -f FN, --file FN      Tab-separated renaming list old <tab> new. New object
+                        must start with container name in the event that ones
+                        is trying to also switch containers
+
+#### delete_from_swift_list.py
+usage: delete_from_swift_list.py [-h] [-c CONT] [-f FN] [-l L]
+
+Delete from swift using object list
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONT, --container CONT
+                        Swift container, i.e. PANCAN
+  -f FN, --file FN      Swift object list - text document one per line
+  -l L, --leave L       Flag to leave segments ('y') for large objects. Useful
+                        for when a large one was renamed, but the manifest
+                        with original anes stays the same
+
 ##### hg19_pe_config.json
 JSON config file with standard references and tools locations
 
@@ -82,7 +110,20 @@ JSON configuration parameters for creating a pipeline vm and attaching reference
 #### unmount.sh
 Command cleanup.py uses to unmount a reference from a vm.
 
-#### ownload_from_swift.py 
+#### job_manager.py                                                                                                                                          
+usage: job_manager.py [-h] [-j CMD_LIST] [-t MAX_T]
+
+Generic shell job manager. Will take a list of shell commands and a number of
+threads and will keep that many jobs running at all times.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -j CMD_LIST, --jobs CMD_LIST
+                        List of shell jobs to run
+  -t MAX_T, --threads MAX_T
+                        Number of threads to use
+
+#### download_from_swift.py 
 usage: download_from_swift.py [-h] [-c CONT] [-o OBJ]
 
 Simple download module to get files from swift. Can use prefix or whole object
