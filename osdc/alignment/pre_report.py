@@ -54,6 +54,7 @@ def parse_pileup(out,tbl,sample,mode,cov,index):
         for samp in samp_list:
             line=line.rstrip('\n')
             (chrom,pos,ref,mut,gene)=line.split('\t')
+            pos=int(pos)
             if chrom not in index[samp]:
                 index[samp][chrom]={}
             if pos not in index[samp][chrom]:
@@ -68,8 +69,9 @@ def parse_pileup(out,tbl,sample,mode,cov,index):
     for line in fo:
         line=line.rstrip('\n')
         pile=line.split('\t')
-        # fields 1-3 are chrom, pos, ref then triplets of ct, base, quality.  
-        (chrom,pos,ref)=(pile[0],pile[1],pile[2])
+        # fields 1-3 are chrom, pos, ref then triplets of ct, base, quality.
+        (chrom,pos,ref)=(pile[0],int(pile[1]),pile[2])
+        
         k=0 # tracks sample list position
         for i in xrange(4,len(pile),3):
             if samp_list[k] not in cov:
@@ -100,13 +102,10 @@ def parse_pileup(out,tbl,sample,mode,cov,index):
                 elif cur == '^' or cur == '$':
                     # will make assumption that read will not start/end with in/del, skipping over read score
                     if cur =='^':
-                        sys.stderr.write('Read start found at ' + str(j) + ' with value ' + cur + '.')
                         j=j+2
                     else:
-                        sys.stderr.write('Read end found at ' + str(j) + ' with value ' + cur + '.')
                         j=j+1
                     cur=pile[i][j]
-                    sys.stderr.write('Call adjusted to ' + cur + ' at position ' + str(j) + '\n')
                     if re.match('[,|.]',cur):
                         base_call(cov,pile,ref,samp_list[k],chrom,pos,i,k,m)
                     else:
@@ -132,13 +131,13 @@ def parse_pileup(out,tbl,sample,mode,cov,index):
             k+=1
     return samp_list
 
-# code obtained from web - may make int a class
+# code obtained from web - may make it a class
 def mean(data):
     """Return the sample arithmetic mean of data."""
     n = len(data)
     if n < 1:
         raise ValueError('mean requires at least one data point')
-    return sum(data)/n # in Python 2 use sum(data)/float(n)
+    return sum(data)/float(n) # in Python 2 use sum(data)/float(n)
 
 def _ss(data):
     """Return sum of square deviations of sequence data."""
@@ -156,24 +155,25 @@ def pstdev(data):
     return pvar**0.5
 
 def calc_values(cov):
-    #cov[samp_list[k]][chrom][pos]['tot']=pile[i-1]
-    #cov[samp_list[k]][chrom][pos]['bp'][base]['ct']+=1
-    #cov[samp_list[k]][chrom][pos]['bp'][base]['score'].append(ord(pile[i+1][m]-33))
-    for samp in cov:
-        tot_check=0
-        for chrom in cov[samp]:
-            for pos in cov[samp][chrom]:
-                for base in cov[samp][chrom][pos]['bp']:
+    for samp in sorted(cov):
+        for chrom in sorted(cov[samp]):
+            for pos in sorted(cov[samp][chrom]):
+                tot_check=0
+                for base in sorted(cov[samp][chrom][pos]['bp']):
                     score_tot=0
                     tot_check+=cov[samp][chrom][pos]['bp'][base]['ct']
                     #calc mean score
-                    cov[samp][chrom][pos]['bp'][base]['x']=mean(cov[samp][chrom][pos]['bp'][base]['score'])
+                    cov[samp][chrom][pos]['bp'][base]['x']="{0:.2f}".format(mean(cov[samp][chrom][pos]['bp'][base]['score']))
                     # calc std dev
-                    cov[samp][chrom][pos]['bp'][base]['stdev']=pstdev(cov[samp][chrom][pos]['bp'][base]['score'])
+                    if cov[samp][chrom][pos]['bp'][base]['ct'] >= 2:
+                        cov[samp][chrom][pos]['bp'][base]['stdev']="{0:.2f}".format(pstdev(cov[samp][chrom][pos]['bp'][base]['score']))
+                    else:
+                        cov[samp][chrom][pos]['bp'][base]['stdev']='NA'
                 if tot_check != int(cov[samp][chrom][pos]['tot']):
                     sys.stderr.write('Per base coverage total (' + str(tot_check) + ') does not equal total coverage ( ' + cov[samp][chrom][pos]['tot'] + ') of position (' + pos + ') for sample ' + samp + '.  Try using math.\n')
                     exit(69)
-
+#                else:
+#                    sys.stderr.write('Per base coverage total (' + str(tot_check) + ') equals total coverage ( ' + cov[samp][chrom][pos]['tot'] + ') of position (' + pos + ') for sample ' + samp + '.  Good job!\n')
 def gen_report(cov,index,samp_list):
     sys.stdout.write('sample\tchromosome\tposition\tgene\treference\tbase\tct\tavg_score\tstd dev\ttracked_alt?\n')
     for samp in samp_list:
@@ -186,15 +186,15 @@ def gen_report(cov,index,samp_list):
                         flag='N'
                         if base in index[samp][chrom][pos]['mut']:
                             flag = 'Y'
-                        sys.stdout.write("\t".join(samp,chrom,pos,gene,ref,base,str(cov[samp][chrom][pos]['bp'][base]['ct']),str(cov[samp][chrom][pos]['bp'][base]['x']),str(cov[samp][chrom][pos]['bp'][base]['stdev']),flag) + '\n')
+                        sys.stdout.write("\t".join((samp,chrom,str(pos),gene,ref,base,str(cov[samp][chrom][pos]['bp'][base]['ct']),str(cov[samp][chrom][pos]['bp'][base]['x']),str(cov[samp][chrom][pos]['bp'][base]['stdev']),flag)) + '\n')
                 else:
-                    sys.stdout.write("\t".join(samp,chrom,pos,gene,ref,'None',0,'NA','NA','NA') + '\n')
+                    sys.stdout.write("\t".join((samp,chrom,str(pos),gene,ref,'None',0,'NA','NA','NA')) + '\n')
 
 def pre_report(mode,bam,sample,pos,config_file,ref_mnt):
-    #~/TOOLS/samtools-0.1.19/samtools mpileup -6 -b bam_list.txt -D -f /mnt/cinder/HOTTEST/REFS/FASTA/hg19_karyo_ordered.fa -d 50000 -l hot_list_pos_only.txt > test_w_idx.txt 2> log.txt &
     (samtools_tool,samtools_ref)=parse_config(config_file)
     samtools_ref = ref_mnt + '/' + samtools_ref
     create_pos_ref(pos)
+    sys.stderr.write(date_time() + 'Creating mpileup with samtools\n')
     pre_rpt_cmd=samtools_tool + ' mpileup -6 -D -d 500000 -l pos_list.txt -f ' +  samtools_ref
     out=''
     if mode == 'b':

@@ -5,7 +5,6 @@ Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Febr
 ## UTILITY:
 
 #### basic_node_setup.py
-```
 usage: basic_node_setup.py [-h] [-id BID] [-j CONFIG_FILE] [-w WAIT]
 
 VM spawner for pipeline processes. Sets up vm for sample analysis and attaches
@@ -18,12 +17,10 @@ optional arguments:
                         JSON config file with snapshot ids and set up params
   -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
                         Reommended value 600 (in seconds)
-```
 
 #### date_time.py
 Simple helper module that prints the current timestamp
 #### attach_cinder.py
-```
 usage: attach_cinder.py [-h] [-sid SID] [-vid VID] [-id BID] [-s SIZE]
                         [-ip IP] [-w WAIT]
 
@@ -40,10 +37,8 @@ optional arguments:
   -ip IP, --ip_add IP   VM IP address
   -w WAIT, --wait WAIT  Wait time before giving up on spawning an image.
                         Recommended value 300 (in seconds)
-```
 
-#### cleanup.py                                                                                                       
-```
+#### cleanup.py                                                                                                                                               
 usage: cleanup.py [-h] [-cid CID] [-vid VID] [-id BID] [-ip VIP]
 
 Breaks down a vm built with the standard of having the bionimbus project ID as
@@ -58,10 +53,8 @@ optional arguments:
   -id BID, --BID BID    Bionimbpus project id
   -ip VIP, --ip_add VIP
                         VM IP address
-```
 
 #### cp_swift_object.py 
-```
 usage: cp_swift_object.py [-h] [-c CONT] [-f FN]
 
 Tool to take a list of swift objects from the same container and copy them
@@ -74,10 +67,8 @@ optional arguments:
   -f FN, --file FN      Tab-separated renaming list old <tab> new. New object
                         must start with container name in the event that ones
                         is trying to also switch containers
-```
 
 #### delete_from_swift_list.py
-```
 usage: delete_from_swift_list.py [-h] [-c CONT] [-f FN] [-l L]
 
 Delete from swift using object list
@@ -90,7 +81,6 @@ optional arguments:
   -l L, --leave L       Flag to leave segments ('y') for large objects. Useful
                         for when a large one was renamed, but the manifest
                         with original anes stays the same
-```
 
 ##### hg19_pe_config.json
 JSON config file with standard references and tools locations
@@ -99,7 +89,6 @@ JSON config file with standard references and tools locations
 Command basic_node_setup.py uses to mount a reference to a vm.
 
 #### setup_vm.py
-```
 usage: setup_vm.py [-h] [-id BID] [-im IMAGE] [-w WAIT] [-f FLAVOR] [-k KEY]
 
 VM spawner for pipeline processes
@@ -114,7 +103,6 @@ optional arguments:
   -f FLAVOR, --flavor FLAVOR
                         Image "flavor" to spawn
   -k KEY, --key KEY     Image key-pair to use
-```
 
 ##### std_vm_config.json
 JSON configuration parameters for creating a pipeline vm and attaching reference storage to it
@@ -122,8 +110,7 @@ JSON configuration parameters for creating a pipeline vm and attaching reference
 #### unmount.sh
 Command cleanup.py uses to unmount a reference from a vm.
 
-#### job_manager.py                                                                                                 
-```
+#### job_manager.py                                                                                                                                          
 usage: job_manager.py [-h] [-j CMD_LIST] [-t MAX_T]
 
 Generic shell job manager. Will take a list of shell commands and a number of
@@ -135,10 +122,8 @@ optional arguments:
                         List of shell jobs to run
   -t MAX_T, --threads MAX_T
                         Number of threads to use
-```
 
 #### download_from_swift.py 
-```
 usage: download_from_swift.py [-h] [-c CONT] [-o OBJ]
 
 Simple download module to get files from swift. Can use prefix or whole object
@@ -149,10 +134,8 @@ optional arguments:
   -c CONT, --container CONT
                         Swift container, i.e. PANCAN
   -o OBJ, --object OBJ  Swift object name/prefix, i.e. RAW/2015-1234
-```
 
 #### upload_variants_to_swift.py 
-```
 usage: upload_variants_to_swift.py [-h] [-o OBJ] [-c CONT] [-sl SAMPLE_LIST]
                                    [-sp SAMPLE_PAIRS]
 
@@ -169,10 +152,8 @@ optional arguments:
   -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
                         Sample tumor/normal pairs, tsv file with bid pair,
                         sample1, sample2
-```
 
 #### upload_to_swift.py 
-```
 usage: upload_to_swift.py [-h] [-o OBJ] [-c CONT]
 
 Uploads current directory contents to specified object and container
@@ -183,10 +164,8 @@ optional arguments:
                         to. i.e. ALIGN/2015-1234
   -c CONT, --container CONT
                         Swfit container to upload to. i.e. PANCAN
-```
 
 #### update_couchdb.py 
-```
 usage: update_couchdb.py [-h] [-f FN]
 
 Update couch db with qc stats using a json object list file
@@ -194,12 +173,10 @@ Update couch db with qc stats using a json object list file
 optional arguments:
   -h, --help        show this help message and exit
   -f FN, --file FN  qc_stats.json document list
-```
 
 ## ALIGNMENT:
 
 ### pipeline_wrapper.py 
-```
 usage: pipeline_wrapper.py [-h] [-f FN] [-j CONFIG]
 
 Pipeline wrapper script to process multiple paired end set serially.
@@ -213,10 +190,8 @@ optional arguments:
   -m REF_MNT, --mount REF_MNT
                         Reference drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
-```
 
 #### pipeline.py
-```
 usage: pipeline.py [-h] [-f1 END1] [-f2 END2] [-t SEQTYPE] [-j CONFIG_FILE]
 
 DNA alignment paired-end QC pipeline
@@ -236,7 +211,6 @@ optional arguments:
   -m REF_MNT, --mount REF_MNT
                         Drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
-```
 
 ##### Runs the following submodules in order:
 1. fastx
@@ -251,7 +225,6 @@ optional arguments:
 
 ## Pipeline submodule descriptions:
 #### fastx.py
-```
 usage: fastx.py [-h] [-f FASTX_TOOL] [-sa SAMPLE] [-f1 END1] [-f2 END2]
 
 FASTX quality stats module. Provides quality stats for fastq file and is
@@ -268,10 +241,8 @@ optional arguments:
                         First of paired-end fastq file
   -f2 END2, --file2 END2
                         Second of paired-end fastq file
-```
 
 #### bwa_mem_pe.py
-```
 usage: bwa_mem_pe.py [-h] [-b BWA_TOOL] [-rg RGRP] [-br BWA_REF] [-f1 END1]
                      [-f2 END2] [-s SAMTOOLS_TOOL] [-sr SAMTOOLS_REF]
                      [-sa SAMPLE] [-l LOG_DIR]
@@ -299,10 +270,7 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
-```
-
 #### novosort_sort_pe.py 
-```
 usage: novosort_sort_pe.py [-h] [-n NOVOSORT] [-sa SAMPLE] [-l LOG_DIR]
 
 novosort tool to sort BAM module.
@@ -315,10 +283,8 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
-```
 
 ##### picard_sort_pe.py - available, but deprecated in favor of novosort
-```
 usage: picard_sort_pe.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
                          [-sa SAMPLE] [-l LOG_DIR]
 
@@ -336,10 +302,8 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
-```
 
 #### picard_rmdup.py
-```
 usage: picard_rmdup.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
                        [-sa SAMPLE] [-l LOG_DIR]
 
@@ -358,10 +322,8 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
-```
 
 #### flagstats.py
-```
 usage: flagstats.py [-h] [-s SAMTOOLS_TOOL] [-sa SAMPLE]
 
 Flag stats from samtools module. Assumes bwa alignent and picard tools have
@@ -373,10 +335,8 @@ optional arguments:
                         Location of samtools tool. Version 1.19 preferred.
   -sa SAMPLE, --sample SAMPLE
                         Sample/project name prefix
-```
 
 #### picard_insert_size.py
-```
 usage: picard_insert_size.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-sa SAMPLE]
                              [-l LOG_DIR]
 
@@ -393,10 +353,8 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
-```
 
 #### coverage.py 
-```
 usage: coverage.py [-h] [-bt BEDTOOLS2_TOOL] [-sa SAMPLE] [-c COVERAGE]
                    [-bf BED_FILE]
 
@@ -416,10 +374,8 @@ optional arguments:
                         Bedfile list. If running all, list as string in order
                         format 'exome,genome,capture'. Else, just list the one
                         bed file
-```
 
 #### merge_qc_stats.py 
-```
 usage: merge_qc_stats.py [-h] [-o OBJ] [-c CONT] [-l LANE_LIST]
 
 Uses pipeline lane list to create a summary table of qc stats
@@ -431,10 +387,8 @@ optional arguments:
                         Swift container prefix, i.e. RAW/2015-1234
   -l LANE_LIST, --lane_list LANE_LIST
                         Original lane list used to run pipeline
-```
 
 #### novosort_merge_pe.py 
-```
 usage: novosort_merge_pe.py [-h] [-sl SAMPLE_LIST] [-j CONFIG_FILE] [-w WAIT]
 
 novosort tool to merge BAM files module.
@@ -447,10 +401,8 @@ optional arguments:
                         JSON config file with tool and ref locations
   -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
                         recommended
-```
 
 #### picard_ksort.py 
-```
 usage: picard_ksort.py [-h] [-b BAM_LIST] [-j CONFIG_FILE] [-o FLAG]
                        [-r REF_MNT]
 
@@ -469,14 +421,33 @@ optional arguments:
   -r REF_MNT, --reference REF_MNT
                         Directory references are mounted, i.e.
                         /mnt/cinder/REFS_XXX
-``` 
-
+ 
 #### parse_qc.pl - run at end of pipeline to gather qc stats
+
+#### pre_report.py 
+usage: pre_report.py [-h] [-m MODE] [-b BAM] [-s SAMPLE] [-p POS]
+                     [-j CONFIG_FILE] [-r REF_MNT]
+
+Variant pre-report using mpileup from samtools module. Typically used with
+merged bams gives coverage report of mutation hot spots of interest.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -m MODE, --mode MODE  Run in (b)atch mode or (s)ingle sample mode
+  -b BAM, --bam BAM     List or name of merged bam file(s)
+  -s SAMPLE, --sample SAMPLE
+                        Sample name or list
+  -p POS, --position POS
+                        Tab-separated position list with header Chromosome
+                        position ref_base mut_base gene_sym
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and reference locations
+  -r REF_MNT, --ref_mount REF_MNT
+                        Reference mount directory, i.e. /mnt/cinder/REFS_XXX
 
 ## ANALYSIS:
 
 ### variant_annot_pipe.py 
-```
 usage: variant_annot_pipe.py [-h] [-sp SAMPLE_PAIRS] [-j CONFIG_FILE]
                              [-w WAIT] [-k KFLAG] [-r REF_MNT]
 
@@ -500,7 +471,7 @@ optional arguments:
   -wg WG, --whole-genome WG
                         'y' or 'n' flag if whole genome or not. will determine
                         whether to flag for on/off target
-```
+
 Runs the following modules:
 1. novosort_merge_pe
 2. mutect_pipe
@@ -509,7 +480,6 @@ Runs the following modules:
 5. upload_variants_to_swift
 
 #### mutect_pipe.py 
-```
 usage: mutect_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS] [-r REF_MNT]
 
 muTect pipleine for variant calling. Need BAM and bai files ahead of time.
@@ -522,10 +492,8 @@ optional arguments:
                         Sample tumor/normal pairs
   -r REF_MNT, --ref_mnt REF_MNT
                         Reference drive path - i.e. /mnt/cinder/REFS_XXXX
-```
 
 #### mutect_merge_sort.py 
-```
 usage: mutect_merge_sort.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS]
                             [-r REF_MNT]
 
@@ -539,12 +507,10 @@ optional arguments:
                         Sample tumor/normal pairs
   -r REF_MNT, --ref_mnt REF_MNT
                         Reference drive path - i.e. /mnt/cinder/REFS_XXXX
-```
 
 ## ANNOTATION:
 
 #### snpeff_pipe.py
-```
 usage: snpeff_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS]
 
 muTect pipleine for variant calling. Need BAM and bai files ahead of time.
@@ -558,10 +524,8 @@ optional arguments:
   -f CFLAG, --flag CFLAG
                         'y' if whole genome,, 'n' if custom capture to mark
                         on/off target
-```
 
 #### report.py
-```
 usage: report.py [-h] [-i INFILE] [-f]
 
 parse snpEff annotated output into a digestable report.
@@ -575,4 +539,3 @@ optional arguments:
   -f, --filter_missense_nonsense_only
                         Apply a filter that only reports NONSENSE and MISSENSE
                         vars
-```
