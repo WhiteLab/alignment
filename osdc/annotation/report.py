@@ -38,7 +38,7 @@ class Reporter:
   def __identify_columns(self):
     self.columns = ['chr', 'pos', 'context', 'ref', 'alt', 'normal_ref_count',
                     'normal_alt_count', '%_normal_alt', 'tumor_ref_count', 'tumor_alt_count',
-                    '%_tumor_alt', 'dbSnp_id','gene', 'effect', 'coding', 'codon_change',
+                    '%_tumor_alt', 'T/N_%_alt_ratio','dbSnp_id','gene', 'effect', 'coding', 'codon_change',
                     'amino_acid_change', 'amino_acid_length', 'mutect_call']
     if self.c != 'n':
       self.columns.append('on/off-target')
@@ -69,8 +69,10 @@ class Reporter:
     return status
     
   def calc_pct(self,a,b):
-    res="{0:.2f}%".format(float(b)/(float(a)+float(b))*100)
-    return res
+    # return both formatted and unformatted
+    ratio=float(b)/(float(a)+float(b))*100
+    fmt="{0:.2f}%".format(ratio)
+    return (ratio,fmt)
     
   def parse_infile(self):
     self.outstring = '\t'.join(self.columns) + '\n'
@@ -100,11 +102,17 @@ class Reporter:
         report.append(line[column_refs.index('ALT_ALLELE')]) # alternative
         report.append(line[column_refs.index('n_ref_count')]) # normal reference count
         report.append(line[column_refs.index('n_alt_count')]) # normal alternative count
-        # calculate % normal and tumor coverage
-        report.append(self.calc_pct(line[column_refs.index('n_ref_count')],line[column_refs.index('n_alt_count')]))
+        # calculate % normal and tumor coverage, keep both formatted and unforamtted version in order to calculate that ratio of the ratios
+        (n_rat,n_fmt)=self.calc_pct(line[column_refs.index('n_ref_count')],line[column_refs.index('n_alt_count')])
+        report.append(n_fmt)
         report.append(line[column_refs.index('t_ref_count')]) # tumor reference count
         report.append(line[column_refs.index('t_alt_count')]) # tumor alternative count
-        report.append(self.calc_pct(line[column_refs.index('t_ref_count')],line[column_refs.index('t_alt_count')]))
+        (t_rat,t_fmt)=self.calc_pct(line[column_refs.index('t_ref_count')],line[column_refs.index('t_alt_count')])
+        report.append(t_fmt)
+        t_n_rat=10000
+        if n_rat > 0:
+          t_n_rat=t_rat/n_rat
+        report.append("{0:.2f}".format(t_n_rat))
         # parse context for dbSnp id
         if id_check:
           report.append(id_check.group(2))

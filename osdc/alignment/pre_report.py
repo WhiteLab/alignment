@@ -70,8 +70,7 @@ def parse_pileup(out,tbl,sample,mode,cov,index):
         line=line.rstrip('\n')
         pile=line.split('\t')
         # fields 1-3 are chrom, pos, ref then triplets of ct, base, quality.
-        (chrom,pos,ref)=(pile[0],int(pile[1]),pile[2])
-        
+        (chrom,pos,ref)=(pile[0],int(pile[1]),pile[2])        
         k=0 # tracks sample list position
         for i in xrange(4,len(pile),3):
             if samp_list[k] not in cov:
@@ -118,13 +117,18 @@ def parse_pileup(out,tbl,sample,mode,cov,index):
                     try:
                         cur=pile[i][j] + pile[i][(j+2):(j+2+int(size))]
                     except:
-                        sys.stderr.write('Parse error size was ' + str(size) + ' current base code ' + cur + ' chromosome ' + chrom + ' position ' + pos + ' in sample ' + samp_list[k] + ' column index ' + str(i) + ' string index '+ str(j) + '\n')
+                        sys.stderr.write('Parse error size was ' + str(size) + ' current base code ' + cur + ' chromosome ' + chrom + ' position ' + str(pos) + ' in sample ' + samp_list[k] + ' column index ' + str(i) + ' string index '+ str(j) + '\n')
                         exit(3)
                     j=j+2+int(size)
                     base_call(cov,pile,cur,samp_list[k],chrom,pos,i,k,m)
                     call = 1
+                # odd * character seems to mean unaligned
+                elif cur == '*':
+                    cur='unaligned'
+                    base_call(cov,pile,cur,samp_list[k],chrom,pos,i,k,m)
+                    call = 1
                 if call == 0:
-                    sys.stderr.write('A base call was missed.  Check logic or input! current base code ' + cur + ' chromosome ' + chrom + ' position ' + pos + ' in sample ' + samp_list[k] + ' column index ' + str(i) + ' string index '+ str(j) + '\n')
+                    sys.stderr.write('A base call was missed.  Check logic or input! current base code ' + cur + ' chromosome ' + chrom + ' position ' + str(pos) + ' in sample ' + samp_list[k] + ' column index ' + str(i) + ' string index '+ str(j) + '\n')
                     exit(3)
                 m+=1
                 j+=1
@@ -195,7 +199,7 @@ def pre_report(mode,bam,sample,pos,config_file,ref_mnt):
     samtools_ref = ref_mnt + '/' + samtools_ref
     create_pos_ref(pos)
     sys.stderr.write(date_time() + 'Creating mpileup with samtools\n')
-    pre_rpt_cmd=samtools_tool + ' mpileup -6 -D -d 500000 -l pos_list.txt -f ' +  samtools_ref
+    pre_rpt_cmd=samtools_tool + ' mpileup -D -d 500000 -l pos_list.txt -f ' +  samtools_ref
     out=''
     if mode == 'b':
         out='batch_pileup.txt'

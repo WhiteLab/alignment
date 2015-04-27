@@ -16,7 +16,11 @@ def upload_variants_to_swift(cont,obj,sample_list,sample_pairs):
       swift_cmd=src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam -S ' + str(ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bam >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
       check=call(swift_cmd,shell=True)
       swift_cmd=src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bai -S ' + str(ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bai >> LOGS/' + sample+ '.upload.log 2>> LOGS/' + sample + '.upload.log'
-      check=check + call(swift_cmd,shell=True)
+      try:
+         call(swift_cmd,shell=True)
+      except:
+         swift_cmd=src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam.bai -S ' + str(ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bai >> LOGS/' + sample+ '.upload.log 2>> LOGS/' + sample + '.upload.log'
+         check=check + call(swift_cmd,shell=True)
       if check==0:
          sys.stderr.write(date_time() + 'Uploading final BAMs for ' + sample + ' successful!\n')
       else:
@@ -72,8 +76,8 @@ def upload_variants_to_swift(cont,obj,sample_list,sample_pairs):
 if __name__ == "__main__":
    import argparse
    parser=argparse.ArgumentParser(description='Uploads current directory contents to specified object and container')
-   parser.add_argument('-o','--object',action='store',dest='obj',help='Swift object name root to use for aligned merged bam files.  i.e. ALIGN/2015-1234')
    parser.add_argument('-c','--container',action='store',dest='cont',help='Swfit container name to upload to.  i.e. PANCAN')
+   parser.add_argument('-o','--object',action='store',dest='obj',help='Swift object name root to use for aligned merged bam files.  i.e. ALIGN/2015-1234')
    parser.add_argument('-sl','--sample_list',action='store',dest='sample_list',help='Sample list, one per line')
    parser.add_argument('-sp','--sample_pairs',action='store',dest='sample_pairs',help='Sample tumor/normal pairs, tsv file with bid pair, sample1, sample2')
    
