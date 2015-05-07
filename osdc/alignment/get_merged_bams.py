@@ -23,7 +23,7 @@ def list_bam(cont,obj,sample,wait):
     for fn in re.findall('(.*)\n',flist):
         if re.match('.*.merged.final.ba', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
-            dl_cmd='. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
+            dl_cmd='. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' --output ' + os.path.basename(fn)
             p.append(subprocess.Popen(dl_cmd,shell=True))
     n=0
     f=0
@@ -59,7 +59,7 @@ def get_merged_bams(config_file,sample_list,wait):
 
 if __name__ == "__main__":
     import argparse
-    parser=argparse.ArgumentParser(description='Pipeline downloader of merged bam files if sm flag is y.')
+    parser=argparse.ArgumentParser(description='novosort tool to merge BAM files module.')
     parser.add_argument('-sl','--sample_list',action='store',dest='sample_list',help='Sample/project prefix list')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file with tool and ref locations')
     parser.add_argument('-w','--wait',action='store',dest='wait',help='Wait time to download bam files.  900 (seconds) recommended')
