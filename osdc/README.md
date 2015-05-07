@@ -401,7 +401,18 @@ optional arguments:
                         JSON config file with tool and ref locations
   -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
                         recommended
+#### get_merged_bams.py [-h] [-sl SAMPLE_LIST] [-j CONFIG_FILE] [-w WAIT]
 
+Pipeline downloader of merged bam files if sm flag is y.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -sl SAMPLE_LIST, --sample_list SAMPLE_LIST
+                        Sample/project prefix list
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and ref locations
+  -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
+                        recommended
 #### picard_ksort.py 
 usage: picard_ksort.py [-h] [-b BAM_LIST] [-j CONFIG_FILE] [-o FLAG]
                        [-r REF_MNT]
@@ -471,9 +482,14 @@ optional arguments:
   -wg WG, --whole-genome WG
                         'y' or 'n' flag if whole genome or not. will determine
                         whether to flag for on/off target
+  -sm SM, --skip-merge SM	
+                        'y' or 'n' flag to skip merge files. Useful for
+                        repeating variant calls when BAMs were already merged,
+                        sorted, etc the first time
 
 Runs the following modules:
-1. novosort_merge_pe
+1. novosort_merge_pe (unless skipped with sm flag y)
+1. get_merged_bams (unless merge-sort run, sm flag n)
 2. mutect_pipe
 3. mutect_merge_sort
 4. snpeff_pipe
