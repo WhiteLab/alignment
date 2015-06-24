@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import re
+from getpass import getpass
 from date_time import date_time
 from subprocess import call
 from subprocess import check_output
@@ -11,7 +12,7 @@ def update_couchdb(fn):
     setproxy='export http_proxy=http://cloud-proxy:3128; export https_proxy=http://cloud-proxy:3128; export no_proxy="rados-bionimbus-pdc.opensciencedatacloud.org";'
     server='https://128.135.219.167:6984'
     user='mbrown'
-    pw='Jah6Eeji'
+    pw=getpass.getpass()
     db='igsb_qc'
     fh=open(fn,'r')
     for obj in fh:
