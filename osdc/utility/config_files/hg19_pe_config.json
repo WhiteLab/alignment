@@ -7,7 +7,7 @@
 	"picard":"/home/ubuntu/TOOLS/picard/dist/picard.jar",
 	"novosort":"/home/ubuntu/TOOLS/nova/novosort",
 	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
-	"qc_stats":"/home/ubuntu/TOOLS/Scripts/alignment/parse_qc.pl",
+	"qc_stats":"/home/ubuntu/TOOLS/Scripts/alignment/parse_qc.py",
 	"mutect":"/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
 	"snpEff":"/home/ubuntu/TOOLS/snpEff/snpEff.jar",
 	"snpsift":"/home/ubuntu/TOOLS/snpEff/SnpSift.jar",
@@ -25,11 +25,14 @@
 	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
 	"dbsnp":"REFS/VCF/dbsnp_138.hg19.vcf",
 	"cont":"PANCAN",
-	"obj":"ALIGN",
+	"obj":"ALIGN_TESTCC",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
     },
     "params":{
 	"threads":"8",
-	"ram":"24"
+	"ram":"24",
+	"cc_vsn":"V2",
+	"genome_size":"3137161264",
+	"ranges":"0.9,0.5,0.1"
     }
 }

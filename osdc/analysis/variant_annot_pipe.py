@@ -78,7 +78,7 @@ def variant_annot_pipe(config_file,sample_pairs,wait,kflag,ref_mnt,wg,sm):
     else:
         sys.stderr.write(date_time() + 'snpEff failed.\n')
         exit(1)
-    # relocate sutff, then upload
+    # relocate stuff, then upload
     mv_cmds='mv *.bai *.bam BAM;mv *eff* *sift* ANNOTATION; mv *out* *vcf* ANALYSIS'
     call(mv_cmds,shell=True)
     check=upload_variants_to_swift(cont,obj,sample_list,sample_pairs)

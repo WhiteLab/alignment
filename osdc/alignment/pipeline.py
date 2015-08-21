@@ -7,7 +7,6 @@ import re
 from date_time import date_time
 from fastx import fastx
 from bwa_mem_pe import bwa_mem_pe
-#from picard_sort_pe import picard_sort_pe
 from novosort_sort_pe import novosort_sort_pe
 from picard_rmdup import picard_rmdup
 from picard_insert_size import picard_insert_size
@@ -17,7 +16,8 @@ from subprocess import call
 import subprocess
 import json
 from log import log
-from update_couchdb import update_couchdb
+#from update_couchdb import update_couchdb
+from parse_qc import parse_qc
 import pdb
 
 class Pipeline():
@@ -57,6 +57,10 @@ class Pipeline():
         self.qc_stats=self.config_data['tools']['qc_stats']
         self.threads=self.config_data['params']['threads']
         self.ram=self.config_data['params']['ram']
+        if self.seqtype == 'capture':
+            #self.cov=self.config_data['params']['cov']
+            self.cflag='n'
+            
         self.pipeline()
 
     def pipeline(self):
@@ -89,24 +93,35 @@ class Pipeline():
     
         wait_flag=1
         # check certain key processes
-        check=bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir,self.threads) # rest won't run until completed
-        if(check != 0):
-            log(self.loc,date_time() + 'BWA failure for ' + self.sample + '\n')
-            exit(1)
-        log(self.loc,date_time() + 'Getting fastq quality score stats\n')
-        fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
+        # skip aligning if bam already exists
+        if os.path.isfile(self.sample + '.bam') == False:
+            check=bwa_mem_pe(self.bwa_tool,RGRP,self.bwa_ref,self.end1,self.end2,self.samtools_tool,self.samtools_ref,self.sample,log_dir,self.threads) # rest won't run until completed
+            if(check != 0):
+                log(self.loc,date_time() + 'BWA failure for ' + self.sample + '\n')
+                exit(1)
+            log(self.loc,date_time() + 'Getting fastq quality score stats\n')
+            fastx(self.fastx_tool,self.sample,self.end1,self.end2) # will run independently of rest of output
+        else:
+            log(self.loc,date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
+        # skip sort if sorted file exists already
         log(self.loc,date_time() + 'Sorting BAM file\n')
-
-        check=novosort_sort_pe(self.novosort,self.sample,log_dir,self.threads,self.ram) # rest won't run until completed
-        if(check != 0):
-            log(self.loc,date_time() + 'novosort sort failure for ' + self.sample + '\n')
-            exit(1)
-        log(self.loc,date_time() + 'Removing PCR duplicates\n')
-        picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir,self.ram)  # rest won't run until emopleted
-        log(self.loc,date_time() + 'Gathering SAM flag stats\n')
-        flagstats(self.samtools_tool,self.sample) # flag determines whether to run independently or hold up the rest of the pipe until completion
-        log(self.loc,date_time() + 'Calculating insert sizes\n')
-        picard_insert_size(self.java_tool,self.picard_tool,self.sample,log_dir,self.ram) # get insert size metrics. 
+        if os.path.isfile(self.sample + '.srt.bam') == False:
+            check=novosort_sort_pe(self.novosort,self.sample,log_dir,self.threads,self.ram) # rest won't run until completed
+            if(check != 0):
+                log(self.loc,date_time() + 'novosort sort failure for ' + self.sample + '\n')
+                exit(1)
+        else:
+            log(self.loc,date_time() + 'Sorted bam file already exists, skipping\n')
+        # skip next steps in insert size already calculated
+        if os.path.isfile(self.sample + '.insert_metrics.hist') == False:
+            log(self.loc,date_time() + 'Removing PCR duplicates\n')
+            picard_rmdup(self.java_tool,self.picard_tool,self.picard_tmp,self.sample,log_dir,self.ram)  # rest won't run until emopleted
+            log(self.loc,date_time() + 'Gathering SAM flag stats\n')
+            flagstats(self.samtools_tool,self.sample) # flag determines whether to run independently or hold up the rest of the pipe until completion
+            log(self.loc,date_time() + 'Calculating insert sizes\n')
+            picard_insert_size(self.java_tool,self.picard_tool,self.sample,log_dir,self.ram) # get insert size metrics. 
+        else:
+            log(self.loc, date_time() + 'Insert size file detected, skipping remove duplicates, flagstats, and remove duplicates steps')
         #figure out which coverage method to call using seqtype
         log(self.loc,date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method=getattr(coverage,(self.seqtype+'_coverage'))
@@ -114,8 +129,10 @@ class Pipeline():
         method(self.bedtools2_tool,self.sample,self.bed_ref,wait_flag) # run last since this step slowest of the last
         log(self.loc,date_time() + 'Checking outputs and uploading results\n')
         # check to see if last expected file was generated search for seqtype + .hist suffix
+        
         flist=os.listdir('./')
-        suffix=self.seqtype+'.hist'
+        suffix=self.seqtype+'_t2.hist'
+        
         for fn in flist:
             if fn==(self.sample +'.' + suffix):
                 self.status=1
@@ -123,34 +140,27 @@ class Pipeline():
         if self.status==1:
             p_tmp_rm="rm -rf picard_tmp"
             call(p_tmp_rm,shell=True)
-            # move files into approriate place and run qc_stats
-            log(self.loc,date_time() + 'Calculating qc stats and prepping files for uplaod\n')
+            # move files into appropriate place and run qc_stats
+            log(self.loc,date_time() + 'Calculating qc stats and prepping files for upload\n')
             mv_bam='mv *.bam *.bai BAM/'
             subprocess.call(mv_bam,shell=True)
-            qc_cmd=self.qc_stats + ' 2 ' + self.sample
-            subprocess.call(qc_cmd,shell=True)
             rm_sf='rm ' + self.end1 + ' ' + self.end2
             subprocess.call(rm_sf,shell=True)
+            parse_qc(self.json_config,self.sample,self.cflag)
             mv_rest='find . -maxdepth 1 -type f -exec mv {} QC \;'
             subprocess.call(mv_rest, shell=True)
             from upload_to_swift import upload_to_swift
             obj=self.obj + "/" + self.bid
+            
             check=upload_to_swift(self.cont,obj)
             if check==0:
-                create_list='ls QC/*qc_stats.json > QC/' + self.sample + '_qc_stats.list'
-                subprocess.call(create_list,shell=True)
-                uc=update_couchdb('QC/' + self.sample + '_qc_stats.list')
-                if uc==0:
-                    log(self.loc,date_time() + 'Couchdb successfully updated\n')
-                    self.status = 0                    
-                    log(self.loc,date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
-                else:
-                    self.status = 1
-                    log(self.loc,date_time() + "CouchDB update failed! Check database server connection\n")
-                
+                log(self.loc,date_time() + 'Couchdb successfully updated\n')
+                self.status = 0                    
+                log(self.loc,date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
             else:
                 log(self.loc,date_time() + "All but file upload succeeded\n")
                 self.status = 1
+            
         else:
             (self.loc,date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
             self.status = 1

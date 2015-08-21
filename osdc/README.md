@@ -433,7 +433,20 @@ optional arguments:
                         Directory references are mounted, i.e.
                         /mnt/cinder/REFS_XXX
  
-#### parse_qc.pl - run at end of pipeline to gather qc stats
+#### parse_qc.py
+usage: parse_qc.py [-h] [-j CONFIG_FILE] [-f CFLAG] [-sa SAMPLE]
+
+Coverage and algnment QC summary.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file with tool and reference locations
+  -f CFLAG, --flag CFLAG
+                        'y' if whole genome, 'n' if custom capture to provide
+                        per-tier coverage stats
+  -sa SAMPLE, --sample SAMPLE
+                        Sample prefix
 
 #### pre_report.py 
 usage: pre_report.py [-h] [-m MODE] [-b BAM] [-s SAMPLE] [-p POS]
