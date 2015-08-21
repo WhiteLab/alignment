@@ -49,7 +49,11 @@ class Reporter:
     fh=open(self.c,'r')
     for line in fh:
       m=re.search('(chr\w+):(\d+)-(\d+)',line)
-      (chrom,start,end)=(m.group(1),m.group(2),m.group(3))
+      try:
+        (chrom,start,end)=(m.group(1),m.group(2),m.group(3))
+      except:
+        sys.stderr.write(line + ' doesn\'t fit format (chr\w+):(\d+)-(\d+), skipping\n')
+        continue
       if chrom not in self.index:
         self.index[chrom]={}
       self.index[chrom][(int(start))]=int(end)
