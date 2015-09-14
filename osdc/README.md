@@ -9,6 +9,7 @@ You don't have time to read through what each script does, and you're a BAMF.
 ./basic_node_setup.py -id <vm_name> -j <json config file> -w 600 2> setup.log >> setup.log
 ```
 Typical config file:
+
 {
     "vm_image":{
 	"id":"83ed8fb4-6c27-40e5-9648-4e12605d6f16",
@@ -21,6 +22,7 @@ Typical config file:
 	"size":"200"
     }
 }
+
 Things to check for post set-up: Does the vm exist?  Does the cinder volume exist?  Was the cinder volume attached? Was it mounted?
 #####2) Create job run files
 ##### a) Get list of fastq files to process from swift, one file per line
@@ -49,6 +51,7 @@ Resultant lane_list:
 2014-2231	capture	141212_SN1070_0312_BHB5BNADXX_2
 
 ##### c) Check config file - this file is typically in ~/TOOLS/Scripts/utility/config_files/hg19_pe_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
+
     "refs":{
 	"cont":"PANCAN", # container
 	"obj":"ALIGN_TESTCC", # object prefix
@@ -60,7 +63,9 @@ Resultant lane_list:
 	"ram":"24",
 	"cc_vsn":"V2", # custom capture version
     }
+
 #####3) Pipeline run - QC:
+
 ```
 /home/ubuntu/TOOLS/Scripts/alignment/pipeline_wrapper.py -f lane_list.txt -j hg19_pe_config.json -m location_of_volume_mount 2> run.log
 ```
@@ -71,7 +76,7 @@ Resultant lane_list:
 
 The pipeline will iterate throught the list upload files to swift, and delete on the cinder volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for conveniece after run using /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py:
 ```
-/home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py -f <lane_list> -c <swift container> -o <swift object prefix>
+/home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
 ```
 
 ## UTILITY:
