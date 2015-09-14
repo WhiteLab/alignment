@@ -1,6 +1,78 @@
 DNAseq Paired End pipeline
 ===========================
 Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
+## CRASH COURSE RUN:
+You don't have time to read through what each script does, and you're a BAMF.
+
+#####1) Set up vm - on head node, will give updates on set up
+```
+./basic_node_setup.py -id <vm_name> -j <json config file> -w 600 2> setup.log >> setup.log
+```
+Typical config file:
+{
+    "vm_image":{
+	"id":"83ed8fb4-6c27-40e5-9648-4e12605d6f16",
+	"flavor":"13",
+	"key":"your_vm_key"
+    },
+
+    "cinder_ref":{
+	"id":"85655e73-6a89-4be0-9152-61059fb0af3c",
+	"size":"200"
+    }
+}
+Things to check for post set-up: Does the vm exist?  Does the cinder volume exist?  Was the cinder volume attached? Was it mounted?
+#####2) Create job run files
+##### a) Get list of fastq files to process from swift, one file per line
+##### b) Use this list to create a run file, in this example for custom capture:
+```
+/home/ubuntu/utility/fq2lane.py -f <fastq_list> -s capture > lane_list
+```
+Typical fastq list:
+
+RAW/2014-2230/2014-2230_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2230/2014-2230_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+RAW/2014-2231/2014-2231_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2231/2014-2231_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+RAW/2014-2232/2014-2232_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2232/2014-2232_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+RAW/2014-2232/2014-2232_150501_SN1070_0375_AH3L5KBCXX_1_1_sequence.txt.gz
+RAW/2014-2232/2014-2232_150501_SN1070_0375_AH3L5KBCXX_1_2_sequence.txt.gz
+RAW/2014-2233/2014-2233_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2233/2014-2233_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+
+Resultant lane_list:
+
+2014-2232	capture	141212_SN1070_0312_BHB5BNADXX_2, 150501_SN1070_0375_AH3L5KBCXX_1
+2014-2233	capture	141212_SN1070_0312_BHB5BNADXX_2
+2014-2230	capture	141212_SN1070_0312_BHB5BNADXX_2
+2014-2231	capture	141212_SN1070_0312_BHB5BNADXX_2
+
+##### c) Check config file - this file is typically in ~/TOOLS/Scripts/utility/config_files/hg19_pe_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
+    "refs":{
+	"cont":"PANCAN", # container
+	"obj":"ALIGN_TESTCC", # object prefix
+	"capture":"REFS/BED/capture_panel_2.0.bed", # location of bed file with capture defs.  tiers are implied and have been created ahead of time
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/hg19_pe_config.json" # this file location
+    },
+    "params":{
+	"threads":"8",
+	"ram":"24",
+	"cc_vsn":"V2", # custom capture version
+    }
+#####3) Pipeline run - QC:
+```
+/home/ubuntu/TOOLS/Scripts/alignment/pipeline_wrapper.py -f lane_list.txt -j hg19_pe_config.json -m location_of_volume_mount 2> run.log
+```
+-m clarification:
+ -m REF_MNT, --mount REF_MNT
+                        Reference drive mount location. Example would be
+                        /mnt/cinder/REFS_XXX
+
+The pipeline will iterate throught the list upload files to swift, and delete on the cinder volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for conveniece after run using /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py:
+```
+/home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py -f <lane_list> -c <swift container> -o <swift object prefix>
+```
 
 ## UTILITY:
 

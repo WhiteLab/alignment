@@ -15,23 +15,23 @@
     },
 
     "refs":{
-	"bwa":"REFS/bwa-0.7.8/hg19_karyo_ordered.fa",
-	"samtools":"REFS/samtools-0.1.19/hg19_karyo_ordered.fa",
+	"bwa":"REFS/bwa-0.7.8/mm10.fa",
+	"samtools":"REFS/samtools-0.1.19/mm10.fa",
 	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
-	"genome":"REFS/BED/hg19_karyo_ordered.bed",
+	"genome":"REFS/BED/,,10.bed",
 	"capture":"REFS/BED/capture_panel_2.0.bed",
 	"intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt",
-	"fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
-	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
+	"fa_ordered":"REFS/FASTA/mm10.fa",
+	"fai":"REFS/FASTA/mm10.fa.fai",
 	"dbsnp":"REFS/VCF/dbsnp_138.hg19.vcf",
-	"cont":"PANCAN",
-	"obj":"ALIGN_TESTCC",
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/hg19_pe_config.json"
+	"cont":"PDX",
+	"obj":"ALIGN_TEST",
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/mm10_pe_config.json"
     },
     "params":{
-	"threads":"8",
-	"ram":"24",
-	"cc_vsn":"V2",
+	"threads":"4",
+	"ram":"20",
+	"cc_vsn":"mm10",
 	"genome_size":"3137161264",
 	"ranges":"0.9,0.5,0.1"
     }

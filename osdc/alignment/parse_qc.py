@@ -161,21 +161,22 @@ def parse_qc(config_file,sample,cflag):
         json_out.close()
     else:
         log(loc,date_time() + 'Whole genome flag given\n')
-        bed_hist = sample + '.hist'
+        bed_hist = sample + '.genome.hist'
         # cov is a dictionary with the per -ratio stats
         tbl.write("BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\tmedian_insert_size\tmedian_absolute_deviation\tmean_insert_size\tinsert_standard_devation\tdate_aligned\taverage_x_coverage\t%covered_at_average\t90%\t50%\t10%\tzero_cov_bp\t%zero_cov\n")
         tbl.write('\t'.join(RG) + '\t' + str(rd_len))
         log(loc, 'Parsing bedtools coverage file ' + bed_hist + '\n')
-        (target_size,aligned_bp_ot,num_bp,cov,zero_cov,pct_zero_cov,avg_cov) = parseCoverage(bed_hist)
+        (target_size,aligned_bp_ot,num_bp,cov,zero_cov,pct_zero_cov,avg_cov,avg_ratio) = parseCoverage(bed_hist,ranges)
         fraction_aligned_bp_ot = float(num_bp)/float(target_size)
         fraction_sequenced_bp_ot = float(aligned_bp_ot)/float(all_bp_est)
-        to_print = (tot_rds,post_aligned_reads,frac_aligned,rmduped_reads,frac_rmduped_reads,target_size,aligned_bp_ot,fraction_aligned_bp_ot,fraction_sequenced_ot,median_insert_size,median_absolute_deviation,mean_insert_size,insert_standard_devation,date_aligned,avg_cov,avg_ratio)
+#(t1_ts,t1_aln_bp_ot,t1_num_bp,t1_cov,t1_zero_cov,t1_pct_zero_cov,t1_avg_cov,t1_avg_ratio)
+        to_print = (tot_rds,post_aligned_reads,frac_aligned,rmduped_reads,frac_rmduped_reads,target_size,aligned_bp_ot,fraction_aligned_bp_ot,fraction_sequenced_ot,median_insert_size,median_absolute_deviation,mean_insert_size,insert_standard_deviation,date_aligned,avg_cov,avg_ratio)
         tbl.write('\t' + '\t'.join(str(e) for e in to_print) + '\t')
         for ratio in ranges:
-            tbl.write('\t' + str(cvg[ratio]))
+            tbl.write('\t' + str(cov[ratio]['xcov']))
         tbl.write('\t'.join((str(zero_cov),str(pct_zero_cov))) + '\n')
         tbl.close()
-        json_dict = {'BionimbusID':RG[0],'Date':RG[1],'Machine':RG[2],'Run':RG[3],'BarCode':RG[4],'Lane':RG[5],'read_length':rd_len,'total_reads':tot_rds,'post_align_reads':post_aligned_reads,'fraction_aligned':frac_aligned,'post_rmdup_reads':rmduped_reads,'fraction_rmduped':frac_rmduped_reads,'target_size':target_size,'aligned_bp_ot':align_bp_ot,'fraction_aligned_bp_ot':fraction_aligned_bp_ot,'fraction_sequenced_bp_ot':fraction_sequenced_ot,'median_insert_size':median_insert_size,'median_absolute_deviation':median_absolute_deviation,'mean_insert_size':mean_insert_size,'insert_standard_deviation':insert_standard_deviation,'date_aligned':date_aligned,'coverage':{ccvsn:{'average':avg_cov,'%covered_at_average':avg_ratio,'90%':cov[0.9]['xcov'],'50%':cov[0.5]['xcov'],'10%':cov[0.1]['xcov'],'zero_cov_bp':zero_cov,'%zero_cov':pct_zero_cov}}}
+        json_dict = {'BionimbusID':RG[0],'Date':RG[1],'Machine':RG[2],'Run':RG[3],'BarCode':RG[4],'Lane':RG[5],'read_length':rd_len,'total_reads':tot_rds,'post_align_reads':post_aligned_reads,'fraction_aligned':frac_aligned,'post_rmdup_reads':rmduped_reads,'fraction_rmduped':frac_rmduped_reads,'target_size':target_size,'aligned_bp_ot':aligned_bp_ot,'fraction_aligned_bp_ot':fraction_aligned_bp_ot,'fraction_sequenced_bp_ot':fraction_sequenced_ot,'median_insert_size':median_insert_size,'median_absolute_deviation':median_absolute_deviation,'mean_insert_size':mean_insert_size,'insert_standard_deviation':insert_standard_deviation,'date_aligned':date_aligned,'coverage':{ccvsn:{'average':avg_cov,'%covered_at_average':avg_ratio,'90%':cov[0.9]['xcov'],'50%':cov[0.5]['xcov'],'10%':cov[0.1]['xcov'],'zero_cov_bp':zero_cov,'%zero_cov':pct_zero_cov}}}
         json_out.write(json.dumps(json_dict,indent=4, sort_keys=True))
         json_out.close()
 
