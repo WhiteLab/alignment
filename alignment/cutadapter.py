@@ -26,11 +26,14 @@ def cutadapter(sample, end1, end2, config_file):
     temp1 = end1 + '.temp'
     temp2 = end2 + '.temp'
     (cutadapt_tool, qual, mqual) = parse_config(config_file)
-    cutadapt_cmd = cutadapt_tool + ' -m ' + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp1 + ' -p ' + \
+    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp1 + ' -p ' + \
                    temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + "\n")
-    call(cutadapt_cmd, shell=True)
-    log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory.')
+    check = call(cutadapt_cmd, shell=True)
+    if not check:
+        log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
+    else:
+        log(loc, date_time() + 'Cutadapt failed.  Check log files\n'')
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ' ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
