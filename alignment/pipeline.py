@@ -91,7 +91,7 @@ class Pipeline():
         SAMPLES[self.sample]['f1'] = self.end1
         SAMPLES[self.sample]['f2'] = self.end2
         RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
-        check = cutadapter(self.sample, self.end1, self.end2, self.config_file)
+        check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
         if (check != 0):
             log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
             exit(1)
