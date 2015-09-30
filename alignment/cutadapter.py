@@ -23,8 +23,8 @@ def cutadapter(sample, end1, end2, config_file):
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
     loc = log_dir + sample + '.cutadapt.log'
-    temp1 = end1 + '.temp'
-    temp2 = end2 + '.temp'
+    temp1 = end1 + '.temp.gz'
+    temp2 = end2 + '.temp.gz'
     (cutadapt_tool, qual, mqual) = parse_config(config_file)
     cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp1 + ' -p ' + \
                    temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
@@ -33,7 +33,7 @@ def cutadapter(sample, end1, end2, config_file):
     if not check:
         log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
     else:
-        log(loc, date_time() + 'Cutadapt failed.  Check log files\n'')
+        log(loc, date_time() + 'Cutadapt failed.  Check log files\n)
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ' ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
