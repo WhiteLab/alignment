@@ -1,0 +1,41 @@
+{
+    "tools":{
+    "cutadapt":"cutadapt",
+	"fastx":"fastx_quality_stats",
+	"bwa":"/home/ubuntu/TOOLS/bwa-0.7.8/bwa",
+	"samtools":"/home/ubuntu/TOOLS/samtools-0.1.19/samtools",
+	"java":"/home/ubuntu/TOOLS/jdk1.7.0_45/bin/java",
+	"picard":"/home/ubuntu/TOOLS/picard/dist/picard.jar",
+	"novosort":"/home/ubuntu/TOOLS/nova/novosort",
+	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
+	"qc_stats":"/home/ubuntu/TOOLS/Scripts/alignment/parse_qc.py",
+	"mutect":"/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
+	"snpEff":"/home/ubuntu/TOOLS/snpEff/snpEff.jar",
+	"snpsift":"/home/ubuntu/TOOLS/snpEff/SnpSift.jar",
+	"report":"/home/ubuntu/TOOLS/Scripts/annotation/report.py"
+    },
+
+    "refs":{
+	"bwa":"REFS/bwa-0.7.8/mm10.fa",
+	"samtools":"REFS/samtools-0.1.19/mm10.fa",
+	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
+	"genome":"REFS/BED/mm10.bed",
+	"capture":"REFS/BED/capture_panel_2.0.bed",
+	"intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt",
+	"fa_ordered":"REFS/FASTA/mm10.fa",
+	"fai":"REFS/FASTA/mm10.fa.fai",
+	"dbsnp":"REFS/VCF/dbsnp_138.hg19.vcf",
+	"cont":"PDX",
+	"obj":"ALIGN_TEST",
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/mm10_pe_config.json"
+    },
+    "params":{
+	"threads":"8",
+	"ram":"30",
+	"qual":"33",
+	"mqual":"30",
+	"cc_vsn":"mm10",
+	"genome_size":"2785373478",
+	"ranges":"0.9,0.5,0.1"
+    }
+}
