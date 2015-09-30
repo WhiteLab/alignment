@@ -1,5 +1,6 @@
 {
     "tools":{
+    "cutadapt":"cutadapt",
 	"fastx":"fastx_quality_stats",
 	"bwa":"/home/ubuntu/TOOLS/bwa-0.7.8/bwa",
 	"samtools":"/home/ubuntu/TOOLS/samtools-0.1.19/samtools",
@@ -18,7 +19,7 @@
 	"bwa":"REFS/bwa-0.7.8/mm10.fa",
 	"samtools":"REFS/samtools-0.1.19/mm10.fa",
 	"exome":"REFS/BED/refseq.Hs19.coding_regions.merged.bed",
-	"genome":"REFS/BED/,,10.bed",
+	"genome":"REFS/BED/mm10.bed",
 	"capture":"REFS/BED/capture_panel_2.0.bed",
 	"intervals":"REFS/INTERVAL/hg19_karyo_ordered_interval.txt",
 	"fa_ordered":"REFS/FASTA/mm10.fa",
@@ -29,10 +30,12 @@
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/mm10_pe_config.json"
     },
     "params":{
-	"threads":"4",
-	"ram":"20",
+	"threads":"8",
+	"ram":"30",
+	"qual":"33",
+	"mqual":"30",
 	"cc_vsn":"mm10",
-	"genome_size":"3137161264",
+	"genome_size":"2785373478",
 	"ranges":"0.9,0.5,0.1"
     }
 }
