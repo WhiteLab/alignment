@@ -7,6 +7,7 @@ import json
 from date_time import date_time
 from subprocess import call
 from log import log
+from job_manager import job_manager
 
 
 def parse_config(config_file):
@@ -22,18 +23,23 @@ def cutadapter(sample, end1, end2, config_file):
     log_dir = './'
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
-    loc = log_dir + sample + '.cutadapt.log'
+    loc1 = log_dir + sample + '.cutadapt_r1.log'
+    loc2 = log_dir + sample + '.cutadapt_r2.log'
     temp1 = end1 + '.temp.gz'
     temp2 = end2 + '.temp.gz'
     (cutadapt_tool, qual, mqual) = parse_config(config_file)
-    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp1 + ' -p ' + \
-                   temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
-    log(loc, date_time() + cutadapt_cmd + "\n")
-    check = call(cutadapt_cmd, shell=True)
+    job_list = []
+    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp1 + ' ' + end1 + ' >> '\
+                   + loc1 + ' 2>> ' + loc1
+    job_list.append(cutadapt_cmd)
+    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp2 + ' ' + end2 + ' >> '\
+                   + loc2 + ' 2>> ' + loc2
+    job_list.append(cutadapt_cmd)
+    check = job_manager(job_list, 2)
     if not check:
-        log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
+        log(loc1, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
     else:
-        log(loc, date_time() + 'Cutadapt failed.  Check log files\n')
+        log(loc1, date_time() + 'Cutadapt failed.  Check log files\n')
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
