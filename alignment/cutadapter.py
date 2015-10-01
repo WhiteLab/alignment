@@ -34,7 +34,7 @@ def cutadapter(sample, end1, end2, config_file):
         log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
     else:
         log(loc, date_time() + 'Cutadapt failed.  Check log files\n')
-    rn_fq = 'mv ' + temp1 + ' ' + end1 + ' ' + temp2 + ' ' + end2
+    rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
 
