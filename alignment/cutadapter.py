@@ -25,8 +25,8 @@ def cutadapter(sample, end1, end2, config_file):
     temp1 = end1 + '.temp.gz'
     temp2 = end2 + '.temp.gz'
     (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen) = parse_config(config_file)
-    cutadapt_cmd = cutadapt_tool + '-m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + '-a ' \
-                   + r1_adapt + ' -A ' + r2_adapt + ' -o ' + temp1 + '-p ' + temp2 + ' ' + end1 + ' ' + end2\
+    cutadapt_cmd = cutadapt_tool + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + ' -a ' \
+                   + r1_adapt + ' -A ' + r2_adapt + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2\
                    + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
     check = call(cutadapt_cmd, shell=True)
