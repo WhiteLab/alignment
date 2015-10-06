@@ -7,15 +7,13 @@ import json
 from date_time import date_time
 from subprocess import call
 from log import log
-from job_manager import job_manager
-
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    (cutadapt_tool, qual, mqual) = (
-        config_data['tools']['cutadapt'],
-        config_data['params']['qual'], config_data['params']['mqual'])
-    return (cutadapt_tool, qual, mqual)
+    (cutadapt_tool, qual, mqual,r1_adapt, r2_adapt) = (
+        config_data['tools']['cutadapt'], config_data['params']['qual'], config_data['params']['mqual'],
+        config_data['params']['r1adapt'],config_data['params']['r2adapt'])
+    return (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt)
 
 
 def cutadapter(sample, end1, end2, config_file):
@@ -23,23 +21,17 @@ def cutadapter(sample, end1, end2, config_file):
     log_dir = './'
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
-    loc1 = log_dir + sample + '.cutadapt_r1.log'
-    loc2 = log_dir + sample + '.cutadapt_r2.log'
+    loc = log_dir + sample + '.cutadapt.log'
     temp1 = end1 + '.temp.gz'
     temp2 = end2 + '.temp.gz'
-    (cutadapt_tool, qual, mqual) = parse_config(config_file)
-    job_list = []
-    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp1 + ' ' + end1 + ' >> '\
-                   + loc1 + ' 2>> ' + loc1
-    job_list.append(cutadapt_cmd)
-    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + ' -o ' + temp2 + ' ' + end2 + ' >> '\
-                   + loc2 + ' 2>> ' + loc2
-    job_list.append(cutadapt_cmd)
-    check = job_manager(job_list, 2)
+    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt) = parse_config(config_file)
+    cutadapt_cmd = cutadapt_tool + ' --quality-base=' + qual + ' -q ' + mqual + '-a ' + r1_adapt + ' -A ' + r2_adapt +\
+                   ' -o ' + temp1 + '-p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
+    check = call(cutadapt_cmd, shell=True)
     if not check:
-        log(loc1, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
+        log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
     else:
-        log(loc1, date_time() + 'Cutadapt failed.  Check log files\n')
+        log(loc, date_time() + 'Cutadapt failed.  Check log files\n')
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
