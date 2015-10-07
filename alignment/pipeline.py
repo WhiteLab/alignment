@@ -143,7 +143,7 @@ class Pipeline():
         # check to see if last expected file was generated search for seqtype + .hist suffix
 
         flist = os.listdir('./')
-        if seqtype == 'capture':
+        if self.seqtype == 'capture':
             suffix = self.seqtype + '_t2.hist'
         else:
             suffix = self.seqtype + '.hist'
