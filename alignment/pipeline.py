@@ -59,6 +59,7 @@ class Pipeline():
         self.qc_stats = self.config_data['tools']['qc_stats']
         self.threads = self.config_data['params']['threads']
         self.ram = self.config_data['params']['ram']
+        self.cflag = 'y'
         if self.seqtype == 'capture':
             # self.cov=self.config_data['params']['cov']
             self.cflag = 'n'
