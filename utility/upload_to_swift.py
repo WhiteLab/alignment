@@ -23,10 +23,10 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Uploads current directory contents to specified object and container')
-    parser.add_argument('-o', '--object', action='store', dest='obj',
-                        help='Swift object name to upload current directory contents to.  i.e. ALIGN/2015-1234')
     parser.add_argument('-c', '--container', action='store', dest='cont',
                         help='Swfit container to upload to.  i.e. PANCAN')
+    parser.add_argument('-o', '--object', action='store', dest='obj',
+                        help='Swift object name to upload current directory contents to.  i.e. ALIGN/2015-1234')
 
     if len(sys.argv) == 1:
         parser.print_help()
