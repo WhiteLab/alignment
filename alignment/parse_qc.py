@@ -221,7 +221,7 @@ def parse_qc(config_file, sample, cflag):
         tbl.write('\t' + '\t'.join(str(e) for e in to_print) + '\t')
         for ratio in ranges:
             tbl.write('\t' + str(cov[ratio]['xcov']))
-        tbl.write('\t'.join((str(zero_cov), str(pct_zero_cov))) + '\n')
+        tbl.write('\t' + "\t".join((str(zero_cov), str(pct_zero_cov))) + '\n')
         tbl.close()
         json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                      'Lane': RG[5], 'read_length': rd_len, 'total_reads': tot_rds,
