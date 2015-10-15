@@ -6,7 +6,6 @@ import re
 import json
 import subprocess
 import time
-import pdb
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
@@ -15,18 +14,23 @@ from log import log
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['params']['cc_vsn'], int(config_data['params']['genome_size']), config_data['params']['ranges'])
+    return config_data['params']['cc_vsn'], int(config_data['params']['genome_size']), config_data['params']['ranges']
 
 
 def print_header_cc(tbl, ccvsn, ranges):
     tbl.write(
-        "BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\tmedian_insert_size\tmedian_absolute_deviation\tmean_insert_size\tinsert_standard_deviation\tdate_aligned\t" + ccvsn + "_t1_average_x_coverage\t" + ccvsn + "_t1_%covered_at_average\t")
+        "BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tpercent_aligned" +
+        "\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\t" +
+        "fraction_sequenced_bp_ot\tmedian_insert_size\tmedian_absolute_deviation\tmean_insert_size\t" +
+        "insert_standard_deviation\tdate_aligned\t" + ccvsn + "_t1_average_x_coverage\t" + ccvsn +
+        "_t1_%covered_at_average\t")
     for r in ranges:
         r *= 100
         r = str(int(r))
         tbl.write(ccvsn + "_t1_" + r + "%\t")
     tbl.write(
-        ccvsn + "_t1_zero_cov_bp\t" + ccvsn + "_t1_%zero_cov\t" + ccvsn + "_t2_average_x_coverage\t" + ccvsn + "_t2_%covered_at_average\t")
+        ccvsn + "_t1_zero_cov_bp\t" + ccvsn + "_t1_%zero_cov\t" + ccvsn + "_t2_average_x_coverage\t" + ccvsn +
+        "_t2_%covered_at_average\t")
     for r in ranges:
         r *= 100
         r = str(int(r))
@@ -44,7 +48,7 @@ def parseFS(FS):
     line = line.rstrip('\n')
     mapped = re.search('^(\d+).*\((\d+\.\d+)', line)
     fh.close()
-    return (rd_ct.group(1), mapped.group(1), mapped.group(2))
+    return rd_ct.group(1), mapped.group(1), mapped.group(2)
 
 
 def parseINS(INS):
@@ -55,7 +59,7 @@ def parseINS(INS):
     line = line.rstrip('\n')
     stats = line.split('\t')
     fh.close()
-    return (stats[0], stats[1], stats[4], stats[5])
+    return stats[0], stats[1], stats[4], stats[5]
 
 
 def parseCoverage(CF, ranges):
@@ -97,7 +101,7 @@ def parseCoverage(CF, ranges):
         if int(temp[i][1]) >= avg_cov:
             avg_ratio = 1 - avg_ratio
             break
-    return (target, aln_bp, run_total, cvg, zero_bp, zero_ratio, avg_cov, avg_ratio)
+    return target, aln_bp, run_total, cvg, zero_bp, zero_ratio, avg_cov, avg_ratio
 
 
 def parse_qc(config_file, sample, cflag):
@@ -143,14 +147,16 @@ def parse_qc(config_file, sample, cflag):
         # cov is a dictionary with the per -ratio stats
         log(loc, date_time() + 'Parsing bedtools coverage file ' + bed_hist1 + '\n')
         (
-        t1_ts, t1_aln_bp_ot, t1_num_bp, t1_cov, t1_zero_cov, t1_pct_zero_cov, t1_avg_cov, t1_avg_ratio) = parseCoverage(
+            t1_ts, t1_aln_bp_ot, t1_num_bp, t1_cov, t1_zero_cov, t1_pct_zero_cov, t1_avg_cov,
+            t1_avg_ratio) = parseCoverage(
             bed_hist1, ranges)
         target_size += t1_ts
         aligned_bp_ot += t1_aln_bp_ot
         num_bp += t1_num_bp
         log(loc, date_time() + 'Parsing bedtools coverage file ' + bed_hist2 + '\n')
         (
-        t2_ts, t2_aln_bp_ot, t2_num_bp, t2_cov, t2_zero_cov, t2_pct_zero_cov, t2_avg_cov, t2_avg_ratio) = parseCoverage(
+            t2_ts, t2_aln_bp_ot, t2_num_bp, t2_cov, t2_zero_cov, t2_pct_zero_cov, t2_avg_cov,
+            t2_avg_ratio) = parseCoverage(
             bed_hist2, ranges)
         target_size += t2_ts
         aligned_bp_ot += t2_aln_bp_ot
@@ -159,9 +165,10 @@ def parse_qc(config_file, sample, cflag):
         fraction_sequenced_ot = float(aligned_bp_ot) / float(all_bp_est)
         # store items to print as a list so that they can be cast as a string in a smoother statement
         to_print = (
-        tot_rds, post_aligned_reads, frac_aligned, rmduped_reads, frac_rmduped_reads, target_size, aligned_bp_ot,
-        fraction_aligned_bp_ot, fraction_sequenced_ot, median_insert_size, median_absolute_deviation, mean_insert_size,
-        insert_standard_deviation, date_aligned, t1_avg_cov, t1_avg_ratio)
+            tot_rds, post_aligned_reads, frac_aligned, rmduped_reads, frac_rmduped_reads, target_size, aligned_bp_ot,
+            fraction_aligned_bp_ot, fraction_sequenced_ot, median_insert_size, median_absolute_deviation,
+            mean_insert_size,
+            insert_standard_deviation, date_aligned, t1_avg_cov, t1_avg_ratio)
         tbl.write('\t' + '\t'.join(str(e) for e in to_print))
         for ratio in ranges:
             tbl.write('\t' + str(t1_cov[ratio]['xcov']))
@@ -173,7 +180,7 @@ def parse_qc(config_file, sample, cflag):
         tbl.close()
         json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                      'Lane': RG[5], 'read_length': rd_len, 'total_reads': tot_rds,
-                     'post_align_reads': post_aligned_reads, 'fraction_aligned': frac_aligned,
+                     'post_align_reads': post_aligned_reads, 'percent_aligned': frac_aligned,
                      'post_rmdup_reads': rmduped_reads, 'fraction_rmduped': frac_rmduped_reads,
                      'target_size': target_size, 'aligned_bp_ot': aligned_bp_ot,
                      'fraction_aligned_bp_ot': fraction_aligned_bp_ot,
@@ -195,18 +202,22 @@ def parse_qc(config_file, sample, cflag):
         bed_hist = sample + '.genome.hist'
         # cov is a dictionary with the per -ratio stats
         tbl.write(
-            "BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\tfraction_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot\tfraction_sequenced_bp_ot\tmedian_insert_size\tmedian_absolute_deviation\tmean_insert_size\tinsert_standard_devation\tdate_aligned\taverage_x_coverage\t%covered_at_average\t90%\t50%\t10%\tzero_cov_bp\t%zero_cov\n")
+            "BionimbusID\tDate\tMachine\tRun\tBarCode\tLane\tread_length\ttotal_reads\tpost_align_reads\t" +
+            "percent_aligned\tpost_rmdup_reads\tfraction_rmduped\ttarget_size\taligned_bp_ot\tfraction_aligned_bp_ot" +
+            "\tfraction_sequenced_bp_ot\tmedian_insert_size\tmedian_absolute_deviation\tmean_insert_size\t" +
+            "insert_standard_devation\tdate_aligned\taverage_x_coverage\t%covered_at_average\t90%\t50%\t10%\t" +
+            "zero_cov_bp\t%zero_cov\n")
         tbl.write('\t'.join(RG) + '\t' + str(rd_len))
         log(loc, 'Parsing bedtools coverage file ' + bed_hist + '\n')
         (target_size, aligned_bp_ot, num_bp, cov, zero_cov, pct_zero_cov, avg_cov, avg_ratio) = parseCoverage(bed_hist,
                                                                                                               ranges)
         fraction_aligned_bp_ot = float(num_bp) / float(target_size)
         fraction_sequenced_bp_ot = float(aligned_bp_ot) / float(all_bp_est)
-        # (t1_ts,t1_aln_bp_ot,t1_num_bp,t1_cov,t1_zero_cov,t1_pct_zero_cov,t1_avg_cov,t1_avg_ratio)
         to_print = (
-        tot_rds, post_aligned_reads, frac_aligned, rmduped_reads, frac_rmduped_reads, target_size, aligned_bp_ot,
-        fraction_aligned_bp_ot, fraction_sequenced_ot, median_insert_size, median_absolute_deviation, mean_insert_size,
-        insert_standard_deviation, date_aligned, avg_cov, avg_ratio)
+            tot_rds, post_aligned_reads, frac_aligned, rmduped_reads, frac_rmduped_reads, target_size, aligned_bp_ot,
+            fraction_aligned_bp_ot, fraction_sequenced_bp_ot, median_insert_size, median_absolute_deviation,
+            mean_insert_size,
+            insert_standard_deviation, date_aligned, avg_cov, avg_ratio)
         tbl.write('\t' + '\t'.join(str(e) for e in to_print) + '\t')
         for ratio in ranges:
             tbl.write('\t' + str(cov[ratio]['xcov']))
@@ -214,11 +225,11 @@ def parse_qc(config_file, sample, cflag):
         tbl.close()
         json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                      'Lane': RG[5], 'read_length': rd_len, 'total_reads': tot_rds,
-                     'post_align_reads': post_aligned_reads, 'fraction_aligned': frac_aligned,
+                     'post_align_reads': post_aligned_reads, 'percent_aligned': frac_aligned,
                      'post_rmdup_reads': rmduped_reads, 'fraction_rmduped': frac_rmduped_reads,
                      'target_size': target_size, 'aligned_bp_ot': aligned_bp_ot,
                      'fraction_aligned_bp_ot': fraction_aligned_bp_ot,
-                     'fraction_sequenced_bp_ot': fraction_sequenced_ot, 'median_insert_size': median_insert_size,
+                     'fraction_sequenced_bp_ot': fraction_sequenced_bp_ot, 'median_insert_size': median_insert_size,
                      'median_absolute_deviation': median_absolute_deviation, 'mean_insert_size': mean_insert_size,
                      'insert_standard_deviation': insert_standard_deviation, 'date_aligned': date_aligned, 'coverage': {
                 ccvsn: {'average': avg_cov, '%covered_at_average': avg_ratio, '90%': cov[0.9]['xcov'],
