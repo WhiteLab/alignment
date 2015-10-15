@@ -218,7 +218,7 @@ def parse_qc(config_file, sample, cflag):
             fraction_aligned_bp_ot, fraction_sequenced_bp_ot, median_insert_size, median_absolute_deviation,
             mean_insert_size,
             insert_standard_deviation, date_aligned, avg_cov, avg_ratio)
-        tbl.write('\t' + '\t'.join(str(e) for e in to_print) + '\t')
+        tbl.write('\t' + '\t'.join(str(e) for e in to_print))
         for ratio in ranges:
             tbl.write('\t' + str(cov[ratio]['xcov']))
         tbl.write('\t' + "\t".join((str(zero_cov), str(pct_zero_cov))) + '\n')
