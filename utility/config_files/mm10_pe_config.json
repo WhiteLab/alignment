@@ -12,7 +12,8 @@
     "mutect": "/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
     "snpEff": "/home/ubuntu/TOOLS/snpEff/snpEff.jar",
     "snpsift": "/home/ubuntu/TOOLS/snpEff/SnpSift.jar",
-    "report": "/home/ubuntu/TOOLS/Scripts/annotation/report.py"
+    "report": "/home/ubuntu/TOOLS/Scripts/annotation/report.py",
+    "varscan": "/home/ubuntu/TOOLS/varscan/VarScan.v2.4.0.jar"
   },
   "refs": {
     "bwa": "REFS/bwa-0.7.8/mm10.fa",
