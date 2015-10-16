@@ -232,7 +232,7 @@ def parse_qc(config_file, sample, cflag):
                      'fraction_sequenced_bp_ot': fraction_sequenced_bp_ot, 'median_insert_size': median_insert_size,
                      'median_absolute_deviation': median_absolute_deviation, 'mean_insert_size': mean_insert_size,
                      'insert_standard_deviation': insert_standard_deviation, 'date_aligned': date_aligned, 'coverage': {
-                ccvsn: {'average': avg_cov, '%covered_at_average': avg_ratio, '90%': cov[0.9]['xcov'],
+                ccvsn: {'average': avg_cov, 'covered_at_average': avg_ratio, '90%': cov[0.9]['xcov'],
                         '50%': cov[0.5]['xcov'], '10%': cov[0.1]['xcov'], 'zero_cov_bp': zero_cov,
                         '%zero_cov': pct_zero_cov}}}
         json_out.write(json.dumps(json_dict, indent=4, sort_keys=True))
