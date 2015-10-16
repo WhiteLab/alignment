@@ -13,8 +13,10 @@ def parse_config(config_file):
            config_data['refs']['fa_ordered'], config_data['params']['threads']
 
 
-def varscan_germline(config_file, sample):
+def varscan_germline(config_file, sample, ref_mnt):
     (samtools, varscan, region, fasta, th) = parse_config(config_file)
+    region = ref_mnt + '/' + region
+    fasta = ref_mnt + '/' + fasta
     rf = open(region, 'r')
     cmd_list = []
     for line in rf:
@@ -34,11 +36,14 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample prefix')
+    parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
+                    help='Reference drive mount location.  Example would be /mnt/cinder/REFS_XXX')
+
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample) = (inputs.config_file, inputs.sample)
-    varscan_germline(config_file, sample)
+    (config_file, sample, ref_mnt) = (inputs.config_file, inputs.sample, inputs.ref_mnt)
+    varscan_germline(config_file, sample, inputs.ref_mnt)
