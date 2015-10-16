@@ -21,8 +21,8 @@ def varscan_germline(config_file, sample, ref_mnt):
     cmd_list = []
     for line in rf:
         chrom = line.split('\t')
-        cmd = samtools + ' mpileup -r ' + chrom[
-            0] + ' -B -f ' + fasta + ' ' + sample + '.merged.final.bam | java -jar ' + varscan + ' mpileup2cns'
+        cmd = samtools + ' mpileup -r ' + chrom[0] + ' -B -f ' + fasta + ' ' + sample +\
+              '.merged.final.bam | java -jar ' + varscan + ' mpileup2cns > ' + region + '.vcf'
         cmd_list.append(cmd)
     rf.close()
     proc = int(th) - 2
@@ -37,8 +37,7 @@ if __name__ == "__main__":
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample prefix')
     parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
-                    help='Reference drive mount location.  Example would be /mnt/cinder/REFS_XXX')
-
+                        help='Reference drive mount location.  Example would be /mnt/cinder/REFS_XXX')
 
     if len(sys.argv) == 1:
         parser.print_help()
