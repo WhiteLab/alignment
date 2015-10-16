@@ -22,7 +22,7 @@ def varscan_germline(config_file, sample, ref_mnt):
     for line in rf:
         chrom = line.split('\t')
         cmd = samtools + ' mpileup -r ' + chrom[0] + ' -B -f ' + fasta + ' ' + sample +\
-              '.merged.final.bam | java -jar ' + varscan + ' mpileup2cns > ' + region + '.vcf'
+              '.merged.final.bam | java -jar ' + varscan + ' mpileup2cns > ' + chrom[0] + '.vcf'
         cmd_list.append(cmd)
     rf.close()
     proc = int(th) - 2
