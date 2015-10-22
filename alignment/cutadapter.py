@@ -12,8 +12,9 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     (cutadapt_tool, qual, mqual,r1_adapt, r2_adapt, minlen) = (
         config_data['tools']['cutadapt'], config_data['params']['qual'], config_data['params']['mqual'],
-        config_data['params']['r1adapt'],config_data['params']['r2adapt'], config_data['params']['minlen'])
-    return (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen)
+        config_data['params']['r1adapt'],config_data['params']['r2adapt'], config_data['params']['minlen'],
+        config_data['params']['r1trim'],config_data['params']['r2trim'])
+    return (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim,r2trim)
 
 
 def cutadapter(sample, end1, end2, config_file):
@@ -26,14 +27,15 @@ def cutadapter(sample, end1, end2, config_file):
     temp2 = end2 + '.temp.gz'
     (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen) = parse_config(config_file)
     cutadapt_cmd = cutadapt_tool + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + ' -a ' \
-                   + r1_adapt + ' -A ' + r2_adapt + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2\
-                   + ' >> ' + loc + ' 2>> ' + loc
+                   + r1_adapt + ' -A ' + r2_adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + temp1\
+                   + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
     check = call(cutadapt_cmd, shell=True)
     if not check:
         log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
     else:
         log(loc, date_time() + 'Cutadapt failed.  Check log files\n')
+        exit(1)
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
