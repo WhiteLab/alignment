@@ -22,7 +22,7 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
         info = la.split('\t')
         lanes = info[2].split(', ')
         for rg in lanes:
-            fn = info[0] + '_' + rg + '.bam'
+            fn = obj + '/' + info[0] + '/BAM/' + info[0] + '_' + rg + '.bam'
             stub = info[0] + '_' + rg
             swift_cmd = src_cmd + "swift download " + cont + " --skip-identical " + fn + " >> dl.log 2>> dl.log"
             mf = mouse_filter + ' -b ' + fn + ' -o ' + stub
