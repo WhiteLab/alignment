@@ -15,6 +15,7 @@ def parse_config(config_file):
 
 
 def snpeff_pipe(config_file, sample_pairs, ref_mnt, cflag):
+    # edit to grab from config max thread count
     max_t = 8
     (java, snpeff, snpsift, report, dbsnp, intervals) = parse_config(config_file)
     dbsnp = ref_mnt + '/' + dbsnp
