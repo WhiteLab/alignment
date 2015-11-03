@@ -2,7 +2,7 @@
 __author__ = 'Miguel'
 import json
 import sys
-
+import pdb 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from job_manager import job_manager
 
@@ -15,7 +15,7 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
     (th, cont, obj, mouse_filter) = parse_config(config_file)
     job_list = []
     src_cmd = ". /home/ubuntu/.novarc;"
-
+    # pdb.set_trace()
     fh = open(lane, 'r')
     for la in fh:
         la = la.rstrip('\n')
@@ -29,7 +29,7 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
             cmd = swift_cmd + '; ' + mf + '; rm ' + fn + ';'
             job_list.append(cmd)
     fh.close()
-    job_manager(cmd, th)
+    job_manager(job_list, th)
 
 if __name__ == "__main__":
     import argparse

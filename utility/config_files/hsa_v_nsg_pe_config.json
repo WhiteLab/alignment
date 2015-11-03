@@ -13,7 +13,8 @@
     "snpEff": "/home/ubuntu/TOOLS/snpEff/snpEff.jar",
     "snpsift": "/home/ubuntu/TOOLS/snpEff/SnpSift.jar",
     "report": "/home/ubuntu/TOOLS/Scripts/annotation/report.py",
-    "varscan": "/home/ubuntu/TOOLS/varscan/VarScan.v2.4.0.jar"
+    "varscan": "/home/ubuntu/TOOLS/varscan/VarScan.v2.4.0.jar",
+    "mouse_filter": "/home/ubuntu/TOOLS/mouse_filter/stream_run.sh"
   },
   "refs": {
     "bwa": "SCRATCH/ASSEMBLED_GENOMES/BEAGLE/NSG_MMU.fa",
