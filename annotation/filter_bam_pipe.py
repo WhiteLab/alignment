@@ -16,7 +16,7 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
     job_list = []
     src_cmd = ". /home/ubuntu/.novarc;"
 
-    fh = open(lane,'r')
+    fh = open(lane, 'r')
     for la in fh:
         la = la.rstrip('\n')
         info = la.split('\t')
@@ -24,12 +24,12 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
         for rg in lanes:
             fn = info[0] + '_' + rg + '.bam'
             stub = info[0] + '_' + rg
-            swift_cmd = src_cmd + "swift download " + cont + " --skip-identical " + fn
+            swift_cmd = src_cmd + "swift download " + cont + " --skip-identical " + fn + " >> dl.log 2>> dl.log"
             mf = mouse_filter + ' -b ' + fn + ' -o ' + stub
             cmd = swift_cmd + '; ' + mf + '; rm ' + fn + ';'
             job_list.append(cmd)
     fh.close()
-    job_manager(cmd,th)
+    job_manager(cmd, th)
 
 if __name__ == "__main__":
     import argparse
