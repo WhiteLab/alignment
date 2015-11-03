@@ -26,7 +26,7 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
             stub = info[0] + '_' + rg
             swift_cmd = src_cmd + "swift download " + cont + " --skip-identical " + fn
             mf = mouse_filter + ' -b ' + fn + ' -o ' + stub
-            cmd = swift_cmd + '; ' + mf + ';'
+            cmd = swift_cmd + '; ' + mf + '; rm ' + fn + ';'
             job_list.append(cmd)
     fh.close()
     job_manager(cmd,th)
