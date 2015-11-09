@@ -21,8 +21,10 @@ args = docopt(__doc__)
 fn = args['<fastq>']
 fastq = gzip.open(fn,'rb')
 indir = os.path.dirname(fn)
+if len(indir) > 0:
+    indir = indir + '/'
 bn = os.path.basename(fn)
-out = gzip.open(indir + '/converted/' + bn,'wb')
+out = gzip.open(indir + 'converted/' + bn,'wb')
 
 # code snippets obtained from https://github.com/vpiro/readtools/blob/master/PHRED_converter.py
 quali='fastq-illumina'
