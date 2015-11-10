@@ -47,9 +47,11 @@ class Pipeline():
         self.mmu_filter = self.config_data['tools']['mouse_filter']
         self.fastx_tool = self.config_data['tools']['fastx']
         self.bwa_tool = self.config_data['tools']['bwa']
-        self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
+        self.mmu_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_bwa']
+        self.hsa_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_bwa']
         self.samtools_tool = self.config_data['tools']['samtools']
-        self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
+        self.mmu_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_samtools']
+        self.hsa_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_samtools']
         self.java_tool = self.config_data['tools']['java']
         self.picard_tool = self.config_data['tools']['picard']
         self.novosort = self.config_data['tools']['novosort']
@@ -98,8 +100,8 @@ class Pipeline():
             log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
             exit(1)
         log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
-        check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
-                            self.samtools_ref, self.sample, log_dir, self.threads)
+        check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.mmu_bwa_ref, self.end1, self.end2,
+                            self.samtools_tool, self.mmu_samtools_ref, self.sample, log_dir, self.threads)
         if check != 0:
             log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
             exit(1)
@@ -108,8 +110,9 @@ class Pipeline():
         # check certain key processes
         # skip aligning if bam already exists
         if not os.path.isfile(self.sample + '.bam'):
-            check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
-                               self.samtools_ref, self.sample, log_dir, self.threads)  # rest won't run until completed
+            check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
+                               self.hsa_samtools_ref, self.sample, log_dir, self.threads)
+            # rest won't run until completed
             if check != 0:
                 log(self.loc, date_time() + 'BWA failure for ' + self.sample + '\n')
                 exit(1)
@@ -133,14 +136,15 @@ class Pipeline():
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
                          self.ram)  # rest won't run until emopleted
             log(self.loc, date_time() + 'Gathering SAM flag stats\n')
-            flagstats(self.samtools_tool,
-                      self.sample)  # flag determines whether to run independently or hold up the rest of the pipe until completion
+            flagstats(self.samtools_tool, self.sample)  # flag determines whether to run independently or hold up
+            #  the rest of the pipe until completion
             log(self.loc, date_time() + 'Calculating insert sizes\n')
             picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir,
                                self.ram)  # get insert size metrics.
         else:
             log(self.loc,
-                date_time() + 'Insert size file detected, skipping remove duplicates, flagstats, and remove duplicates steps')
+                date_time() + 'Insert size file detected, skipping remove duplicates, flagstats, '
+                              'and remove duplicates steps')
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method = getattr(coverage, (self.seqtype + '_coverage'))

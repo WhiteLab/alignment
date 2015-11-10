@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Mouse read filter alignment module. Fairly PDX-specific process.')
     parser.add_argument('-mmu', '--mmu_filter', action='store', dest='mmu_filter',
-                        help='Location of bwa alignment tool.  Version 0.7.8 preferred.')
+                        help='Location of bam filter tool.')
     parser.add_argument('-b', '--bwa', action='store', dest='bwa_tool',
                         help='Location of bwa alignment tool.  Version 0.7.8 preferred.')
     parser.add_argument('-rg', '--RGRP', action='store', dest='RGRP', help='SAM header read group string')
