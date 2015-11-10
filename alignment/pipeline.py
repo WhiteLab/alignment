@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
@@ -7,6 +7,7 @@ import os
 import re
 from date_time import date_time
 from cutadapter import cutadapter
+from filter_wrap import filter_wrap
 from fastx import fastx
 from bwa_mem_pe import bwa_mem_pe
 from novosort_sort_pe import novosort_sort_pe
@@ -43,6 +44,7 @@ class Pipeline():
         HGACID = self.sample.split("_")
         self.bid = HGACID[0]
         self.cutadapter = self.config_data['tools']['cutadapt']
+        self.mmu_filter = self.config_data['tools']['mouse_filter']
         self.fastx_tool = self.config_data['tools']['fastx']
         self.bwa_tool = self.config_data['tools']['bwa']
         self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
@@ -61,7 +63,6 @@ class Pipeline():
         self.ram = self.config_data['params']['ram']
         self.cflag = 'y'
         if self.seqtype == 'capture':
-            # self.cov=self.config_data['params']['cov']
             self.cflag = 'n'
 
         self.pipeline()
@@ -95,6 +96,12 @@ class Pipeline():
         check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
         if (check != 0):
             log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
+            exit(1)
+        log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
+        check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
+                            self.samtools_ref, self.sample, log_dir, self.threads)
+        if check != 0:
+            log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
             exit(1)
         log(self.loc, date_time() + 'Starting BWA align\n')
         wait_flag = 1

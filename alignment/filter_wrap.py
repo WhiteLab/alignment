@@ -7,8 +7,11 @@ from log import log
 import subprocess
 
 
-def bwa_mem_pe(bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads):
-    bwa_cmd = "(" + bwa_tool + " mem -t " + threads + " -R \"" + RGRP + "\" -v 2 " + bwa_ref + " " + end1 + " " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwa.pe.log 2>&1"
+def filter_wrap(mmu_filter, bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads):
+    bwa_cmd = "(" + bwa_tool + " mem -O 60 -L 0 -E 10 -t " + threads + " -R \"" + RGRP + "\" -v 2 " + bwa_ref + " "\
+              + end1 + " " + end2 + " 2> " + log_dir + sample + ".mmu.bwa.pe.log | " + samtools_tool + " view -bT " \
+              + samtools_ref + " - tee " + sample + ".mmu.bam | " + mmu_filter + "gzip -4 -c - > " + sample\
+              + "filtered_1.fq.gz; 2>&1 | gzip -4 -c - > " + sample + "filtered_2.fq.gz)"
     loc = log_dir + sample + ".bwa.pe.log"
     log(loc, date_time() + bwa_cmd + "\n")
     try:
@@ -21,7 +24,9 @@ def bwa_mem_pe(bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref,
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='BWA paired-end alignment module.  Typically run first in pipeline.')
+    parser = argparse.ArgumentParser(description='Mouse read filter alignment module. Fairly PDX-specific process.')
+    parser.add_argument('-mmu', '--mmu_filter', action='store', dest='mmu_filter',
+                        help='Location of bwa alignment tool.  Version 0.7.8 preferred.')
     parser.add_argument('-b', '--bwa', action='store', dest='bwa_tool',
                         help='Location of bwa alignment tool.  Version 0.7.8 preferred.')
     parser.add_argument('-rg', '--RGRP', action='store', dest='RGRP', help='SAM header read group string')
@@ -42,7 +47,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads) = (
-    inputs.bwa_tool, inputs.RGRP, inputs.bwa_ref, inputs.end1, inputs.end2, inputs.samtools_tool, inputs.samtools_ref,
-    inputs.sample, inputs.log_dir, inputs.threads)
-    bwa_mem_pe(bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads)
+    (mmu_filter, bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads) = (
+        inputs.mmu_filter, inputs.bwa_tool, inputs.RGRP, inputs.bwa_ref, inputs.end1, inputs.end2, inputs.samtools_tool,
+        inputs.samtools_ref, inputs.sample, inputs.log_dir, inputs.threads)
+    filter_wrap(mmu_filter, bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads)
