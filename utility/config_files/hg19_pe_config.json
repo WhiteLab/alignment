@@ -1,5 +1,6 @@
 {
     "tools":{
+	"cutadapt": "cutadapt",
 	"fastx":"fastx_quality_stats",
 	"bwa":"/home/ubuntu/TOOLS/bwa-0.7.8/bwa",
 	"samtools":"/home/ubuntu/TOOLS/samtools-0.1.19/samtools",
@@ -24,14 +25,21 @@
 	"fa_ordered":"REFS/FASTA/hg19_karyo_ordered.fa",
 	"fai":"REFS/FASTA/hg19_karyo_ordered.fa.fai",
 	"dbsnp":"REFS/VCF/dbsnp_138.hg19.vcf",
-	"cont":"PANCAN",
-	"obj":"ALIGN",
+	"cont":"PDX",
+	"obj":"ALIGN_FILTER",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/hg19_pe_config.json"
     },
     "params":{
 	"threads":"8",
-	"ram":"24",
-	"cc_vsn":"V3",
+	"ram":"30",
+	"qual": "33",
+	"mqual": "25",
+	"minlen": "19",
+	"r1adapt": "ZZZ",
+	"r2adapt": "ZZZ",
+	"r1trim": "0",
+	"r2trim": "0",
+	"cc_vsn": "hg19",
 	"genome_size":"3137161264",
 	"ranges":"0.9,0.5,0.1",
 	"cut_flag":"N"
