@@ -42,6 +42,6 @@
 	"cc_vsn": "hg19",
 	"genome_size":"3137161264",
 	"ranges":"0.9,0.5,0.1",
-	"cut_flag":"Y"
+	"cutflag":"Y"
     }
 }
