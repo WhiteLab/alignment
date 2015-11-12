@@ -10,7 +10,7 @@ import subprocess
 def filter_wrap(mmu_filter, bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads):
     bwa_cmd = "(" + bwa_tool + " mem -O 60 -L 0 -E 10 -t " + threads + " -R \"" + RGRP + "\" -v 2 " + bwa_ref + " "\
               + end1 + " " + end2 + " 2>> " + log_dir + sample + ".mmu.bwa.pe.log | " + samtools_tool + " view -bT " \
-              + samtools_ref + " - 2>> " + sample + ".mmu.bwa.pe.log | tee " + sample + ".mmu.bam | python " + \
+              + samtools_ref + " - 2>> " + log_dir + sample + ".mmu.bwa.pe.log | tee " + sample + ".mmu.bam | python " + \
               mmu_filter + " | gzip -4 -c - > " + sample + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample\
               + "_2.filtered.fq.gz"
     loc = log_dir + sample + ".mmu.bwa.pe.log"
