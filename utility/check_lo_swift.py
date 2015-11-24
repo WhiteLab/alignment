@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import os
-import sys
 import json
+import os
 import re
+import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
@@ -25,10 +25,10 @@ def check_manifest(manifest, body):
         hasher = md5(body.read(segment['bytes']))
         sys.stderr.write(date_time() + '%s ?= %s' % (hasher.hexdigest(), segment['hash'] + '\n'))
         if hasher.hexdigest() != segment['hash']:
-            #            return False
             sys.stderr.write('Not the same\n')
-    # return True
+            return False
     sys.stderr.write('The same\n')
+    return True
 
 
 def main():

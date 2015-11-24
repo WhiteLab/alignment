@@ -1,15 +1,12 @@
 #!/usr/bin/python
-import sys
-import re
-from subprocess import call
-from subprocess import check_output
-import subprocess
 import glob
+import sys
+from subprocess import call
 
 from date_time import date_time
 
 
-def upload_variants_to_swift(cont, obj, sample_list, sample_pairs):
+def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, annotation, analysis):
     src_cmd = '. ~/.novarc;'
     ONE_GB = 1073741824
     fh = open(sample_list, 'r')
@@ -25,7 +22,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs):
         except:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam.bai -S ' + str(
                 ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
-            check = check + call(swift_cmd, shell=True)
+            check += call(swift_cmd, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'Uploading final BAMs for ' + sample + ' successful!\n')
         else:
@@ -42,7 +39,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs):
         # upload analysis files
         for suffix in suffix_list1:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + pair + suffix + ' -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ANALYSIS/' + pair + '/OUTPUT/' + pair + suffix + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/OUTPUT/' + pair + suffix + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
             check = call(swift_cmd, shell=True)
             if check == 0:
                 sys.stderr.write(date_time() + 'Uploading analysis file ' + pair + suffix + ' successful!\n')
@@ -52,7 +49,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs):
         # upload annotation files
         for suffix in suffix_list2:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ANNOTATION/' + pair + suffix + ' -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ANNOTATION/' + pair + '/OUTPUT/' + pair + suffix + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/OUTPUT/' + pair + suffix + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
             check = call(swift_cmd, shell=True)
             if check == 0:
                 sys.stderr.write(date_time() + 'Uploading annotation file ' + pair + suffix + ' successful!\n')
@@ -63,7 +60,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs):
         mut_list = glob.glob('LOGS/' + pair + '.mut*')
         for mut in mut_list:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + mut + ' -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ANALYSIS/' + pair + '/' + mut + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/' + mut + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
             check = call(swift_cmd, shell=True)
             if check == 0:
                 sys.stderr.write(date_time() + 'Uploading analysis log file ' + mut + ' successful!\n')
@@ -71,7 +68,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs):
                 sys.stderr.write(date_time() + 'Uploading analysis log file ' + mut + ' failed!\n')
                 exit(1)
         swift_cmd = src_cmd + 'swift upload ' + cont + ' LOGS/' + pair + '.snpeff.log -S ' + str(
-            ONE_GB) + ' --skip-identical --object-name ANNOTATION/' + pair + '/LOGS/' + pair + '.snpeff.log >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+            ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/LOGS/' + pair + '.snpeff.log >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
         check = call(swift_cmd, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + '.snpeff.log' + ' successful!\n')
@@ -94,11 +91,16 @@ if __name__ == "__main__":
     parser.add_argument('-sl', '--sample_list', action='store', dest='sample_list', help='Sample list, one per line')
     parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs',
                         help='Sample tumor/normal pairs, tsv file with bid pair, sample1, sample2')
+    parser.add_argument('-ana', '--analysis', action='store', dest='analysis',
+                        help='Analysis output object root, i.e. ANALYSIS')
+    parser.add_argument('-ann', '--annotation', action='store', dest='annotation',
+                        help='Analysis output object root, i.e. ANNOTATION')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (cont, obj, sample_list, sample_pairs) = (inputs.cont, inputs.obj, inputs.sample_list, inputs.sample_pairs)
-    upload_variants_to_swift(cont, obj, sample_list, sample_pairs)
+    (cont, obj, sample_list, sample_pairs, analysis, annotation) = (
+        inputs.cont, inputs.obj, inputs.sample_list, inputs.sample_pairs, inputs.analysis, inputs.annotation)
+    upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation)

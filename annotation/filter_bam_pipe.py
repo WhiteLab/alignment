@@ -2,13 +2,15 @@
 __author__ = 'Miguel'
 import json
 import sys
-import pdb 
+
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from job_manager import job_manager
 
+
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['params']['threads'], config_data['refs']['cont'], config_data['refs']['obj'], config_data['tools']['mouse_filter']
+    return config_data['params']['threads'], config_data['refs']['cont'], config_data['refs']['obj'], \
+           config_data['tools']['mouse_filter']
 
 
 def filter_bam_pipe(config_file, lane, ref_mnt):
@@ -30,6 +32,7 @@ def filter_bam_pipe(config_file, lane, ref_mnt):
             job_list.append(cmd)
     fh.close()
     job_manager(job_list, th)
+
 
 if __name__ == "__main__":
     import argparse

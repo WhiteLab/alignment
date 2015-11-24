@@ -4,27 +4,24 @@
 import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-import os
-import re
 import json
 import argparse
-from date_time import date_time
-import subprocess
 from setup_vm import setup_vm
 from attach_cinder import attach_cinder
 
 
-class Setup():
+class Setup:
     def __init__(self, bid, json_config, wait):
+        (self.vm_id, self.flavor, self.key) = (
+            self.config_data['vm_image']['id'], self.config_data['vm_image']['flavor'],
+            self.config_data['vm_image']['key'])
+        self.config_data = json.loads(open(self.json_config, 'r').read())
         self.json_config = json_config
         self.wait = wait
         self.bid = bid
         self.parse_config()
 
     def parse_config(self):
-        self.config_data = json.loads(open(self.json_config, 'r').read())
-        (self.vm_id, self.flavor, self.key) = (
-        self.config_data['vm_image']['id'], self.config_data['vm_image']['flavor'], self.config_data['vm_image']['key'])
         self.create_vm()
 
     def create_vm(self):

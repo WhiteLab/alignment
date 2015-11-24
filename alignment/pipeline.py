@@ -21,8 +21,31 @@ from log import log
 from parse_qc import parse_qc
 
 
-class Pipeline():
+class Pipeline:
     def __init__(self, end1, end2, seqtype, json_config, ref_mnt):
+        self.cflag = 'n'
+        self.run_cut_flag = self.config_data['params']['cutflag']
+        self.ram = self.config_data['params']['ram']
+        self.threads = self.config_data['params']['threads']
+        self.qc_stats = self.config_data['tools']['qc_stats']
+        self.cont = self.config_data['refs']['cont']
+        self.obj = self.config_data['refs']['obj']
+        self.bed_ref = self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
+        self.bedtools2_tool = self.config_data['tools']['bedtools']
+        self.picard_tmp = 'picard_tmp'
+        self.novosort = self.config_data['tools']['novosort']
+        self.picard_tool = self.config_data['tools']['picard']
+        self.java_tool = self.config_data['tools']['java']
+        self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
+        self.samtools_tool = self.config_data['tools']['samtools']
+        self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
+        self.bwa_tool = self.config_data['tools']['bwa']
+        self.fastx_tool = self.config_data['tools']['fastx']
+        self.cutadapter = self.config_data['tools']['cutadapt']
+        self.bid = HGACID[0]
+        self.sample = s.group(1)
+        self.config_data = json.loads(open(self.json_config, 'r').read())
+        self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
         self.end1 = end1
         self.end2 = end2
@@ -32,38 +55,16 @@ class Pipeline():
         self.parse_config()
 
     def parse_config(self):
-        self.config_data = json.loads(open(self.json_config, 'r').read())
         s = re.match('^(\S+)_1_sequence\.txt\.gz$', self.end1)
         if s:
             self.sample = s.group(1)
         else:
             s = re.match('(^\S+)_\D*\d\.f\w*q\.gz$', self.end1)
-            self.sample = s.group(1)
-        self.loc = 'LOGS/' + self.sample + '.pipe.log'
         HGACID = self.sample.split("_")
-        self.bid = HGACID[0]
-        self.cutadapter = self.config_data['tools']['cutadapt']
-        self.fastx_tool = self.config_data['tools']['fastx']
-        self.bwa_tool = self.config_data['tools']['bwa']
-        self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
-        self.samtools_tool = self.config_data['tools']['samtools']
-        self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
-        self.java_tool = self.config_data['tools']['java']
-        self.picard_tool = self.config_data['tools']['picard']
-        self.novosort = self.config_data['tools']['novosort']
-        self.picard_tmp = 'picard_tmp'
-        self.bedtools2_tool = self.config_data['tools']['bedtools']
-        self.bed_ref = self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
-        self.obj = self.config_data['refs']['obj']
-        self.cont = self.config_data['refs']['cont']
-        self.qc_stats = self.config_data['tools']['qc_stats']
-        self.threads = self.config_data['params']['threads']
-        self.ram = self.config_data['params']['ram']
-        self.run_cut_flag = self.config_data['params']['cutflag']
         self.cflag = 'y'
         if self.seqtype == 'capture':
             # self.cov=self.config_data['params']['cov']
-            self.cflag = 'n'
+            pass
 
         self.pipeline()
 
@@ -95,7 +96,7 @@ class Pipeline():
         RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
         if self.run_cut_flag == 'Y':
             check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
-            if (check != 0):
+            if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
                 exit(1)
         log(self.loc, date_time() + 'Starting BWA align\n')
@@ -117,7 +118,7 @@ class Pipeline():
         if not os.path.isfile(self.sample + '.srt.bam'):
             check = novosort_sort_pe(self.novosort, self.sample, log_dir, self.threads,
                                      self.ram)  # rest won't run until completed
-            if (check != 0):
+            if check != 0:
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
                 exit(1)
         else:

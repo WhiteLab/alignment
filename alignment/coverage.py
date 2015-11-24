@@ -5,7 +5,6 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from subprocess import Popen
 from subprocess import call
-from log import log
 from job_manager import job_manager
 
 
@@ -38,9 +37,7 @@ def capture_coverage(bedtools2_tool, sample, capture_bed_ref, wait_flag):
         Popen(cc_t1_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
         Popen(cc_t2_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
     else:
-        jobs = []
-        jobs.append(cc_t1_cmd)
-        jobs.append(cc_t2_cmd)
+        jobs = [cc_t1_cmd, cc_t2_cmd]
         job_manager(jobs, 2)
     return 0
 

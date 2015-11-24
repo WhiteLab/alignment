@@ -35,7 +35,7 @@
     "ram": "30",
     "qual": "64",
     "mqual": "25",
-    "minlen":"19",
+    "minlen": "19",
     "r1adapt": "ZZZZZZZZZZ",
     "r2adapt": "ZZZZZZZZZZ",
     "r1trim": "0",

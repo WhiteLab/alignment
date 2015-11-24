@@ -32,5 +32,5 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (java_tool, picard_tool, sample, log_dir, ram) = (
-    inputs.java_tool, inputs.picard_tool, inputs.sample, inputs.log_dir, inputs.ram)
+        inputs.java_tool, inputs.picard_tool, inputs.sample, inputs.log_dir, inputs.ram)
     picard_insert_size(java_tool, picard_tool, sample, log_dir, ram)

@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-import sys
+import json
 import os
 import re
-import json
 import subprocess
+import sys
 import time
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
@@ -69,8 +69,7 @@ def parseCoverage(CF, ranges):
     zero_cov = next(fh)
     zero_cov.rstrip('\n')
     zero_attr = zero_cov.split('\t')
-    temp = []
-    temp.append(zero_attr)
+    temp = [zero_attr]
     target = int(zero_attr[3])
     zero_bp = int(zero_attr[2])
     zero_ratio = float(zero_attr[4])

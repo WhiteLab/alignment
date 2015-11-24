@@ -62,5 +62,5 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (config_file, sample_pairs, ref_mnt, cflag) = (
-    inputs.config_file, inputs.sample_pairs, inputs.ref_mnt, inputs.cflag)
+        inputs.config_file, inputs.sample_pairs, inputs.ref_mnt, inputs.cflag)
     snpeff_pipe(config_file, sample_pairs, ref_mnt, cflag)

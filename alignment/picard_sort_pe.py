@@ -3,7 +3,6 @@ import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
-from subprocess import call
 import subprocess
 from log import log
 
@@ -38,5 +37,5 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (java_tool, picard_tool, picard_tmp, sample, log_dir) = (
-    inputs.java_tool, inputs.picard_tool, inputs.picard_tmp, inputs.sample, inputs.log_dir)
+        inputs.java_tool, inputs.picard_tool, inputs.picard_tmp, inputs.sample, inputs.log_dir)
     picard_sort_pe(java_tool, picard_tool, picard_tmp, sample, log_dir)

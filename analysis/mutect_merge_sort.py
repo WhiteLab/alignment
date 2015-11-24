@@ -3,15 +3,13 @@ import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
-import subprocess
 import json
 import os
-import re
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['refs']['fai'])
+    return config_data['refs']['fai']
 
 
 def merge_sort(suffix_dict, pair, fai_list):
@@ -23,7 +21,7 @@ def merge_sort(suffix_dict, pair, fai_list):
             fh = open(pair + '/' + fn, 'r')
             head = ''
             head = next(fh)
-            head = head + next(fh)
+            head += next(fh)
             for line in fh:
                 data = line.split('\t')
                 data[1] = int(data[1])
@@ -49,7 +47,7 @@ def merge_sort(suffix_dict, pair, fai_list):
             fh = open(pair + '/' + fn, 'r')
             head = ''
             head = next(fh)
-            head = head + next(fh)
+            head += next(fh)
             for line in fh:
                 data = line.split('\t')
                 data[1] = int(data[1])
@@ -75,7 +73,7 @@ def merge_sort(suffix_dict, pair, fai_list):
             fh = open(pair + '/' + fn, 'r')
             head = ''
             for line in fh:
-                head = head + line
+                head += line
                 if line[0:2] != '##':
                     break
             for line in fh:
@@ -103,7 +101,7 @@ def merge_sort(suffix_dict, pair, fai_list):
             fh = open(pair + '/' + fn, 'r')
             head = ''
             for line in fh:
-                head = head + line
+                head += line
                 if line[0:2] != '##':
                     break
             for line in fh:

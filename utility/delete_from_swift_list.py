@@ -1,9 +1,7 @@
 #!/usr/bin/python
-import sys
 import re
+import sys
 from subprocess import call
-from subprocess import check_output
-import subprocess
 
 from date_time import date_time
 
