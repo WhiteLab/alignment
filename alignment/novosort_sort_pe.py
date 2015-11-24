@@ -3,7 +3,6 @@ import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
-from subprocess import call
 import subprocess
 from log import log
 
@@ -40,5 +39,5 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (novosort, sample, log_dir, threads, ram) = (
-    inputs.novosort, inputs.sample, inputs.log_dir, inputs.threads, inputs.ram)
+        inputs.novosort, inputs.sample, inputs.log_dir, inputs.threads, inputs.ram)
     novosort_sort_pe(novosort, sample, log_dir, threads, ram)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import sys
 import json
 import re
+import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
@@ -10,7 +10,7 @@ import subprocess
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['samtools'], config_data['refs']['fa_ordered'])
+    return config_data['tools']['samtools'], config_data['refs']['fa_ordered']
 
 
 def create_pos_ref(pos):
@@ -106,9 +106,9 @@ def parse_pileup(out, tbl, sample, mode, cov, index):
                 elif cur == '^' or cur == '$':
                     # will make assumption that read will not start/end with in/del, skipping over read score
                     if cur == '^':
-                        j = j + 2
+                        j += 2
                     else:
-                        j = j + 1
+                        j += 1
                     cur = pile[i][j]
                     if re.match('[,|.]', cur):
                         base_call(cov, pile, ref, samp_list[k], chrom, pos, i, k, m)
@@ -273,5 +273,5 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (mode, bam, sample, pos, config_file, ref_mnt) = (
-    inputs.mode, inputs.bam, inputs.sample, inputs.pos, inputs.config_file, inputs.ref_mnt)
+        inputs.mode, inputs.bam, inputs.sample, inputs.pos, inputs.config_file, inputs.ref_mnt)
     pre_report(mode, bam, sample, pos, config_file, ref_mnt)

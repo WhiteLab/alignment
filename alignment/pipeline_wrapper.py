@@ -13,7 +13,6 @@ from date_time import date_time
 import subprocess
 from download_from_swift import download_from_swift
 from pipeline import Pipeline
-import pdb
 from log import log
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
@@ -36,7 +35,7 @@ ref_mnt = inputs.ref_mnt
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'])
+    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config']
 
 
 (cont, obj, pipe_cfg) = parse_config(inputs.config_file)
@@ -46,7 +45,7 @@ for line in fh:
     (bid, seqtype, lane_csv) = line.split('\t')
     cwd = ref_mnt + '/SCRATCH'
     check_dir = os.path.isdir(cwd)
-    if check_dir == False:
+    if not check_dir:
         subprocess.check_output('mkdir ' + cwd, shell=True)
     try:
         os.chdir(cwd)
@@ -107,7 +106,7 @@ for line in fh:
             os.chdir(cur_dir)
             l_dir = cur_dir + '/LOGS'
             l_check = os.path.isdir(l_dir)
-            if l_check == False:
+            if not l_check:
                 subprocess.call('mkdir ' + l_dir, shell=True)
         except:
             log(loc,

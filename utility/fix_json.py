@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
-import sys
-import re
-import subprocess
 import os
-import pdb
+import subprocess
+import sys
 
 fh = open(sys.argv[1], 'r')
 cont = 'HGAC'
@@ -20,7 +18,7 @@ for obj in fh:
         cur = next(jfile)
         cur = cur.replace('\t\t', '\t')
         temp.write(cur)
-    #    pdb.set_trace()
+    # pdb.set_trace()
     cur = next(jfile)
     cur = cur.replace('\n', ',\n')
     cur = cur.replace('\t\t', '\t')

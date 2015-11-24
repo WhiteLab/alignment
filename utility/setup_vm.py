@@ -1,8 +1,7 @@
 #!/usr/bin/python
-import sys
-import subprocess
-import os
 import re
+import subprocess
+import sys
 
 from date_time import date_time
 
@@ -41,22 +40,22 @@ def setup_vm(bid, image, flavor, key, wait):
             p = subprocess.check_output(check, shell=True)
             for line in re.findall('(.*)\n', p):
                 line = line.rstrip('\n')
-                if (re.search(vid, line)):
+                if re.search(vid, line):
                     line = re.sub(r"\|", r"", line)
                     info = line.split()
                     vname = info[1]
                     vstatus = info[2]
                     sys.stderr.write('Status of ' + vname + ' is ' + vstatus + ' with id ' + vid + '\n')
-                    if (vstatus == "ACTIVE"):
+                    if vstatus == "ACTIVE":
                         flag = 1
                         m = re.search("private=(.*)", info[5])
                         vip = m.group(1)
                         break
-                    if (vstatus == "ERROR"):
+                    if vstatus == "ERROR":
                         flag = 2
                         break
-        n = n + i
-    if (flag == 1):
+        n += i
+    if flag == 1:
         # upload openstack variables from head vm
         delay = 'sleep 60s'
         sys.stderr.write(date_time() + 'Pausing 1 minute to give vm a chance to initialize\n')
@@ -69,7 +68,7 @@ def setup_vm(bid, image, flavor, key, wait):
     else:
         sys.stderr.write(
             date_time() + "VM setup either timed out or produced ERROR for " + vm + ". Check connection settings, increase wait time and try again\n")
-    return (flag, vid, vip)
+    return flag, vid, vip
 
 
 if __name__ == "__main__":

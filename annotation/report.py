@@ -1,8 +1,7 @@
 #!/usr/bin/env python
+import argparse
 import re
 import sys
-
-import argparse
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
@@ -10,6 +9,7 @@ from date_time import date_time
 
 class Reporter:
     def __init__(self, infile, c, filt=False):
+        self.outstring = '\t'.join(self.columns) + '\n'
         self.infile = infile
         self.filter_missense_nonsense_only = filt
         self.c = c
@@ -62,7 +62,7 @@ class Reporter:
         f = 0
         if chrom in self.index:
             for start in sorted(self.index[chrom]):
-                if int(pos) >= start and int(pos) <= self.index[chrom][start]:
+                if start <= int(pos) <= self.index[chrom][start]:
                     f = 1
                     break
                 elif start > int(pos):
@@ -76,10 +76,9 @@ class Reporter:
         # return both formatted and unformatted
         ratio = float(b) / (float(a) + float(b)) * 100
         fmt = "{0:.2f}%".format(ratio)
-        return (ratio, fmt)
+        return ratio, fmt
 
     def parse_infile(self):
-        self.outstring = '\t'.join(self.columns) + '\n'
 
         column_refs = ''  # lookup for irregularly placed columns
         sys.stderr.write(date_time() + 'Processing ' + self.infile + '\n')

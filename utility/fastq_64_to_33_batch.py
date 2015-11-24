@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Usage: ./fastq_64_to_33_batch.py <list> <th>
 
 Options:
@@ -9,14 +9,15 @@ Arguments:
 <list> fastq list
 <th>   num threads
 
-'''
-import sys
-import os
+"""
 import subprocess
+import sys
+
 sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 
 from docopt import docopt
+
 args = docopt(__doc__)
 
 fh = open(args['<list>'])
@@ -29,4 +30,5 @@ for line in fh:
     cmd = '/home/ubuntu/TOOLS/Scripts/utility/fastq64_to_33.py ' + line
     cmd_list.append(cmd)
 from job_manager import job_manager
-job_manager(cmd_list,th)
+
+job_manager(cmd_list, th)

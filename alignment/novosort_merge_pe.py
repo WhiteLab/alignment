@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import sys
-import re
 import json
+import re
+import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
@@ -32,30 +32,30 @@ def list_bam(cont, obj, sample, wait):
             p.append(subprocess.Popen(dl_cmd, shell=True))
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
-                ct = ct + 1
+                ct += 1
             else:
                 bai_list.append(fn)
     n = 0
     f = 0
     x = len(p)
 
-    while (n < wait):
+    while n < wait:
         sys.stderr.write(date_time() + 'Checking status of download processes. ' + str(n) + ' seconds have passed\n')
         s = 0
         for cur in p:
             check = cur.poll()
             if str(check) != 'None':
-                s = s + 1
+                s += 1
         if s == x:
             f = 1
             break
         sys.stderr.write(date_time() + str(s) + ' of ' + str(x) + ' downloads have been completed\n')
-        n = n + 30
+        n += 30
         sleep_cmd = 'sleep 30s;'
         subprocess.call(sleep_cmd, shell=True)
     if f == 1:
         sys.stderr.write(date_time() + 'BAM download complete\n')
-        return (bam_list, bai_list, ct)
+        return bam_list, bai_list, ct
     else:
         sys.stderr.write(date_time() + 'BAM download failed\n')
         exit(1)
