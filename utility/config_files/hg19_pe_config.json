@@ -25,7 +25,7 @@
     "fai": "REFS/FASTA/hg19_karyo_ordered.fa.fai",
     "dbsnp": "REFS/VCF/dbsnp_138.hg19.vcf",
     "cont": "PDX",
-    "obj": "ALIGN_FILTER",
+    "obj": "ALIGN",
     "analysis": "ANALYSIS_REV",
     "annotation": "ANNOTATION_REV",
     "config": "/home/ubuntu/TOOLS/Scripts/utility/config_files/hg19_pe_config.json"

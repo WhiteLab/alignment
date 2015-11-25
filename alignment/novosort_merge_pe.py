@@ -69,7 +69,8 @@ def novosort_merge_pe(config_file, sample_list, wait):
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
         bam_string = " ".join(bam_list)
         if n > 1:
-            novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output " + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
+            novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
+                                    + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
             try:
                 subprocess.check_output(novosort_merge_pe_cmd, shell=True)
@@ -81,8 +82,12 @@ def novosort_merge_pe(config_file, sample_list, wait):
                 picard_tmp = 'picard_tmp'
                 # setting max records in ram to half of ram
                 recs = (int(ram) / 2) * (1000000000 / 200)
-                picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true ASSUME_SORTED=true MAX_RECORDS_IN_RAM=" + str(
-                    recs) + " MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".merged.bam OUTPUT=" + sample + ".merged.final.bam METRICS_FILE=" + sample + ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT"
+                picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates " \
+                                   "CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true" \
+                                   " ASSUME_SORTED=true MAX_RECORDS_IN_RAM=" + str(recs) + \
+                                   " MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".merged.bam OUTPUT="\
+                                   + sample + ".merged.final.bam METRICS_FILE=" + sample +\
+                                   ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT"
                 sys.stderr.write(date_time() + 'Removing dups\n' + picard_rmdup_cmd + '\n')
                 subprocess.call(picard_rmdup_cmd, shell=True)
                 # delete merged bam after removing dups
@@ -92,8 +97,8 @@ def novosort_merge_pe(config_file, sample_list, wait):
                 sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
                 exit(1)
         else:
-            mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam;mv ' + bai_list[
-                0] + ' ' + sample + '.merged.final.bam.bai'
+            mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam;mv ' + bai_list[0]\
+                     + ' ' + sample + '.merged.final.bam.bai'
             sys.stderr.write(date_time() + mv_bam + ' Only one associated bam file, renaming\n')
             subprocess.call(mv_bam, shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
