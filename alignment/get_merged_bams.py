@@ -26,8 +26,8 @@ def list_bam(cont, obj, sample, wait):
     for fn in re.findall('(.*)\n', flist):
         if re.match('.*.merged.final.ba', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
-            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' --output ' + os.path.basename(
-                fn)
+            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' --output '\
+                     + os.path.basename(fn)
             p.append(subprocess.Popen(dl_cmd, shell=True))
     n = 0
     f = 0
