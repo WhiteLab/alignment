@@ -9,7 +9,6 @@ from date_time import date_time
 
 class Reporter:
     def __init__(self, infile, c, filt=False):
-        self.outstring = '\t'.join(self.columns) + '\n'
         self.infile = infile
         self.filter_missense_nonsense_only = filt
         self.c = c
@@ -17,6 +16,7 @@ class Reporter:
         self.__identify_columns()
         if c != 'n':
             self.__index_intervals()
+        self.outstring = '\t'.join(self.columns) + '\n'
         self.parse_infile()
 
     def __build_regex(self):
