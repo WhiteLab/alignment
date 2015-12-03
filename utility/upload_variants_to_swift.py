@@ -6,7 +6,7 @@ from subprocess import call
 from date_time import date_time
 
 
-def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, annotation, analysis):
+def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation):
     src_cmd = '. ~/.novarc;'
     ONE_GB = 1073741824
     fh = open(sample_list, 'r')
