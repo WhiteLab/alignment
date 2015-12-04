@@ -24,6 +24,7 @@ from parse_qc import parse_qc
 class Pipeline:
     def __init__(self, end1, end2, seqtype, json_config, ref_mnt):
         self.cflag = 'n'
+        self.config_data = json.loads(open(json_config, 'r').read())
         self.run_cut_flag = self.config_data['params']['cutflag']
         self.ram = self.config_data['params']['ram']
         self.threads = self.config_data['params']['threads']
