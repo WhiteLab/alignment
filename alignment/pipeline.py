@@ -59,7 +59,6 @@ class Pipeline:
         self.cutadapter = self.config_data['tools']['cutadapt']
         self.bid = hgac_ID[0]
         self.sample = s.group(1)
-        self.config_data = json.loads(open(self.json_config, 'r').read())
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
 
