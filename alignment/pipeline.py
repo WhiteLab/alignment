@@ -166,7 +166,7 @@ class Pipeline:
             rm_sf = 'rm ' + self.end1 + ' ' + self.end2
             subprocess.call(rm_sf, shell=True)
             parse_qc(self.json_config, self.sample, self.cflag)
-            mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
+            mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \; cp ' + self.json_config + ' QC/;'
             subprocess.call(mv_rest, shell=True)
             from upload_to_swift import upload_to_swift
             obj = self.obj + "/" + self.bid

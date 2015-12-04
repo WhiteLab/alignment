@@ -10,12 +10,14 @@ def bid_swift_list(cont, obj, blist):
     src_cmd = ". /home/ubuntu/.novarc;"
     fh = open(blist, 'r')
     for bid in fh:
+        bid = bid.rstrip('\n')
         swift_cmd = src_cmd + "swift list " + cont + " --prefix " + obj + "/" + bid
         sys.stderr.write(date_time() + swift_cmd + "\n")
         try:
-            check = call(swift_cmd, shell=True)
+            call(swift_cmd, shell=True)
         except:
             sys.stderr.write(date_time() + "Lising of " + bid + ' of ' + obj + " from " + cont + " failed\n")
+            return 1
 
     return 0
 
