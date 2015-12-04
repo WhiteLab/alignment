@@ -23,8 +23,22 @@ from parse_qc import parse_qc
 
 class Pipeline:
     def __init__(self, end1, end2, seqtype, json_config, ref_mnt):
-        self.cflag = 'n'
         self.config_data = json.loads(open(json_config, 'r').read())
+        self.end1 = end1
+        self.end2 = end2
+        s = re.match('^(\S+)_1_sequence\.txt\.gz$', self.end1)
+        if s:
+            self.sample = s.group(1)
+        else:
+            s = re.match('(^\S+)_\D*\d\.f\w*q\.gz$', self.end1)
+            self.sample = s.group(1)
+        hgac_ID = self.sample.split("_")
+        self.ref_mnt = ref_mnt
+        self.seqtype = seqtype
+        self.cflag = 'y'
+        if self.seqtype == 'capture':
+            self.cflag = 'n'
+
         self.run_cut_flag = self.config_data['params']['cutflag']
         self.ram = self.config_data['params']['ram']
         self.threads = self.config_data['params']['threads']
@@ -43,30 +57,13 @@ class Pipeline:
         self.bwa_tool = self.config_data['tools']['bwa']
         self.fastx_tool = self.config_data['tools']['fastx']
         self.cutadapter = self.config_data['tools']['cutadapt']
-        self.bid = HGACID[0]
+        self.bid = hgac_ID[0]
         self.sample = s.group(1)
         self.config_data = json.loads(open(self.json_config, 'r').read())
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
-        self.end1 = end1
-        self.end2 = end2
-        self.seqtype = seqtype
+
         self.status = 0
-        self.ref_mnt = ref_mnt
-        self.parse_config()
-
-    def parse_config(self):
-        s = re.match('^(\S+)_1_sequence\.txt\.gz$', self.end1)
-        if s:
-            self.sample = s.group(1)
-        else:
-            s = re.match('(^\S+)_\D*\d\.f\w*q\.gz$', self.end1)
-        HGACID = self.sample.split("_")
-        self.cflag = 'y'
-        if self.seqtype == 'capture':
-            # self.cov=self.config_data['params']['cov']
-            pass
-
         self.pipeline()
 
     def pipeline(self):
