@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Usage: ./concat_vcfs2.py <fai> <dir>
+Usage: ./concat_vcfs2.py <fai> <list>
 
 Arguments:
 <fai> fasta index
@@ -25,7 +25,7 @@ for entry in chrs:
     vcf_entries[chrom[0]] = []
     order.append(chrom[0])
 
-vcf = open(args['<dlist>'], 'r')
+vcf = open(args['<list>'], 'r')
 for line in vcf:
     line = line.strip()
     m = re.search('(chr\S+)\.', line)
