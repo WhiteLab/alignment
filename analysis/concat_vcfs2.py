@@ -32,6 +32,7 @@ for line in vcf_list:
     cur = m.group(1)
     vcf = open(line, 'r')
     for variant in vcf:
+        variant = variant.rstrip('\n')
         if variant.startswith('#') and header_flag == 0:
             header.append(variant)
         elif not variant.startswith('#'):
@@ -39,7 +40,7 @@ for line in vcf_list:
     header_flag = 1
     vcf.close()
 vcf_list.close()
-print header
+print '\n'.join(header)
 for chrom in order:
-    print vcf_entries[chrom]
+    print '\n'.join(vcf_entries[chrom])
 
