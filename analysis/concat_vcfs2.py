@@ -28,7 +28,7 @@ for entry in chrs:
 vcf = open(args['<list>'], 'r')
 for line in vcf:
     line = line.strip()
-    m = re.search('(chr\S+)\.', line)
+    m = re.search('(chr[A-Z,a-z,0-9,_]+)', line)
     cur = m.group(1)
     for variant in line:
         if variant.startswith('#') and header_flag == 0:
