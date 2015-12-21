@@ -18,6 +18,7 @@ header = []
 vcf_entries = {}
 order = []
 import re
+import sys
 
 for entry in chrs:
     entry = entry.rstrip('\n')
@@ -42,5 +43,5 @@ for line in vcf_list:
 vcf_list.close()
 print '\n'.join(header)
 for chrom in order:
-    print '\n'.join(vcf_entries[chrom])
+    sys.stdout.write('\n'.join(vcf_entries[chrom]))
 
