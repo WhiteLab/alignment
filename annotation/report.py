@@ -32,7 +32,7 @@ class Reporter:
             '(?P<transcript_id>[^\|]*)',
             '(?P<exon_intro_rank>[^\|]*)',
             '(?P<genotype_number>[^\|]*)',
-            # '?(?P<warnings_errors>[^\|]*)?'
+            '?(?P<warnings_errors>[^\|]*)?'
         ]))
 
     def __identify_columns(self):
