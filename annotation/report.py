@@ -114,7 +114,7 @@ class Reporter:
                 (t_rat, t_fmt) = self.calc_pct(line[column_refs.index('t_ref_count')],
                                                line[column_refs.index('t_alt_count')])
                 report.append(t_fmt)
-                t_n_rat = 10000
+                t_n_rat = float(line[column_refs.index('t_alt_count')])
                 if n_rat > 0:
                     t_n_rat = t_rat / n_rat
                 report.append("{0:.2f}".format(t_n_rat))
