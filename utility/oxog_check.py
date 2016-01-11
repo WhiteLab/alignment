@@ -8,7 +8,7 @@ import pdb
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['java'], config_data['tools']['picard'], config_data['refs']['genome'],
+    return (config_data['tools']['java'], config_data['tools']['picard'], config_data['refs']['fa_ordered'],
             config_data['refs']['intervals'], config_data['refs']['cont'], config_data['refs']['obj'],
             config_data['params']['threads'], config_data['params']['ram'])
 
@@ -28,7 +28,7 @@ def oxog_check(config_file, lane_list, ref_mnt):
                  + '_' + lane + '.rmdup.srt.ba;'
             # pdb.set_trace()
             bam = obj + '/' + bid + '/BAM/' + bid + '_' + lane + '.rmdup.srt.bam'
-            oxoG = java + '-Xmx' + ram + 'g -jar ' + picard + ' CollectOxoGMetrics I=' + bam + ' O=' + bid + '_' + \
+            oxoG = java + ' -Xmx' + ram + 'g -jar ' + picard + ' CollectOxoGMetrics I=' + bam + ' O=' + bid + '_' + \
                     lane + '.oxo_summary.txt R=' + ref_mnt + '/' + fa_ordered + ' INTERVALS=' + ref_mnt + '/' + intervals + ' 2> ' + bid + '_' + lane + '.log'
             job_list.append(dl_bam + oxoG)
     lane_fh.close()
