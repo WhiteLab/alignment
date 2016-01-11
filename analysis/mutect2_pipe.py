@@ -63,7 +63,7 @@ def mutect_pipe(config_file, sample_pairs, ref_mnt):
             vcf_file = out + '.' + intvl + '.vcf'
             log_file = 'LOGS/' + out + '.mut.' + intvl + '.log'
             cur = cur + ' -T MuTect2 -S LENIENT -R ' + fa_ordered + ' --intervals ' + int_dict[intvl]['fn'] + \
-                  '  --I:normal ' + normal_bam + '  --I:tumor ' + tumor_bam + ' --max_alt_alleles_in_normal_count 1000'\
+                  '  -I:normal ' + normal_bam + '  -I:tumor ' + tumor_bam + ' --max_alt_alleles_in_normal_count 1000'\
                   ' --max_alt_alleles_in_normal_qscore_sum 37 --max_alt_allele_in_normal_fraction 0.05 --out ' + out \
                   + '/' + vcf_file + ' 2>> ' + log_file + ';'
             cmd_list.append(cur)
