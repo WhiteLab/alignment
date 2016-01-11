@@ -10,12 +10,12 @@ import json
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['java'], config_data['tools']['mutect'], config_data['refs']['genome'],
+    return (config_data['tools']['java'], config_data['tools']['gatk'], config_data['refs']['genome'],
             config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['ram'])
 
 
 def mutect_pipe(config_file, sample_pairs, ref_mnt):
-    (java, mutect, intervals, fa_ordered, max_t, ram) = parse_config(config_file)
+    (java, gatk, intervals, fa_ordered, max_t, ram) = parse_config(config_file)
     intervals = ref_mnt + '/' + intervals
     # break up intervals into max threads junks to run all in parallel
     int_fh = open(intervals, 'r')
@@ -41,7 +41,7 @@ def mutect_pipe(config_file, sample_pairs, ref_mnt):
     fa_ordered = ref_mnt + '/' + fa_ordered
     fh = open(sample_pairs)
     job_ram = (int(ram) / int(max_t))
-    run_mut = java + ' -Djava.io.tmpdir=./temp -Xmx' + str(job_ram) + 'g -jar ' + mutect
+    run_mut = java + ' -Djava.io.tmpdir=./temp -Xmx' + str(job_ram) + 'g -jar ' + gatk
     mk_log_dir = 'mkdir LOGS'
     subprocess.call(mk_log_dir, shell=True)
     for line in fh:
