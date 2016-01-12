@@ -26,8 +26,8 @@ tbl_info = {}
 df = 0
 sn_list = []
 for fn in fl:
-    fn = fl.rstrip('\n')
-    sn = re.search('(\S+)' + suffix, fn)
+    fn = fn.rstrip('\n')
+    sn = re.findall('(\S+)' + suffix, fn)
     sn_list.append(sn[0])
     cur = open(fn, 'r')
     tbl_info[sn[0]] = []
@@ -40,15 +40,17 @@ for fn in fl:
         info = line.split('\t')
         if df == 0:
             cntxt_list.append(info[2])
-        tbl_info[sn[0]].append[info[11]]
-    fl.close()
+        tbl_info[sn[0]].append(float(info[11]))
+    cur.close()
     df = 1
     avg = sum(tbl_info[sn[0]])/float(len(tbl_info[sn[0]]))
     tbl_info[sn[0]].append(avg)
+fl.close()
+
 cntxt_list.append('average')
 sys.stdout.write('Sample/context\t' + '\t'.join(sn_list) + '\n')
 for i in xrange(0,len(cntxt_list),1):
     sys.stdout.write(cntxt_list[i])
     for sn in sn_list:
-        sys.stdout.write('\t' + tbl_info[sn][i])
+        sys.stdout.write('\t' + str(tbl_info[sn][i]))
     sys.stdout.write('\n')
