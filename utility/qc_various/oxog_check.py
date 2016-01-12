@@ -29,8 +29,9 @@ def oxog_check(config_file, lane_list, ref_mnt):
             # pdb.set_trace()
             bam = obj + '/' + bid + '/BAM/' + bid + '_' + lane + '.rmdup.srt.bam'
             oxoG = java + ' -Xmx' + ram + 'g -jar ' + picard + ' CollectOxoGMetrics I=' + bam + ' O=' + bid + '_' + \
-                    lane + '.oxo_summary.txt R=' + ref_mnt + '/' + fa_ordered + ' INTERVALS=' + ref_mnt + '/' + intervals + ' 2> ' + bid + '_' + lane + '.log'
-            job_list.append(dl_bam + oxoG)
+                    lane + '.oxo_summary.txt R=' + ref_mnt + '/' + fa_ordered + ' INTERVALS=' + ref_mnt + '/' + intervals + ' 2> ' + bid + '_' + lane + '.log;'
+            del_bam = 'rm ' + obj + '/' + bid + '/BAM/' + bid + '_' + lane + '.rmdup.srt.bam;'
+            job_list.append(dl_bam + oxoG + del_bam)
     lane_fh.close()
     job_manager(job_list, max_t)
 
