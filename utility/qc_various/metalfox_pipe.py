@@ -30,7 +30,8 @@ def metalfox_pipe(config_file, sample_pairs, ref_mnt):
         dl_bam = 'swift download ' + cont + ' ' + bam[0] + ' ' + bam[1] + ';'
         mut_out = 'ANALYSIS/' + info[0] + '/OUTPUT/' + info[0] + '.out.keep'
         dl_out = 'swift download ' + cont + ' ' + mut_out + ';'
-        run_metal = metalfox_tool + ' -f1 ' + mut_out + ' -f3 ' + bam[0] + ' -m ' + map_ref + ';'
+        run_metal = metalfox_tool + ' -f1 ' + mut_out + ' -f3 ' + bam[0] + ' -m ' + map_ref + ' > ' + info[0] + \
+                    '.foxog_scored_added.out;'
         cleanup = 'rm ' + ' '.join((bam[0],bam[1],mut_out)) + ';'
         job_list.append(src_cmd + dl_bam + dl_out + run_metal + cleanup)
     pairs.close()
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='muTect pipleine for variant calling.  Need BAM and bai files ahead of time.')
+        description='Mini pipeline for adding FoxoG scores to calls for filtering.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs')
