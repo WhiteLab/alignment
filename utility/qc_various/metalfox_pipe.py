@@ -19,6 +19,7 @@ def metalfox_pipe(config_file, sample_pairs, ref_mnt):
     (metalfox_tool, cont, obj, map_ref, max_t, ram) = parse_config(config_file)
     map_ref = ref_mnt + '/' + map_ref
     src_cmd = '. ~/.novarc;'
+    deproxy = 'unset http_proxy; unset https_proxy;'
     pairs = open(sample_pairs, 'r')
     job_list = []
     for sn in pairs:
@@ -29,13 +30,13 @@ def metalfox_pipe(config_file, sample_pairs, ref_mnt):
         get_bam_name = 'swift list ' + cont + ' --prefix ' + obj + '/' + info[1] + '/BAM/' + info[1]\
                        + ' | grep .rmdup.srt.ba* '
         bam =subprocess.check_output(get_bam_name, shell=True).split('\n')
-        dl_bam = 'swift download ' + cont + ' ' + bam[0] + ' ' + bam[1] + ';'
+        dl_bam = 'swift download ' + cont + ' ' + bam[1] + ';swift download ' + cont + ' ' + bam[0] + ';'
         mut_out = 'ANALYSIS/' + info[0] + '/OUTPUT/' + info[0] + '.out.keep'
         dl_out = 'swift download ' + cont + ' ' + mut_out + ';'
         run_metal = metalfox_tool + ' -f1 ' + mut_out + ' -f3 ' + bam[1] + ' -m ' + map_ref + ' > ' + info[0] + \
                     '.foxog_scored_added.out;'
         cleanup = 'rm ' + ' '.join((bam[0],bam[1],mut_out)) + ';'
-        job_list.append(src_cmd + dl_bam + dl_out + run_metal)# + cleanup)
+        job_list.append(deproxy + dl_bam + dl_out + run_metal)# + cleanup)
     pairs.close()
     sys.stderr.write('Queing jobs\n')
     job_manager(job_list, max_t)
