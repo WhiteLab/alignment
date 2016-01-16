@@ -17,6 +17,7 @@ def parse_config(config_file):
 
 def metalfox_pipe(config_file, sample_pairs, ref_mnt):
     (metalfox_tool, cont, obj, map_ref, max_t, ram) = parse_config(config_file)
+    map_ref = ref_mnt + '/' + map_ref
     src_cmd = '. ~/.novarc;'
     pairs = open(sample_pairs, 'r')
     job_list = []
@@ -24,6 +25,7 @@ def metalfox_pipe(config_file, sample_pairs, ref_mnt):
         sn = sn.rstrip('\n')
         info = sn.split('\t')
         # stdout=PIPE
+        sys.stderr.write('Getting bam file name for ' + info[1] + '\n')
         get_bam_name = 'swift list ' + cont + ' --prefix ' + obj + '/' + info[1] + '/BAM/' + info[1]\
                        + ' | grep .rmdup.srt.ba* '
         bam =subprocess.check_output(get_bam_name, shell=True).split('\n')
@@ -35,6 +37,7 @@ def metalfox_pipe(config_file, sample_pairs, ref_mnt):
         cleanup = 'rm ' + ' '.join((bam[0],bam[1],mut_out)) + ';'
         job_list.append(src_cmd + dl_bam + dl_out + run_metal + cleanup)
     pairs.close()
+    sys.stderr.write('Queing jobs\n')
     job_manager(job_list, max_t)
 
 if __name__ == "__main__":
