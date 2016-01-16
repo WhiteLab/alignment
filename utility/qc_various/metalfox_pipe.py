@@ -35,7 +35,7 @@ def metalfox_pipe(config_file, sample_pairs, ref_mnt):
         run_metal = metalfox_tool + ' -f1 ' + mut_out + ' -f3 ' + bam[1] + ' -m ' + map_ref + ' > ' + info[0] + \
                     '.foxog_scored_added.out;'
         cleanup = 'rm ' + ' '.join((bam[0],bam[1],mut_out)) + ';'
-        job_list.append(src_cmd + dl_bam + dl_out + run_metal + cleanup)
+        job_list.append(src_cmd + dl_bam + dl_out + run_metal)# + cleanup)
     pairs.close()
     sys.stderr.write('Queing jobs\n')
     job_manager(job_list, max_t)
