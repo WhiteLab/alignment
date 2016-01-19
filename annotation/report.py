@@ -152,7 +152,7 @@ class Reporter:
 
     def print_output(self):
         sys.stdout.write(self.outstring)
-        sys.stderr.write(date_time() + 'Changed last Report complete\n')
+        sys.stderr.write(date_time() + 'Report complete\n')
         return 0
 
 
