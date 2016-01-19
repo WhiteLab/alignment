@@ -151,8 +151,8 @@ class Reporter:
             exit(1)
 
     def print_output(self):
-        print >> sys.stdout, self.outstring
-        sys.stderr.write(date_time() + 'Report complete\n')
+        sys.stdout.write(self.outstring)
+        sys.stderr.write(date_time() + 'Changed last Report complete\n')
         return 0
 
 
