@@ -16,9 +16,9 @@ Options
 
 '''
 import sys
-import pdb
-
+# import pdb
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+from job_manager import job_manager
 from docopt import docopt
 
 args = docopt(__doc__)
@@ -35,11 +35,11 @@ swift_cmd = src_cmd + 'swift upload ' + args['<cont>'] + ' --skip-identical -S '
 
 lut_out = {}
 
-for fq in open(args['<fq_list>'],'r'):
+for fq in open(args['<fq_list>'], 'r'):
     fq = fq.rstrip('\n')
     info = fq.split('_')
     proj_id = info[2] + '_' + info[3]
-    pdb.set_trace()
+    # pdb.set_trace()
     if proj_id not in lut:
         sys.stderr.write('Could not resolve project id in file name. Skipping ' + fq + '\n')
     else:
@@ -57,10 +57,10 @@ for fq in open(args['<fq_list>'],'r'):
         lut_out[bid]['new'].append(new_name)
 
         sys.stderr.write(new_name + '\tnew object name to be uploaded')
-        up_cmd = src_cmd + swift_cmd + new_name + ' 2>> up.log >> up.log'
+        up_cmd = swift_cmd + new_name + ' 2>> up.log >> up.log'
         sys.stderr.write(up_cmd + '\n')
         job_list.append(up_cmd)
+job_manager(job_list, args['<num_threads>'])
 
 for bid in lut_out:
-    sys.stdout.write(bid + '\t' + ' ,'.join(lut_out[bid]['orig']) + '\t' + ' ,'.join(lut_out[bid]['new']) + '\n')
-
+    sys.stdout.write(bid + '\t' + ', '.join(lut_out[bid]['orig']) + '\t' + ', '.join(lut_out[bid]['new']) + '\n')
