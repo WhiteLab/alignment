@@ -45,6 +45,7 @@ for fq in open(args['<fq_list>'],'r'):
     else:
         bid = lut[proj_id]
         if bid not in lut_out:
+            lut_out[bid] = {}
             lut_out[bid]['lane'] = []
             lut_out[bid]['orig'] = []
             lut_out[bid]['new'] = []
