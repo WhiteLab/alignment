@@ -31,7 +31,8 @@ for line in open(args['<LUT>'], 'r'):
 job_list = []
 ONE_GB = 1073741824
 src_cmd = '. /home/ubuntu/.novarc;'
-swift_cmd = src_cmd + 'swift upload ' + args['<cont>'] + ' --skip-identical -S ' + str(ONE_GB) + ' --object-name '
+swift_start = src_cmd + 'swift upload ' + args['<cont>'] + ' '
+swift_end = ' --skip-identical -S ' + str(ONE_GB) + ' --object-name '
 
 lut_out = {}
 
@@ -57,7 +58,7 @@ for fq in open(args['<fq_list>'], 'r'):
         lut_out[bid]['new'].append(new_name)
 
         sys.stderr.write(new_name + '\tnew object name to be uploaded')
-        up_cmd = swift_cmd + new_name + ' ' + fq + ' 2>> up.log >> up.log'
+        up_cmd = swift_start + fq + swift_end + new_name + ' 2>> up.log >> up.log'
         sys.stderr.write(up_cmd + '\n')
         job_list.append(up_cmd)
 job_manager(job_list, args['<num_threads>'])
