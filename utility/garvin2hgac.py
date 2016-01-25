@@ -57,7 +57,7 @@ for fq in open(args['<fq_list>'], 'r'):
         lut_out[bid]['new'].append(new_name)
 
         sys.stderr.write(new_name + '\tnew object name to be uploaded')
-        up_cmd = swift_cmd + new_name + ' 2>> up.log >> up.log'
+        up_cmd = swift_cmd + new_name + ' ' + fq + ' 2>> up.log >> up.log'
         sys.stderr.write(up_cmd + '\n')
         job_list.append(up_cmd)
 job_manager(job_list, args['<num_threads>'])
