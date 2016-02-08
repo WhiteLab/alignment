@@ -1,8 +1,7 @@
 #!/usr/bin/env python
+import argparse
 import re
 import sys
-
-import argparse
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
@@ -17,6 +16,7 @@ class Reporter:
         self.__identify_columns()
         if c != 'n':
             self.__index_intervals()
+        self.outstring = '\t'.join(self.columns) + '\n'
         self.parse_infile()
 
     def __build_regex(self):
@@ -32,7 +32,7 @@ class Reporter:
             '(?P<transcript_id>[^\|]*)',
             '(?P<exon_intro_rank>[^\|]*)',
             '(?P<genotype_number>[^\|]*)',
-            # '?(?P<warnings_errors>[^\|]*)?'
+            '?(?P<warnings_errors>[^\|]*)?'
         ]))
 
     def __identify_columns(self):
@@ -62,7 +62,7 @@ class Reporter:
         f = 0
         if chrom in self.index:
             for start in sorted(self.index[chrom]):
-                if int(pos) >= start and int(pos) <= self.index[chrom][start]:
+                if start <= int(pos) <= self.index[chrom][start]:
                     f = 1
                     break
                 elif start > int(pos):
@@ -76,10 +76,9 @@ class Reporter:
         # return both formatted and unformatted
         ratio = float(b) / (float(a) + float(b)) * 100
         fmt = "{0:.2f}%".format(ratio)
-        return (ratio, fmt)
+        return ratio, fmt
 
     def parse_infile(self):
-        self.outstring = '\t'.join(self.columns) + '\n'
 
         column_refs = ''  # lookup for irregularly placed columns
         sys.stderr.write(date_time() + 'Processing ' + self.infile + '\n')
@@ -115,7 +114,7 @@ class Reporter:
                 (t_rat, t_fmt) = self.calc_pct(line[column_refs.index('t_ref_count')],
                                                line[column_refs.index('t_alt_count')])
                 report.append(t_fmt)
-                t_n_rat = 10000
+                t_n_rat = float(line[column_refs.index('t_alt_count')])
                 if n_rat > 0:
                     t_n_rat = t_rat / n_rat
                 report.append("{0:.2f}".format(t_n_rat))
@@ -152,7 +151,7 @@ class Reporter:
             exit(1)
 
     def print_output(self):
-        print >> sys.stdout, self.outstring
+        sys.stdout.write(self.outstring)
         sys.stderr.write(date_time() + 'Report complete\n')
         return 0
 
