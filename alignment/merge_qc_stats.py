@@ -2,9 +2,7 @@
 import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-import re
 from date_time import date_time
-from subprocess import call
 from subprocess import check_output
 from download_from_swift import download_from_swift
 import subprocess

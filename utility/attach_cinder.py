@@ -4,7 +4,6 @@ import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 import subprocess
-import os
 import re
 
 
@@ -42,17 +41,17 @@ def attach_cinder(sid, vid, bid, size, vip, wait):
             p = subprocess.check_output(check, shell=True)
             for line in re.findall('(.*)\n', p):
                 line = line.rstrip('\n')
-                if (re.search(cid, line)):
+                if re.search(cid, line):
                     line = re.sub(r"\|", r"", line)
                     info = line.split()
                     cname = info[2]
                     cstatus = info[1]
                     sys.stderr.write('Status of ' + cname + ' is ' + cstatus + ' with id ' + cid + '\n')
-                    if (cstatus == "available"):
+                    if cstatus == "available":
                         flag = 1
                         break
-        n = n + i
-    if (flag == 1):
+        n += i
+    if flag == 1:
         sys.stderr.write("VM setup for " + cname + " with ID " + cid + " successful.  Attaching to vm\n")
         attach_vm = src_cmd + "nova volume-attach " + vid + " " + cid
         sys.stderr.write(date_time() + attach_vm + "\n")
@@ -64,7 +63,7 @@ def attach_cinder(sid, vid, bid, size, vip, wait):
             c = subprocess.check_output(check, shell=True)
             for line in re.findall('(.*)\n', c):
                 line = line.rstrip('\n')
-                if (re.search(cid, line)):
+                if re.search(cid, line):
                     line = re.sub(r"\|", r"", line)
                     info = line.split()
                     if info[1] == 'in-use':

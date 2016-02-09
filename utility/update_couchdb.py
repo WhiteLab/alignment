@@ -1,6 +1,6 @@
 #!/usr/bin/python
-import sys
 import re
+import sys
 from getpass import getpass
 from subprocess import check_output
 
@@ -48,5 +48,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    fn = (inputs.fn)
+    fn = inputs.fn
     update_couchdb(fn)

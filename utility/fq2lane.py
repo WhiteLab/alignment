@@ -1,10 +1,7 @@
 #!/usr/bin/python
-import sys
-import subprocess
 import os
 import re
-
-from date_time import date_time
+import sys
 
 
 def fq2lane(fq_list, seqtype):

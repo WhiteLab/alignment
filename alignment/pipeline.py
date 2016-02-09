@@ -62,6 +62,7 @@ class Pipeline():
         self.cont = self.config_data['refs']['cont']
         self.qc_stats = self.config_data['tools']['qc_stats']
         self.threads = self.config_data['params']['threads']
+        self.run_cut_flag = self.config_data['params']['cutflag']
         self.ram = self.config_data['params']['ram']
         self.cflag = 'y'
         if self.seqtype == 'capture':
@@ -95,10 +96,11 @@ class Pipeline():
         SAMPLES[self.sample]['f1'] = self.end1
         SAMPLES[self.sample]['f2'] = self.end2
         RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
-        check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
-        if (check != 0):
-            log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
-            exit(1)
+        if self.run_cut_flag == 'Y':
+            check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
+            if check != 0:
+                log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
+                exit(1)
         log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
         check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.mmu_bwa_ref, self.end1, self.end2,
                             self.samtools_tool, self.mmu_samtools_ref, self.sample, log_dir, self.threads)
@@ -125,7 +127,7 @@ class Pipeline():
         if not os.path.isfile(self.sample + '.srt.bam'):
             check = novosort_sort_pe(self.novosort, self.sample, log_dir, self.threads,
                                      self.ram)  # rest won't run until completed
-            if (check != 0):
+            if check != 0:
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
                 exit(1)
         else:
@@ -136,15 +138,14 @@ class Pipeline():
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
                          self.ram)  # rest won't run until emopleted
             log(self.loc, date_time() + 'Gathering SAM flag stats\n')
-            flagstats(self.samtools_tool, self.sample)  # flag determines whether to run independently or hold up
-            #  the rest of the pipe until completion
+            flagstats(self.samtools_tool,
+                      self.sample)  # flag determines whether to run independently or hold up the rest of the pipe until completion
             log(self.loc, date_time() + 'Calculating insert sizes\n')
             picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir,
                                self.ram)  # get insert size metrics.
         else:
             log(self.loc,
-                date_time() + 'Insert size file detected, skipping remove duplicates, flagstats, '
-                              'and remove duplicates steps')
+                date_time() + 'Insert size file detected, skipping remove duplicates, flagstats, and remove duplicates steps')
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method = getattr(coverage, (self.seqtype + '_coverage'))
@@ -176,6 +177,8 @@ class Pipeline():
             parse_qc(self.json_config, self.sample, self.cflag)
             mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
             subprocess.call(mv_rest, shell=True)
+            mv_config = ' cp ' + self.json_config + ' QC/'
+            subprocess.call(mv_config, shell=True)
             from upload_to_swift import upload_to_swift
             obj = self.obj + "/" + self.bid
 

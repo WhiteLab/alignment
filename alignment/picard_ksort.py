@@ -9,7 +9,7 @@ from date_time import date_time
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['java'], config_data['tools']['picard'], config_data['refs']['fa_ordered'])
+    return config_data['tools']['java'], config_data['tools']['picard'], config_data['refs']['fa_ordered']
 
 
 def ksort(config_file, bam_list, flag, ref_mnt):
@@ -28,20 +28,20 @@ def ksort(config_file, bam_list, flag, ref_mnt):
         sys.stderr.write(date_time() + 'Started reorder process for ' + bam + '\n' + ksort_cmd + '\n')
         k_proc.append(subprocess.Popen(ksort_cmd, shell=True))
     n = len(blist)
-    while (c < n):
+    while c < n:
         sys.stderr.write(date_time() + 'Checking status of reorder processes. ' + str(s) + ' seconds have passed\n')
         for cur in k_proc:
             check = cur.poll()
             sys.stderr.write(str(check) + '\n')
             if str(check) == '0':
-                c = c + 1
+                c += 1
                 k_proc.remove(cur)
             if str(check) == '1':
                 sys.stderr.write(
                     date_time() + 'Picard command failed.  Check references and bam file names and try again!\n')
                 exit(1)
         sys.stderr.write(date_time() + str(c) + ' of ' + str(n) + ' processes have been completed\n')
-        s = s + 20
+        s += 20
         sleep_cmd = 'sleep 20s;'
         subprocess.call(sleep_cmd, shell=True)
     if flag == 'y':

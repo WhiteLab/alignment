@@ -1,7 +1,7 @@
 #!/usr/bin/python
+import subprocess
 import sys
 from subprocess import check_output
-import subprocess
 
 from date_time import date_time
 

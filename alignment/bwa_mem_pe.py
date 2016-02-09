@@ -43,6 +43,7 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads) = (
-    inputs.bwa_tool, inputs.RGRP, inputs.bwa_ref, inputs.end1, inputs.end2, inputs.samtools_tool, inputs.samtools_ref,
-    inputs.sample, inputs.log_dir, inputs.threads)
+        inputs.bwa_tool, inputs.RGRP, inputs.bwa_ref, inputs.end1, inputs.end2, inputs.samtools_tool,
+        inputs.samtools_ref,
+        inputs.sample, inputs.log_dir, inputs.threads)
     bwa_mem_pe(bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir, threads)

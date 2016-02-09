@@ -34,5 +34,5 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (java_tool, picard_tool, picard_tmp, sample, log_dir, ram) = (
-    inputs.java_tool, inputs.picard_tool, inputs.picard_tmp, inputs.sample, inputs.log_dir, inputs.ram)
+        inputs.java_tool, inputs.picard_tool, inputs.picard_tmp, inputs.sample, inputs.log_dir, inputs.ram)
     picard_rmdup(java_tool, picard_tool, picard_tmp, sample, log_dir, ram)
