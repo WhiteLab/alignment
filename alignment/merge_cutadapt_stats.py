@@ -1,11 +1,17 @@
 #!/usr/bin/python
 import re
 import sys
-
+import pdb
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from subprocess import check_output
 import subprocess
+
+
+def skip_lines(fh, stop):
+    for i in xrange(0, stop, 1):
+        skip = next(fh)
+    return 0
 
 def process_line(fh, stop):
     list_list = []
@@ -40,34 +46,35 @@ def download_from_swift(cont, obj, lane_list):
                 sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
                 exit(1)
             stat = open(cur, 'r')
-            next(stat)
+            skip_lines(stat, 1)
             temp = []
+            pdb.set_trace()
             params = next(stat)
             m = re.search('-m (\d+) --quality-base=(\d+) -q (\d+)', params)
             # min len enforced, scoring scheme, min base quality)
-            temp.append(m.group(1), m.group(2), m.group(3))
-            for i in xrange(0, 6, 1):
-                next(stat)
+            temp.append((m.group(1), m.group(2), m.group(3)))
+            skip_lines(stat, 7)
             # use generic funtion to parse groups on lines, take what's needed, next group
             # total reads pairs summary section
-            group = process_line(stat, 4)
-            temp.append(group[0][1])
+            group = process_line(stat, 5)
+            pdb.set_trace()
+            temp.append(group[0][4])
             # skip next lines for now, may want in future if adapter trimming performed
-            group[3][3] = rm_parens(group[3][3])
-            temp.append(group[3][2:3])
-            group[4][3] = rm_parens(group[4][3])
-            temp.append(group[4][2:3])
-            next(stat)
+            group[3][6] = rm_parens(group[3][6])
+            temp.append(group[3][5:7])
+            group[4][5] = rm_parens(group[4][5])
+            temp.append(group[4][4:6])
+            skip_lines(stat, 1)
             group = process_line(stat, 1)
             temp.append(group[0][1])
-            next(stat)
-            next(stat)
+            skip_lines(stat, 2)
             group = process_line(stat, 2)
             group[0][3] = rm_parens(group[0][3])
             temp.append((group[0][3], group[1][3], group[2][3]))
             group = process_line(stat, 1)
             group[0][4] = rm_parens(group[0][4])
             temp.append((group[0][3], group[0][4]))
+            print bid + '\t' + lane + '\t' + '\t'.join(temp)
             stat.close()
 
 
