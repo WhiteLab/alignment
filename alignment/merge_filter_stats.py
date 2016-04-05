@@ -32,7 +32,7 @@ def download_from_swift(cont, obj, lane_list):
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
         for lane in lane_csv.split(', '):
-            cur = obj + '/' + bid + '/LOGS/' + bid + '_' + lane + '.cutadapt.log'
+            cur = obj + '/' + bid + '/QC/' + bid + '_' + lane + '.runlog.txt'
             swift_cmd = src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur
             sys.stderr.write(date_time() + swift_cmd + "\n")
             try:
@@ -41,14 +41,14 @@ def download_from_swift(cont, obj, lane_list):
                 sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
                 exit(1)
             stat = open(cur, 'r')
-            skip_lines(stat, 3)
+            skip_lines(stat, 4)
             temp = []
-            group = process_line(stat, 3)
+            group = process_line(stat, 2)
             unamb_pairs_pct = group[0][-1][1:]
             amb_pairs_pct = group[1][-1][1:]
-            filt = str(1-float(unamb_pairs_pct)-float(amb_pairs_pct))
+            filt = str(100-float(unamb_pairs_pct)-float(amb_pairs_pct))
             kept = str(float(unamb_pairs_pct) + float(amb_pairs_pct))
-            temp.append((group[0][6], unamb_pairs_pct, amb_pairs_pct, filt, kept))
+            temp.extend((group[0][6], unamb_pairs_pct, amb_pairs_pct, filt, kept))
 
             print bid + '\t' + lane + '\t' + '\t'.join(temp)
             stat.close()
