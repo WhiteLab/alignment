@@ -65,6 +65,8 @@ def list_bam(cont, obj, sample, wait):
 def novosort_merge_pe(config_file, sample_list, wait):
     fh = open(sample_list, 'r')
     (novosort, java_tool, picard_tool, cont, obj, threads, ram) = parse_config(config_file)
+    tmp_dir = 'mkdir TMP'
+    subprocess.call(tmp_dir, shell=True)
     for sample in fh:
         sample = sample.rstrip('\n')
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
