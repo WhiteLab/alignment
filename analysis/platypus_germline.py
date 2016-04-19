@@ -27,9 +27,9 @@ def platypus_germline(config_file, sample, log_dir, cflag, ref_mnt):
         (platypus, fasta, threads, region_file, minVAF) = parse_config(config_file, cflag)
         regions = ref_mnt + '/' + region_file
         platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
-                       + ".merged.final.bam -o " + sample + ".germline_calls.vcf --minVarFreq=" + minVAF \
+                       + ".merged.final.bam --filterDuplicates=0 ADded s-o " + sample + ".germline_calls.vcf --minVarFreq=" + minVAF \
                        + " --regions=" + regions + " --logFileName=" + log_dir + sample \
-                       + ".platypus.log 2>&1 > " + log_dir + sample + ".platypus.log 2>&1"
+                       + ".platypus.log 2>&1 > " + log_dir + sample + ".latypus.log 2>&1"
     log(log_dir + sample + ".platypus.log", date_time() + platypus_cmd + "\n")
     f = 0
     try:
