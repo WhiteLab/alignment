@@ -20,15 +20,16 @@ def parse_config(config_file, cflag):
 def platypus_germline(config_file, sample, log_dir, cflag, ref_mnt):
     if cflag == 'y':
         (platypus, fasta, threads) = parse_config(config_file, cflag)
-        platypus_cmd = platypus + " --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
-                       + ".merged.final.bam -o " + sample + ".germline_calls.vcf > " + log_dir + sample \
-                       + ".platypus.log 2>&1"
+        platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
+                       + ".merged.final.bam -o " + sample + ".germline_calls.vcf --logFileName=" + log_dir + sample \
+                       + ".platypus.log 2>&1" + " > " + log_dir + sample + ".platypus.log 2>&1"
     else:
         (platypus, fasta, threads, region_file, minVAF) = parse_config(config_file, cflag)
         regions = ref_mnt + '/' + region_file
-        platypus_cmd = platypus + " --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
+        platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
                        + ".merged.final.bam -o " + sample + ".germline_calls.vcf --minVarFreq=" + minVAF \
-                       + " --regions=" + regions + " > " + log_dir + sample + ".platypus.log 2>&1"
+                       + " --regions=" + regions + " --logFileName=" + log_dir + sample \
+                       + ".platypus.log 2>&1 > " + log_dir + sample + ".platypus.log 2>&1"
     log(log_dir + sample + ".platypus.log", date_time() + platypus_cmd + "\n")
     f = 0
     try:
