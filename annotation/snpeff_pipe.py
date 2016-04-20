@@ -37,7 +37,9 @@ def snpeff_pipe(config_file, sample_pairs, ref_mnt, cflag):
         else:
             run_report += 'n'
         run_report += ' > ' + sample + '.vcf.keep.eff.xls'
-        run_snp = run_snpsift + ' ' + sample + '.out.keep > ' + sample + '.out.keep.sift.vcf 2> LOGS/' + sample + '.snpeff.log;' + run_snpeff + ' ' + sample + '.out.keep.sift.vcf -v > ' + sample + '.out.keep.eff.vcf  2>> LOGS/' + sample + '.snpeff.log;' + run_report
+        run_snp = run_snpsift + ' ' + sample + '.out.keep > ' + sample + '.out.keep.sift.vcf 2> LOGS/' + sample \
+                  + '.snpeff.log;' + run_snpeff + ' ' + sample + '.out.keep.sift.vcf -v > ' + sample \
+                  + '.out.keep.eff.vcf  2>> LOGS/' + sample + '.snpeff.log;' + run_report
         cmd_list.append(run_snp)
     job_manager(cmd_list, max_t)
     sys.stderr.write(date_time() + 'SNP annotation  completed!\n')
