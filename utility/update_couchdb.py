@@ -39,7 +39,7 @@ def update_couchdb(fn, config_file):
         sys.stderr.write(date_time() + couch_cmd + '\n')
         result = check_output(couch_cmd, shell=True)
         result = result.rstrip('\n')
-        sys.stdout.write(obj + '\t' + result + '\n')
+        sys.stderr.write(obj + '\t' + result + '\n')
         if result == 1:
             sys.stderr.write(date_time() + 'Database update failed for qc stats.  Check connection')
             exit(1)
