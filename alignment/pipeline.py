@@ -39,7 +39,10 @@ class Pipeline:
         if self.seqtype == 'capture':
             self.cflag = 'n'
 
+        # flag for whether to run adapter/quality trimming
         self.run_cut_flag = self.config_data['params']['cutflag']
+        # flag for whether to use novosort rmdup capabilities
+        self.use_nova_flag = self.config_data['params']['novaflag']
         self.ram = self.config_data['params']['ram']
         self.threads = self.config_data['params']['threads']
         self.qc_stats = self.config_data['tools']['qc_stats']
@@ -110,36 +113,36 @@ class Pipeline:
             fastx(self.fastx_tool, self.sample, self.end1, self.end2)  # will run independently of rest of output
         else:
             log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
+
         # skip sort if sorted file exists already
         log(self.loc, date_time() + 'Sorting BAM file\n')
         if not os.path.isfile(self.sample + '.srt.bam'):
             check = novosort_sort_pe(self.novosort, self.sample, log_dir, self.threads,
-                                     self.ram)  # rest won't run until completed
+                                     self.ram, self.use_nova_flag)  # rest won't run until completed
             if check != 0:
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
                 exit(1)
         else:
             log(self.loc, date_time() + 'Sorted bam file already exists, skipping\n')
         # skip next steps in insert size already calculated
-        if not os.path.isfile(self.sample + '.insert_metrics.hist'):
+
+        if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
             log(self.loc, date_time() + 'Removing PCR duplicates\n')
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
-                         self.ram)  # rest won't run until emopleted
-            log(self.loc, date_time() + 'Gathering SAM flag stats\n')
-            flagstats(self.samtools_tool,
-                      self.sample)  # flag determines whether to run independently or hold up the rest of the pipe until completion
-            log(self.loc, date_time() + 'Calculating insert sizes\n')
-            picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir,
-                               self.ram)  # get insert size metrics.
-        else:
-            log(self.loc,
-                date_time() + 'Insert size file detected, skipping remove duplicates, flagstats, and remove duplicates steps')
+                         self.ram)  # rest won't run until completed
+        if self.use_nova_flag == 'Y':
+            log(self.loc, date_time() + 'Duplicates removed using novosort.')
+
+        log(self.loc, date_time() + 'Gathering SAM flag stats\n')
+        flagstats(self.samtools_tool, self.sample)
+        log(self.loc, date_time() + 'Calculating insert sizes\n')
+        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.ram)  # get insert size metrics.
+
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method = getattr(coverage, (self.seqtype + '_coverage'))
-
-        method(self.bedtools2_tool, self.sample, self.bed_ref,
-               wait_flag)  # run last since this step slowest of the last
+        # run last since this step slowest of the last
+        method(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
         log(self.loc, date_time() + 'Checking outputs and uploading results\n')
         # check to see if last expected file was generated search for seqtype + .hist suffix
 
@@ -154,8 +157,9 @@ class Pipeline:
                 self.status = 1
                 break
         if self.status == 1:
-            p_tmp_rm = "rm -rf picard_tmp"
-            call(p_tmp_rm, shell=True)
+            if self.use_nova_flag != 'Y':
+                p_tmp_rm = "rm -rf picard_tmp"
+                call(p_tmp_rm, shell=True)
             # move files into appropriate place and run qc_stats
             log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
             mv_bam = 'mv *.bam *.bai BAM/'
