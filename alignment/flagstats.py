@@ -13,7 +13,7 @@ def flagstats(samtools_tool, sample):
     res_file = sample + ".srt.bam.flagstats"
     if os.path.isfile(raw_bam) == False:
         raw_bam = sample + ".bam"
-        sample + ".bam.flagstats"
+        res_file = sample + ".bam.flagstats"
 
     flagstats_cmd = samtools_tool + " flagstat " + raw_bam + " > " + res_file
     sys.stderr.write(date_time() + flagstats_cmd + "\n")
