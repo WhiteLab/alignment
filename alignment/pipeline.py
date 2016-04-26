@@ -68,6 +68,46 @@ class Pipeline:
         self.status = 0
         self.pipeline()
 
+    def check_outputs(self):
+        # check for outputs and ensure file size greater than 0, if not, wait
+        if self.seqtype == 'capture':
+            suffix = self.seqtype + '_t2.hist'
+        else:
+            suffix = self.seqtype + '.hist'
+        hist = self.sample + '.' + suffix
+        ins = self.sample + '.insert_metrics.hist'
+        f1 = self.sample + '_1.qs'
+        f2 = self.sample + '_2.qs'
+        fstat1 = self.sample + '.srt.bam.flagstats'
+        if self.use_nova_flag == 'Y':
+            fstat1 = self.sample + '.bam.flagstats'
+        fstat2 = self.sample + '.rmdup.srt.bam.flagstats'
+        status = {hist: 0, ins: 0, f1: 0, f2: 0, fstat1: 0, fstat2: 0}
+        wait = 600
+        intvl = 30
+        cur = 0
+        while cur < wait:
+            for fn in status:
+                comp_flag = 1
+                if os.path.isfile(fn) and os.path.getsize(fn) > 0:
+                    status[fn] = 1
+                else:
+                    sys.stderr.write('Still waiting on file ' + fn + ' to be created\n')
+                    comp_flag = 0
+            if comp_flag == 1:
+                self.status = 1
+                return 0
+            else:
+                cur += intvl
+                sleep_cmd = 'sleep ' + str(intvl) + 's'
+                call(sleep_cmd, shell=True)
+        failed = []
+        for fn in status:
+            if status[fn] == 0:
+                failed.append(fn)
+        sys.stderr.write('Outputs ' + ', '.join(failed) + ' failed to complete!\n')
+        exit(1)
+
     def pipeline(self):
         log_dir = 'LOGS/'
         if not os.path.isdir(log_dir):
@@ -109,8 +149,6 @@ class Pipeline:
             if check != 0:
                 log(self.loc, date_time() + 'BWA failure for ' + self.sample + '\n')
                 exit(1)
-            log(self.loc, date_time() + 'Getting fastq quality score stats\n')
-            fastx(self.fastx_tool, self.sample, self.end1, self.end2)  # will run independently of rest of output
         else:
             log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
 
@@ -125,7 +163,8 @@ class Pipeline:
         else:
             log(self.loc, date_time() + 'Sorted bam file already exists, skipping\n')
         # skip next steps in insert size already calculated
-
+        log(self.loc, date_time() + 'Getting fastq quality score stats\n')
+        fastx(self.fastx_tool, self.sample, self.end1, self.end2)  # will run independently of rest of output
         if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
             log(self.loc, date_time() + 'Removing PCR duplicates\n')
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
@@ -144,51 +183,35 @@ class Pipeline:
         # run last since this step slowest of the last
         method(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
         log(self.loc, date_time() + 'Checking outputs and uploading results\n')
-        # check to see if last expected file was generated search for seqtype + .hist suffix
+        # check to see if last expected files have been generated suffix
+        self.check_outputs()
 
-        flist = os.listdir('./')
-        if self.seqtype == 'capture':
-            suffix = self.seqtype + '_t2.hist'
+        if self.use_nova_flag != 'Y':
+            p_tmp_rm = "rm -rf picard_tmp"
+            call(p_tmp_rm, shell=True)
+        # move files into appropriate place and run qc_stats
+        log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
+        mv_bam = 'mv *.bam *.bai BAM/'
+        subprocess.call(mv_bam, shell=True)
+        rm_sf = 'rm ' + self.end1 + ' ' + self.end2
+        subprocess.call(rm_sf, shell=True)
+        parse_qc(self.json_config, self.sample, self.cflag)
+        mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
+        subprocess.call(mv_rest, shell=True)
+        mv_config = ' cp ' + self.json_config + ' QC/'
+        subprocess.call(mv_config, shell=True)
+        from upload_to_swift import upload_to_swift
+        obj = self.obj + "/" + self.bid + "/"
+
+        check = upload_to_swift(self.cont, obj)
+        if check == 0:
+            log(self.loc, date_time() + 'Couchdb successfully updated\n')
+            self.status = 0
+            log(self.loc,
+                date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
         else:
-            suffix = self.seqtype + '.hist'
-
-        for fn in flist:
-            if fn == (self.sample + '.' + suffix):
-                self.status = 1
-                break
-        if self.status == 1:
-            if self.use_nova_flag != 'Y':
-                p_tmp_rm = "rm -rf picard_tmp"
-                call(p_tmp_rm, shell=True)
-            # move files into appropriate place and run qc_stats
-            log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
-            mv_bam = 'mv *.bam *.bai BAM/'
-            subprocess.call(mv_bam, shell=True)
-            rm_sf = 'rm ' + self.end1 + ' ' + self.end2
-            subprocess.call(rm_sf, shell=True)
-            parse_qc(self.json_config, self.sample, self.cflag)
-            mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
-            subprocess.call(mv_rest, shell=True)
-            mv_config = ' cp ' + self.json_config + ' QC/'
-            subprocess.call(mv_config, shell=True)
-            from upload_to_swift import upload_to_swift
-            obj = self.obj + "/" + self.bid
-
-            check = upload_to_swift(self.cont, obj)
-            if check == 0:
-                log(self.loc, date_time() + 'Couchdb successfully updated\n')
-                self.status = 0
-                log(self.loc,
-                    date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
-            else:
-                log(self.loc, date_time() + "All but file upload succeeded\n")
-                self.status = 1
-
-        else:
-            (self.loc,
-             date_time() + "File with suffix " + suffix + " is missing!  If intentional, ignore this message.  Otherwise, check logs for potential failures\n")
+            log(self.loc, date_time() + "All but file upload succeeded\n")
             self.status = 1
-
 
 def main():
     import argparse
