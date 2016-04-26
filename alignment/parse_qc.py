@@ -111,8 +111,10 @@ def parse_qc(config_file, sample, cflag):
     # set up input files and variables - .hist, .flagstats, .metrics, .qs
     insert = sample + '.insert_metrics.hist'
     rawFlag = sample + '.srt.bam.flagstats'
+    if os.path.isfile(rawFlag) == False:
+        rawFlag = sample + '.bam.flagstats'
+
     rmdupFlag = sample + '.rmdup.srt.bam.flagstats'
-    mets = sample + '.rmdup.srt.metrics'
     qs = sample + '_1.qs'
     tbl = open(sample + '.qc_stats.txt', 'w')
     json_out = open(sample + '.qc_stats.json', 'w')
