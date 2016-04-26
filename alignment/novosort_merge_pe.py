@@ -10,9 +10,9 @@ import subprocess
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'],
-            config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['threads'],
-            config_data['params']['ram'])
+    return config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'], \
+           config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['threads'], \
+           config_data['params']['ram'], config_data['params']['novaflag']
 
 
 def list_bam(cont, obj, sample, wait):
@@ -64,7 +64,7 @@ def list_bam(cont, obj, sample, wait):
 
 def novosort_merge_pe(config_file, sample_list, wait):
     fh = open(sample_list, 'r')
-    (novosort, java_tool, picard_tool, cont, obj, threads, ram) = parse_config(config_file)
+    (novosort, java_tool, picard_tool, cont, obj, threads, ram, rmdup) = parse_config(config_file)
     tmp_dir = 'mkdir TMP'
     subprocess.call(tmp_dir, shell=True)
     for sample in fh:
@@ -72,33 +72,44 @@ def novosort_merge_pe(config_file, sample_list, wait):
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
         bam_string = " ".join(bam_list)
         if n > 1:
-            novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
-                                    + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
-            sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
-            try:
-                subprocess.check_output(novosort_merge_pe_cmd, shell=True)
-                # delete old bams to free up space
-                rm_bam = 'rm ' + bam_string
-                sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
-                subprocess.call(rm_bam, shell=True)
-                # rm dups
-                picard_tmp = 'picard_tmp'
-                # setting max records in ram to half of ram
-                recs = (int(ram) / 2) * (1000000000 / 200)
-                picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates " \
-                                   "CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true" \
-                                   " ASSUME_SORTED=true MAX_RECORDS_IN_RAM=" + str(recs) + \
-                                   " MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".merged.bam OUTPUT="\
-                                   + sample + ".merged.final.bam METRICS_FILE=" + sample +\
-                                   ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT"
-                sys.stderr.write(date_time() + 'Removing dups\n' + picard_rmdup_cmd + '\n')
-                subprocess.call(picard_rmdup_cmd, shell=True)
-                # delete merged bam after removing dups
-                rm_merged_bam = 'rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
-                subprocess.call(rm_merged_bam, shell=True)
-            except:
-                sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
-                exit(1)
+            if rmdup == 'Y':
+                novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
+                                        + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
+                sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
+                try:
+                    subprocess.check_output(novosort_merge_pe_cmd, shell=True)
+                except:
+                    sys.stderr.write(date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
+                    exit(1)
+
+            else:
+                novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
+                                        + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
+                sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
+                try:
+                    subprocess.check_output(novosort_merge_pe_cmd, shell=True)
+                    # delete old bams to free up space
+                    rm_bam = 'rm ' + bam_string
+                    sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
+                    subprocess.call(rm_bam, shell=True)
+                    # rm dups
+                    picard_tmp = 'picard_tmp'
+                    # setting max records in ram to half of ram
+                    recs = (int(ram) / 2) * (1000000000 / 200)
+                    picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates " \
+                                       "CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true" \
+                                       " ASSUME_SORTED=true MAX_RECORDS_IN_RAM=" + str(recs) + \
+                                       " MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".merged.bam OUTPUT="\
+                                       + sample + ".merged.final.bam METRICS_FILE=" + sample +\
+                                       ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT"
+                    sys.stderr.write(date_time() + 'Removing dups\n' + picard_rmdup_cmd + '\n')
+                    subprocess.call(picard_rmdup_cmd, shell=True)
+                    # delete merged bam after removing dups
+                    rm_merged_bam = 'rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
+                    subprocess.call(rm_merged_bam, shell=True)
+                except:
+                    sys.stderr.write(date_time() + 'novosort and picard merge failed for sample ' + sample + '\n')
+                    exit(1)
         else:
             mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam;mv ' + bai_list[0]\
                      + ' ' + sample + '.merged.final.bam.bai'
