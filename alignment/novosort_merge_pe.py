@@ -73,21 +73,25 @@ def novosort_merge_pe(config_file, sample_list, wait):
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
-                novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
-                                        + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
-                sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
+                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
+                                        + sample + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string
+                sys.stderr.write(date_time() + novosort_merge_cmd + "\n")
                 try:
-                    subprocess.check_output(novosort_merge_pe_cmd, shell=True)
+                    subprocess.check_output(novosort_merge_cmd, shell=True)
+                    # delete old bams to free up space
+                    rm_bam = 'rm ' + bam_string
+                    sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
+                    subprocess.call(rm_bam, shell=True)
                 except:
                     sys.stderr.write(date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
                     exit(1)
 
             else:
-                novosort_merge_pe_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
+                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
                                         + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
-                sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
+                sys.stderr.write(date_time() + novosort_merge_cmd + "\n")
                 try:
-                    subprocess.check_output(novosort_merge_pe_cmd, shell=True)
+                    subprocess.check_output(novosort_merge_cmd, shell=True)
                     # delete old bams to free up space
                     rm_bam = 'rm ' + bam_string
                     sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
