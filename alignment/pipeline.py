@@ -83,7 +83,8 @@ class Pipeline:
             fstat1 = self.sample + '.bam.flagstats'
         fstat2 = self.sample + '.rmdup.srt.bam.flagstats'
         status = {hist: 0, ins: 0, f1: 0, f2: 0, fstat1: 0, fstat2: 0}
-        wait = 600
+        # currently giving 20 minutes to complete before giving up
+        wait = 1200
         intvl = 30
         cur = 0
         while cur < wait:
