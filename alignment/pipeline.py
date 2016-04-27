@@ -10,6 +10,7 @@ from cutadapter import cutadapter
 from fastx import fastx
 from bwa_mem_pe import bwa_mem_pe
 from novosort_sort_pe import novosort_sort_pe
+from filter_wrap import filter_wrap
 from picard_rmdup import picard_rmdup
 from picard_insert_size import picard_insert_size
 from flagstats import flagstats
@@ -41,6 +42,17 @@ class Pipeline:
 
         # flag for whether to run adapter/quality trimming
         self.run_cut_flag = self.config_data['params']['cutflag']
+        self.pdxflag = self.config_data['params']['pdxflag']
+        if self.pdxflag == 'Y':
+            self.mmu_filter = self.config_data['tools']['mouse_filter']
+            self.mmu_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_bwa']
+            self.hsa_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_bwa']
+            self.mmu_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_samtools']
+            self.hsa_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_samtools']
+        else:
+            self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
+            self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
+
         # flag for whether to use novosort rmdup capabilities
         self.use_nova_flag = self.config_data['params']['novaflag']
         self.ram = self.config_data['params']['ram']
@@ -54,7 +66,6 @@ class Pipeline:
         self.novosort = self.config_data['tools']['novosort']
         self.picard_tool = self.config_data['tools']['picard']
         self.java_tool = self.config_data['tools']['java']
-        self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
         self.samtools_tool = self.config_data['tools']['samtools']
         self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
         self.bwa_tool = self.config_data['tools']['bwa']
@@ -140,19 +151,31 @@ class Pipeline:
             if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
                 exit(1)
-        log(self.loc, date_time() + 'Starting BWA align\n')
-        wait_flag = 1
-        # check certain key processes
-        # skip aligning if bam already exists
-        if not os.path.isfile(self.sample + '.bam'):
-            check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
-                               self.samtools_ref, self.sample, log_dir, self.threads)  # rest won't run until completed
+        if self.pdxflag == 'Y':
+            log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
+            check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.mmu_bwa_ref, self.end1, self.end2,
+                            self.samtools_tool, self.mmu_samtools_ref, self.sample, log_dir, self.threads)
             if check != 0:
-                log(self.loc, date_time() + 'BWA failure for ' + self.sample + '\n')
+                log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
                 exit(1)
+            if not os.path.isfile(self.sample + '.bam'):
+                check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
+                               self.hsa_samtools_ref, self.sample, log_dir, self.threads)
         else:
-            log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
+            log(self.loc, date_time() + 'Starting BWA align\n')
+            wait_flag = 1
+            # check certain key processes
+            # skip aligning if bam already exists
+            if not os.path.isfile(self.sample + '.bam'):
+                check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
+                                   self.samtools_ref, self.sample, log_dir, self.threads)  # rest won't run until completed
 
+            else:
+                log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
+
+        if check != 0:
+            log(self.loc, date_time() + 'BWA failure for ' + self.sample + '\n')
+            exit(1)
         # skip sort if sorted file exists already
         log(self.loc, date_time() + 'Sorting BAM file\n')
         if not os.path.isfile(self.sample + '.srt.bam'):
