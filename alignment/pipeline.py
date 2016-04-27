@@ -145,6 +145,9 @@ class Pipeline:
         SAMPLES[self.sample]['f1'] = self.end1
         SAMPLES[self.sample]['f2'] = self.end2
         RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
+
+        #initialize fail return values
+        check = 1
         if self.run_cut_flag == 'Y':
             check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
             if check != 0:
@@ -162,7 +165,6 @@ class Pipeline:
                                self.hsa_samtools_ref, self.sample, log_dir, self.threads)
         else:
             log(self.loc, date_time() + 'Starting BWA align\n')
-            wait_flag = 1
             # check certain key processes
             # skip aligning if bam already exists
             if not os.path.isfile(self.sample + '.bam'):
@@ -204,6 +206,7 @@ class Pipeline:
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         method = getattr(coverage, (self.seqtype + '_coverage'))
         # run last since this step slowest of the last
+        wait_flag = 1
         method(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
         log(self.loc, date_time() + 'Checking outputs and uploading results\n')
         # check to see if last expected files have been generated suffix
