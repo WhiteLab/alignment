@@ -67,7 +67,6 @@ class Pipeline:
         self.picard_tool = self.config_data['tools']['picard']
         self.java_tool = self.config_data['tools']['java']
         self.samtools_tool = self.config_data['tools']['samtools']
-        self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
         self.bwa_tool = self.config_data['tools']['bwa']
         self.fastx_tool = self.config_data['tools']['fastx']
         self.cutadapter = self.config_data['tools']['cutadapt']
