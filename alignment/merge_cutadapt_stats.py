@@ -13,9 +13,19 @@ def skip_lines(fh, stop):
         skip = next(fh)
     return 0
 
+def skip_to_summary(fh):
+    flag = 0
+    while(flag == 0):
+        cur = next(fh)
+        cur.rstrip('\n')
+        if cur == '=== Summary ===':
+            skip = next(fh)
+            flag = 1
+
+
 def process_line(fh, stop):
     list_list = []
-    for i in xrange(0,stop,1):
+    for i in xrange(0, stop, 1):
         cur = next(fh)
         cur = cur.rstrip('\n').split()
         list_list.append(cur)
@@ -38,7 +48,7 @@ def download_from_swift(cont, obj, lane_list):
         (bid, seqtype, lane_csv) = line.split('\t')
         for lane in lane_csv.split(', '):
             cur = obj + '/' + bid + '/LOGS/' + bid + '_' + lane + '.cutadapt.log'
-            swift_cmd = src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur
+            swift_cmd = src_cmd + "swift download " + cont + " --skip-identical " + cur
             sys.stderr.write(date_time() + swift_cmd + "\n")
             try:
                 check = check_output(swift_cmd, shell=True, stderr=subprocess.PIPE)
@@ -53,7 +63,7 @@ def download_from_swift(cont, obj, lane_list):
             m = re.search('-m (\d+) --quality-base=(\d+) -q (\d+)', params)
             # min len enforced, scoring scheme, min base quality)
             temp.extend([m.group(1), m.group(2), m.group(3)])
-            skip_lines(stat, 7)
+            skip_to_summary(stat)
             # use generic funtion to parse groups on lines, take what's needed, next group
             # total reads pairs summary section
             group = process_line(stat, 5)
