@@ -17,10 +17,11 @@ def skip_to_summary(fh):
     flag = 0
     while(flag == 0):
         cur = next(fh)
-	cur = cur.rstrip('\n')
+        cur = cur.rstrip('\n')
         if cur == '=== Summary ===':
             skip = next(fh)
             flag = 1
+    return 0
 
 
 def process_line(fh, stop):
