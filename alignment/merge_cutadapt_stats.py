@@ -17,7 +17,7 @@ def skip_to_summary(fh):
     flag = 0
     while(flag == 0):
         cur = next(fh)
-        cur.rstrip('\n')
+	cur = cur.rstrip('\n')
         if cur == '=== Summary ===':
             skip = next(fh)
             flag = 1
