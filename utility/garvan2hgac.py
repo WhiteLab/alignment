@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 '''
-Uses GARVIN sample names with a project ID and a lookup table with bids to create HGAC/pipeline-friendly names and
+Uses GARVAN sample names with a project ID and a lookup table with bids to create HGAC/pipeline-friendly names and
 uploads to ceph.
 
-Usage: ./garvin2hgac.py <LUT> <fq_list> <cont> <num_threads>
+Usage: ./garvan2hgac.py <LUT> <fq_list> <cont> <num_threads>
 
 <LUT>           Look up table
 <fq_list>       Fastq file list
