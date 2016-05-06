@@ -96,6 +96,10 @@ class Pipeline:
         # currently giving 20 minutes to complete before giving up
         wait = 1200
         intvl = 30
+        # if whole genome, increase wait time substantially
+        if self.seqtype == 'genome':
+            wait = 7200
+            intvl = 300
         cur = 0
         while cur < wait:
             comp_flag = 1
@@ -103,7 +107,7 @@ class Pipeline:
                 if os.path.isfile(fn) and (os.path.getsize(fn) > 0):
                     status[fn] = 1
                 else:
-                    sys.stderr.write(date_time() + 'Still waiting on file ' + fn + ' to be created\n')
+                    sys.stderr.write(date_time() + 'Still waiting on file ' + fn + ' to be created.\n')
                     comp_flag = 0
             if comp_flag == 1:
                 self.status = 1
