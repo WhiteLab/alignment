@@ -51,7 +51,8 @@ for line in fh:
         os.chdir(cwd)
     except:
         sys.stderr.write(
-            date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this sample set\n')
+            date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this '
+                                                            'sample set\n')
         exit(1)
     loc = cwd[:-7] + bid + '.run.log'
     log(loc, date_time() + 'Initializing scratch directory for ' + bid + '\n')
@@ -71,13 +72,10 @@ for line in fh:
         except:
             log(loc, date_time() + 'Can\'t find sequencing files for ' + lane + ' skipping!\n')
             continue
-        end1 = ''
-        end2 = ''
-        sf1 = ''
-        sf2 = ''
 
         lane_status[lane] = 'Running'
-        # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order - standard file naming should work with this
+        # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order -
+        # standard file naming should work with this
         seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
         sf1 = seqfile[0]
         end1 = os.path.basename(sf1)
@@ -130,7 +128,7 @@ for line in fh:
         # clean out files for next run
         cleanup = 'rm -rf ' + cur_dir + '/BAM ' + cur_dir + '/QC'
         subprocess.call(cleanup, shell=True)
-        lane_status[lane] = 'Pipeline run and data uplaoded'
+        lane_status[lane] = 'Pipeline run and data uploaded'
         log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')
     os.chdir(cur_dir)
 sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")
