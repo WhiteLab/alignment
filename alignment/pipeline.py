@@ -98,7 +98,7 @@ class Pipeline:
         intvl = 30
         # if whole genome, increase wait time substantially
         if self.seqtype == 'genome':
-            wait = 7200
+            wait = 14400
             intvl = 300
         cur = 0
         while cur < wait:
@@ -199,7 +199,7 @@ class Pipeline:
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
                          self.ram)  # rest won't run until completed
         if self.use_nova_flag == 'Y':
-            log(self.loc, date_time() + 'Duplicates removed using novosort.')
+            log(self.loc, date_time() + 'Duplicates removed using novosort.\n')
 
         log(self.loc, date_time() + 'Gathering SAM flag stats\n')
         flagstats(self.samtools_tool, self.sample)
