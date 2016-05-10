@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import glob
 import sys
+import os
 from subprocess import call
 
 from date_time import date_time
@@ -13,15 +14,22 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
     for sample in fh:
         sample = sample.rstrip('\n')
         swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam -S ' + str(
-            ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bam >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
+            ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample \
+                    + '.merged.final.bam >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
         check = call(swift_cmd, shell=True)
-        swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bai -S ' + str(
-            ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
+        # depending on software used to index, .bai extension may follow bam
+        bai = 'BAM/' + sample + '.merged.final.bai'
+        if not os.path.isfile(bai):
+            bai = 'BAM/' + sample + '.merged.final.bam.bai'
+        swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + bai + '  -S ' + str(
+            ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample\
+                    + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
         try:
             call(swift_cmd, shell=True)
         except:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam.bai -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample\
+                        + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
             check += call(swift_cmd, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'Uploading final BAMs for ' + sample + ' successful!\n')
@@ -39,7 +47,8 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         # upload analysis files
         for suffix in suffix_list1:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + pair + suffix + ' -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/OUTPUT/' + pair + suffix + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/OUTPUT/' + pair + suffix\
+                        + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
             check = call(swift_cmd, shell=True)
             if check == 0:
                 sys.stderr.write(date_time() + 'Uploading analysis file ' + pair + suffix + ' successful!\n')
@@ -49,7 +58,8 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         # upload annotation files
         for suffix in suffix_list2:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ANNOTATION/' + pair + suffix + ' -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/OUTPUT/' + pair + suffix + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/OUTPUT/' + pair + suffix\
+                        + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
             check = call(swift_cmd, shell=True)
             if check == 0:
                 sys.stderr.write(date_time() + 'Uploading annotation file ' + pair + suffix + ' successful!\n')
@@ -60,7 +70,8 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         mut_list = glob.glob('LOGS/' + pair + '.mut*')
         for mut in mut_list:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + mut + ' -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/' + mut + ' >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+                ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/' + mut + ' >> LOGS/'\
+                        + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
             check = call(swift_cmd, shell=True)
             if check == 0:
                 sys.stderr.write(date_time() + 'Uploading analysis log file ' + mut + ' successful!\n')
@@ -68,7 +79,8 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
                 sys.stderr.write(date_time() + 'Uploading analysis log file ' + mut + ' failed!\n')
                 exit(1)
         swift_cmd = src_cmd + 'swift upload ' + cont + ' LOGS/' + pair + '.snpeff.log -S ' + str(
-            ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/LOGS/' + pair + '.snpeff.log >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+            ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/LOGS/' + pair\
+                    + '.snpeff.log >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
         check = call(swift_cmd, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + '.snpeff.log' + ' successful!\n')
