@@ -26,6 +26,7 @@ def platypus_germline(config_file, sample, log_dir, cflag, ref_mnt):
                        + ".platypus.log" + " >> " + log_dir + sample + ".platypus.log 2>&1"
     else:
         (platypus, fasta, threads, region_file, minVAF) = parse_config(config_file, cflag)
+        fasta = ref_mnt + '/' + fasta
         regions = ref_mnt + '/' + region_file
         platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
                        + ".merged.final.bam --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq=" + minVAF \
