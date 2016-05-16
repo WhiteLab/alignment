@@ -20,6 +20,7 @@ def parse_config(config_file, cflag):
 def platypus_germline(config_file, sample, log_dir, cflag, ref_mnt):
     if cflag == 'y':
         (platypus, fasta, threads) = parse_config(config_file, cflag)
+        fasta = ref_mnt + '/' + fasta
         platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
                        + ".merged.final.bam -o " + sample + ".germline_calls.vcf --logFileName=" + log_dir + sample \
                        + ".platypus.log" + " >> " + log_dir + sample + ".platypus.log 2>&1"
