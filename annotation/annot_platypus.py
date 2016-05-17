@@ -10,8 +10,7 @@ import json
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['java'], config_data['tools']['snpEff'], config_data['tools']['snpsift'],
-            config_data['tools']['gatk'], config_data['refs']['dbsnp'], config_data['refs']['intervals'], 
-            config_data['refs']['fa_ordered'])
+            config_data['refs']['dbsnp'], config_data['refs']['intervals'])
 
 def pass_filter(sample):
     in_fn = sample + '.germline_calls.vcf'
@@ -29,12 +28,10 @@ def pass_filter(sample):
     out.close()
 
 def annot_platypus(config_file, sample, ref_mnt):
-    # edit to grab from config max thread count
-    (java, snpeff, snpsift, gatk, dbsnp, intervals, fasta) = parse_config(config_file)
-    # pass_filter(sample)
+    (java, snpeff, snpsift, dbsnp, intervals) = parse_config(config_file)
+    pass_filter(sample)
     dbsnp = ref_mnt + '/' + dbsnp
     mk_log_dir = 'mkdir LOGS'
-    '''
     subprocess.call(mk_log_dir, shell=True)
     run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
     run_snpeff = java + ' -jar ' + snpeff + ' eff -t hg19 '
@@ -47,15 +44,10 @@ def annot_platypus(config_file, sample, ref_mnt):
     else:
         sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
         return 1
-    '''
-    # use GATK tool to convert vcf to table
-    fasta = ref_mnt + '/' + fasta
-    #table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -SMA -V ' + sample + '.germline_pass.eff.vcf -o ' + sample + \
-    #           '.germline_pass.xls -F CHROM -F POS -F ID -F REF -F ALT -GF INFO.EFF.Effect -GF Codon_Change -GF Amino_Acid_Change -GF Amino_Acid_length -GF Gene_Name -GF Transcript_BioType -GF Gene_Coding -R ' + fasta
-    # use snpsift to create table
+
     table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
-                '"EFF[*].EFFECT" "EFF[*].IMPACT" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" "EFF[*].GENE" ' \
-                '"EFF[*].BIOTYPE" "EFF[*].CODING" "EFF[*].RANK"'
+                '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
+                '"EFF[0].BIOTYPE" "EFF[0].CODING" > ' + sample + '.germline_pass.xls'
     check = subprocess.call(table_cmd, shell=True)
     if check == 0:
         sys.stderr.write(date_time() + 'Germline table created!\n')
