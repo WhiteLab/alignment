@@ -50,8 +50,12 @@ def annot_platypus(config_file, sample, ref_mnt):
     '''
     # use GATK tool to convert vcf to table
     fasta = ref_mnt + '/' + fasta
-    table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -SMA -V ' + sample + '.germline_pass.eff.vcf -o ' + sample + \
-                '.germline_pass.xls -F CHROM -F POS -F ID -F REF -F ALT -GF INFO.EFF.Effect -GF Codon_Change -GF Amino_Acid_Change -GF Amino_Acid_length -GF Gene_Name -GF Transcript_BioType -GF Gene_Coding -R ' + fasta
+    #table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -SMA -V ' + sample + '.germline_pass.eff.vcf -o ' + sample + \
+    #           '.germline_pass.xls -F CHROM -F POS -F ID -F REF -F ALT -GF INFO.EFF.Effect -GF Codon_Change -GF Amino_Acid_Change -GF Amino_Acid_length -GF Gene_Name -GF Transcript_BioType -GF Gene_Coding -R ' + fasta
+    # use snpsift to create table
+    table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
+                '"EFF[*].EFFECT" "EFF[*].IMPACT" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" "EFF[*].GENE" ' \
+                '"EFF[*].BIOTYPE" "EFF[*].CODING" "EFF[*].RANK"'
     check = subprocess.call(table_cmd, shell=True)
     if check == 0:
         sys.stderr.write(date_time() + 'Germline table created!\n')
