@@ -23,7 +23,7 @@ def parse_config(config_file):
 
 
 def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
-    # create eventual ouput location directories
+    # create eventual output location directories
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)

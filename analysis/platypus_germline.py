@@ -29,8 +29,8 @@ def platypus_germline(config_file, sample, log_dir, cflag, ref_mnt):
         fasta = ref_mnt + '/' + fasta
         regions = ref_mnt + '/' + region_file
         platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
-                       + ".merged.final.bam --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq=" + minVAF \
-                       + " --regions=" + regions + " --logFileName=" + log_dir + sample \
+                       + ".merged.final.bam --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq="\
+                       + minVAF + " --regions=" + regions + " --logFileName=" + log_dir + sample \
                        + ".platypus.log >> " + log_dir + sample + ".platypus.log 2>&1"
     log(log_dir + sample + ".platypus.log", date_time() + platypus_cmd + "\n")
     f = 0
@@ -45,7 +45,7 @@ def platypus_germline(config_file, sample, log_dir, cflag, ref_mnt):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='novosort tool to sort BAM module.')
+    parser = argparse.ArgumentParser(description='Germline calling using Platypus.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample/project name prefix')

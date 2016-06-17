@@ -13,22 +13,22 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
     fh = open(sample_list, 'r')
     for sample in fh:
         sample = sample.rstrip('\n')
-        swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam -S ' + str(
-            ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample \
+        swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam -S ' + str(ONE_GB)\
+                    + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample \
                     + '.merged.final.bam >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
         check = call(swift_cmd, shell=True)
         # depending on software used to index, .bai extension may follow bam
         bai = 'BAM/' + sample + '.merged.final.bai'
         if not os.path.isfile(bai):
             bai = 'BAM/' + sample + '.merged.final.bam.bai'
-        swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + bai + '  -S ' + str(
-            ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample\
+        swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + bai + '  -S ' + str(ONE_GB)\
+                    + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample\
                     + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
         try:
             call(swift_cmd, shell=True)
         except:
-            swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam.bai -S ' + str(
-                ONE_GB) + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample\
+            swift_cmd = src_cmd + 'swift upload ' + cont + ' BAM/' + sample + '.merged.final.bam.bai -S ' + str(ONE_GB)\
+                        + ' --skip-identical --object-name ' + obj + '/' + sample + '/BAM/' + sample\
                         + '.merged.final.bai >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
             check += call(swift_cmd, shell=True)
         if check == 0:
@@ -36,6 +36,24 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         else:
             sys.stderr.write(date_time() + 'Uploading final BAMs for ' + sample + ' failed\n')
             exit(1)
+        # check for germline call of file, skip if not present
+        germ = sample + '.germline_calls.vcf'
+        if os.path.isfile(germ):
+            swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + germ + ' -S ' + str(ONE_GB)\
+                        + ' --skip-identical --object-name ' + obj + '/' + sample + '/ANALYSIS/' + germ\
+                        + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
+            check += call(swift_cmd, shell=True)
+
+            summary = sample + '.germline_pass.xls'
+            swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + summary + ' -S ' + str(ONE_GB)\
+                        + ' --skip-identical --object-name ' + obj + '/' + sample + '/ANALYSIS/' + summary\
+                        + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
+            check += call(swift_cmd, shell=True)
+            if check == 0:
+                sys.stderr.write(date_time() + 'Uploading germline calls for ' + sample + ' successful!\n')
+            else:
+                sys.stderr.write(date_time() + 'Uploading germline calls for ' + sample + ' failed\n')
+                exit(1)
     fh.close()
 
     # upload analysis and annotation files
