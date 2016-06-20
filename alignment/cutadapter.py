@@ -27,7 +27,7 @@ def cutadapter(sample, end1, end2, config_file):
     temp1 = end1 + '.temp.gz'
     temp2 = end2 + '.temp.gz'
     (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag) = parse_config(config_file)
-    aflag2 = aflag.uppercase()
+    aflag2 = aflag.upper()
     cutadapt_cmd = cutadapt_tool + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + ' -' + aflag + ' '\
                    + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + temp1 \
                    + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
