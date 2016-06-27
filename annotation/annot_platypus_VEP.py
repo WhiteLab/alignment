@@ -10,7 +10,7 @@ import json
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],\
-           config_data['params']['threads']
+           config_data['params']['threads'], config_data['tools']['gatk'], config_data['tools']['java']
 
 
 def pass_filter(sample):
@@ -30,7 +30,7 @@ def pass_filter(sample):
 
 
 def annot_platypus(config_file, sample, ref_mnt):
-    (vep_tool, vep_cache, fasta, threads) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, threads, gatk, java) = parse_config(config_file)
     pass_filter(sample)
     vep_cache = ref_mnt + '/' + vep_cache
     mk_log_dir = 'mkdir LOGS'
@@ -44,10 +44,9 @@ def annot_platypus(config_file, sample, ref_mnt):
     else:
         sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
         return 1
-
-    table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
-                '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
-                '"EFF[0].BIOTYPE" "EFF[0].CODING" > ' + sample + '.germline_pass.xls'
+    field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
+    table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.eff.vcf -R ' + fasta +\
+                ' -F ' + '-F '.join(field_list) + ' -o ' + sample + '.germline_pass.xls'
     check = subprocess.call(table_cmd, shell=True)
     if check == 0:
         sys.stderr.write(date_time() + 'Germline table created!\n')
