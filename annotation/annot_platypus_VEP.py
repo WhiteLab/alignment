@@ -10,7 +10,8 @@ import json
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],\
-           config_data['params']['threads'], config_data['tools']['gatk'], config_data['tools']['java']
+           config_data['params']['threads'], config_data['tools']['gatk'], config_data['tools']['java'], \
+           config_data['refs']['cadd']
 
 
 def pass_filter(sample):
@@ -29,30 +30,38 @@ def pass_filter(sample):
     out.close()
 
 
-def annot_platypus(config_file, sample, ref_mnt):
-    (vep_tool, vep_cache, fasta, threads, gatk, java) = parse_config(config_file)
-    pass_filter(sample)
-    vep_cache = ref_mnt + '/' + vep_cache
-    mk_log_dir = 'mkdir LOGS'
-    subprocess.call(mk_log_dir, shell=True)
-    run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --vcf -o ' + sample\
-              + '.germline_pass.vep.vcf --symbol --html --variant_class --offline --maf_exac --no_whole_genome --fork '\
-              + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' 2>> LOGS/' + sample + '.vep.log;'
-    check = subprocess.call(run_vep, shell=True)
-    if check == 0:
-        sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
-    else:
-        sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
-        return 1
-    field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
-    table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.eff.vcf -R ' + fasta +\
-                ' -F ' + '-F '.join(field_list) + ' -o ' + sample + '.germline_pass.xls'
-    check = subprocess.call(table_cmd, shell=True)
-    if check == 0:
-        sys.stderr.write(date_time() + 'Germline table created!\n')
-        return 0
-    else:
-        sys.stderr.write(date_time() + 'Germline table failed!\n')
+def annot_platypus(config_file, samp_list, ref_mnt):
+    (vep_tool, vep_cache, fasta, threads, gatk, java, cadd) = parse_config(config_file)
+    # parse sample file, use only last if pairs
+    samp_fh = open(samp_list, 'r')
+    for line in samp_fh:
+        info = line.rstrip('\n').split('\t')
+        sample = info[0]
+        if len(info) > 1:
+            sample = info[3]
+        pass_filter(sample)
+        vep_cache = ref_mnt + '/' + vep_cache
+        mk_log_dir = 'mkdir LOGS'
+        subprocess.call(mk_log_dir, shell=True)
+        run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --vcf -o ' + sample\
+                  + '.germline_pass.vep.vcf --symbol --html --variant_class --offline --maf_exac --no_whole_genome' \
+                    ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' \
+                  + cadd + ' 2>> LOGS/' + sample + '.vep.log;'
+        check = subprocess.call(run_vep, shell=True)
+        if check == 0:
+            sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
+        else:
+            sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
+            return 1
+        field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
+        table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.eff.vcf -R ' + fasta \
+                    + ' -F ' + '-F '.join(field_list) + ' -o ' + sample + '.germline_pass.xls'
+        check = subprocess.call(table_cmd, shell=True)
+        if check == 0:
+            sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
+            return 0
+        else:
+            sys.stderr.write(date_time() + 'Germline table for ' + sample + ' failed!\n')
 
 if __name__ == "__main__":
     import argparse

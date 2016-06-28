@@ -60,5 +60,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample, log_dir, cflag, ref_mnt) = (inputs.config_file, inputs.sample, inputs.log_dir, inputs.cflag, inputs.ref_mnt)
+    (config_file, sample, log_dir, cflag, ref_mnt) = (inputs.config_file, inputs.sample, inputs.log_dir, inputs.cflag,
+                                                      inputs.ref_mnt)
     platypus_germline(config_file, sample, log_dir, cflag, ref_mnt)
