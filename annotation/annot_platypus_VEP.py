@@ -32,6 +32,9 @@ def pass_filter(sample):
 
 def annot_platypus(config_file, samp_list, ref_mnt):
     (vep_tool, vep_cache, fasta, threads, gatk, java, cadd) = parse_config(config_file)
+    fasta = ref_mnt + '/' + fasta
+    cadd = ref_mnt + '/' + cadd
+    vep_cache = ref_mnt + '/' + vep_cache
     # parse sample file, use only last if pairs
     samp_fh = open(samp_list, 'r')
     for line in samp_fh:
@@ -40,7 +43,6 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         if len(info) > 1:
             sample = info[3]
         pass_filter(sample)
-        vep_cache = ref_mnt + '/' + vep_cache
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --vcf -o ' + sample\
