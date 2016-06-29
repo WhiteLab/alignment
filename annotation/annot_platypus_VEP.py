@@ -59,7 +59,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
             sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
             return 1
         field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
-        table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.eff.vcf -R ' + fasta \
+        table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.vep.vcf -R ' + fasta \
                     + ' -F ' + ' -F '.join(field_list) + ' -o ' + sample + '.germline_pass.xls'
         check = subprocess.call(table_cmd, shell=True)
         if check == 0:
