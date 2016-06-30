@@ -48,8 +48,8 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         pass_filter(sample)
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --vcf -o ' + sample\
-                  + '.germline_pass.vep.vcf --symbol --html --variant_class --sift b --offline --maf_exac' \
+        run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --tab -o ' + sample\
+                  + '.germline_pass.vep.txt --symbol --html --variant_class --sift b --offline --maf_exac' \
                     ' --no_whole_genome --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache\
                   + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log;'
         check = subprocess.call(run_vep, shell=True)
@@ -58,15 +58,15 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         else:
             sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
             return 1
-        field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
-        table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.vep.vcf -R ' + fasta \
-                    + ' -F ' + ' -F '.join(field_list) + ' -o ' + sample + '.germline_pass.xls'
-        check = subprocess.call(table_cmd, shell=True)
-        if check == 0:
-            sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
-            return 0
-        else:
-            sys.stderr.write(date_time() + 'Germline table for ' + sample + ' failed!\n')
+        #field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
+        #table_cmd = java + ' -jar ' + gatk + ' -T VariantsToTable -V ' + sample + '.germline_pass.vep.vcf -R ' + fasta \
+        #            + ' -F ' + ' -F '.join(field_list) + ' -o ' + sample + '.germline_pass.xls'
+        #check = subprocess.call(table_cmd, shell=True)
+        #if check == 0:
+        #    sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
+        #    return 0
+        #else:
+        #    sys.stderr.write(date_time() + 'Germline table for ' + sample + ' failed!\n')
 
 if __name__ == "__main__":
     import argparse
