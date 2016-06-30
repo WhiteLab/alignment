@@ -49,7 +49,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --tab -o ' + sample\
-                  + '.germline_pass.vep.txt --symbol --html --variant_class --sift b --offline --maf_exac' \
+                  + '.germline_pass.vep.txt --fields CHROM POS REF ALT TR TC --symbol --canonical --html --variant_class --sift b --offline --maf_exac' \
                     ' --no_whole_genome --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache\
                   + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log;'
         check = subprocess.call(run_vep, shell=True)
