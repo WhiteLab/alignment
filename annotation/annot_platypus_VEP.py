@@ -60,8 +60,8 @@ def annot_platypus(config_file, samp_list, ref_mnt):
             return 1
         field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
         table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.vep.vcf CHROM POS ID REF ALT '\
-                '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
-                '"EFF[0].BIOTYPE" "EFF[0].CODING" > ' + sample + '.germline_pass.xls'
+                '"EFF[0].Consequence" "EFF[0].SYMBOL" "EFF[0].BIOTYPE" "EFF[0].SIFT" "EFF[0].Amino_acids" ' \
+                '"EFF[0].ExAC_MAF" "EFF[0].ExAC_Adj_MAF" "EFF[0].CLIN_SIG" "EFF[0].PHENO" "EFF[0].CADD_PHRED" "EFF[0].CADD_RAW" > ' + sample + '.germline_pass.xls'
         check = subprocess.call(table_cmd, shell=True)
         if check == 0:
            sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
