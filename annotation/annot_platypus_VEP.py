@@ -59,7 +59,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
             sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
             return 1
         field_list = ('CHROM', 'POS', 'ID', 'REF', 'ALT')
-        table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
+        table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.vep.vcf CHROM POS ID REF ALT '\
                 '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
                 '"EFF[0].BIOTYPE" "EFF[0].CODING" > ' + sample + '.germline_pass.xls'
         check = subprocess.call(table_cmd, shell=True)
