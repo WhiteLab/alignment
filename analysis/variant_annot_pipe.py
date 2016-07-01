@@ -20,7 +20,7 @@ from annot_platypus_VEP import annot_platypus
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'],
-            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['param']['germflag'])
+            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'])
 
 
 def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
