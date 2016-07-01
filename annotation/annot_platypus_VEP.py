@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
-
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+from germline_report import gen_report
 from date_time import date_time
 import subprocess
 import json
@@ -48,28 +48,23 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         pass_filter(sample)
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + sample + '.germline_pass.vcf --vcf -o ' + sample\
-                  + '.germline_pass.vep.vcf --symbol --vcf_info_field ANN --canonical --html --variant_class --sift b --offline --maf_exac' \
-                    ' --no_whole_genome --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache\
-                  + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log;'
+        out_vcf = sample + '.germline_pass.vep.vcf'
+        run_vep = 'perl ' + vep_tool + ' --cache -i ' + out_vcf + ' --vcf -o ' + sample\
+                + '.germline_pass.vep.vcf --symbol --vcf_info_field ANN --canonical --html --variant_class --sift' \
+                ' both --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' + fasta +\
+                ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log;'
         check = subprocess.call(run_vep, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
         else:
             sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
             return 1
-        # #field_list = ('CHROM', 'POS', 'REF', 'ALT', 'TR' 'SYMBOL', )
-        # table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.vep.vcf CHROM POS REF ALT TR TC'\
-        #         '"ANN[0].Consequence" "ANN[0].SYMBOL" "ANN[0].BIOTYPE" "ANN[0].SIFT" "ANN[0].Amino_acids" ' \
-        #         '"ANN[0].ExAC_MAF" "ANN[0].ExAC_Adj_MAF" "ANN[0].CLIN_SIG" "ANN[0].PHENO" "ANN[0].CADD_PHRED" "ANN[0].CADD_RAW" > ' + sample + '.germline_pass.xls'
-        # sys.stderr.write(table_cmd + '\n')
-        # check = subprocess.call(table_cmd, shell=True)
-        # if check == 0:
-        #    sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
-        #    return 0
-        # else:
-        #    sys.stderr.write(date_time() + 'Germline table for ' + sample + ' failed!\n')
 
+        check = gen_report(out_vcf)
+        if check == 0:
+            sys.stderr.write(date_time() + 'Summary table of germline calls completed!\n')
+        else:
+            sys.stderr.write(date_time() + 'Summary table for ' + out_vcf + ' FAILED!\n')
 if __name__ == "__main__":
     import argparse
 

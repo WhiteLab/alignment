@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-import re
 from pysam import VariantFile
 import sys
 import pdb
-import re
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 
@@ -40,6 +38,7 @@ def gen_report(vcf):
             if cur not in temp:
                 sys.stdout.write(common + cur + '\n')
                 temp[cur] = 1
+    return 0
 
 
 if __name__ == "__main__":
@@ -55,4 +54,4 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     vcf = inputs.infile
-gen_report(vcf)
+    gen_report(vcf)
