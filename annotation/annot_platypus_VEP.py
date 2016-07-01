@@ -58,17 +58,17 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         else:
             sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\n')
             return 1
-        #field_list = ('CHROM', 'POS', 'REF', 'ALT', 'TR' 'SYMBOL', )
-        table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.vep.vcf CHROM POS REF ALT TR TC'\
-                '"ANN[0].Consequence" "ANN[0].SYMBOL" "ANN[0].BIOTYPE" "ANN[0].SIFT" "ANN[0].Amino_acids" ' \
-                '"ANN[0].ExAC_MAF" "ANN[0].ExAC_Adj_MAF" "ANN[0].CLIN_SIG" "ANN[0].PHENO" "ANN[0].CADD_PHRED" "ANN[0].CADD_RAW" > ' + sample + '.germline_pass.xls'
-        sys.stderr.write(table_cmd + '\n')
-        check = subprocess.call(table_cmd, shell=True)
-        if check == 0:
-           sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
-           return 0
-        else:
-           sys.stderr.write(date_time() + 'Germline table for ' + sample + ' failed!\n')
+        # #field_list = ('CHROM', 'POS', 'REF', 'ALT', 'TR' 'SYMBOL', )
+        # table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.vep.vcf CHROM POS REF ALT TR TC'\
+        #         '"ANN[0].Consequence" "ANN[0].SYMBOL" "ANN[0].BIOTYPE" "ANN[0].SIFT" "ANN[0].Amino_acids" ' \
+        #         '"ANN[0].ExAC_MAF" "ANN[0].ExAC_Adj_MAF" "ANN[0].CLIN_SIG" "ANN[0].PHENO" "ANN[0].CADD_PHRED" "ANN[0].CADD_RAW" > ' + sample + '.germline_pass.xls'
+        # sys.stderr.write(table_cmd + '\n')
+        # check = subprocess.call(table_cmd, shell=True)
+        # if check == 0:
+        #    sys.stderr.write(date_time() + 'Germline table for ' + sample + ' created!\n')
+        #    return 0
+        # else:
+        #    sys.stderr.write(date_time() + 'Germline table for ' + sample + ' failed!\n')
 
 if __name__ == "__main__":
     import argparse
