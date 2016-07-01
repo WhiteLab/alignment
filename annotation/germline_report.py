@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import re
 from pysam import VariantFile
-pysam
 import sys
 import pdb
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
