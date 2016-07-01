@@ -13,7 +13,8 @@ def gen_report(vcf):
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0,
                'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'SOMATIC': 0, 'PHENO': 0,
                'CADD_PHRED': 0}
-    desc_string = vcf_in.header.info['ANN']
+
+    desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
     desc_string = desc_string.rstrip('"')
     desc_string = desc_string.replace('Consequence annotations from Ensembl VEP. Format: ', '')
