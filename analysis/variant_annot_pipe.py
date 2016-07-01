@@ -14,7 +14,7 @@ from mutect_pipe import mutect_pipe
 from mutect_merge_sort import mutect_merge_sort
 from snpeff_pipe import snpeff_pipe
 from upload_variants_to_swift import upload_variants_to_swift
-from annotation.annot_platypus_VEP import annot_platypus
+from annot_platypus_VEP import annot_platypus
 
 
 def parse_config(config_file):
