@@ -25,10 +25,10 @@ def gen_report(vcf):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = 1
+    sys.stdout.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tConsequence\tIMPACT\t'
+                    'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
+                    'CLIN_SIG\tSOMATIC\tPHENO\tCADD_PHRED\n')
     for record in vcf_in.fetch():
-        sys.stdout.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tConsequence\tIMPACT\t'
-                         'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
-                         'CLIN_SIG\tSOMATIC\tPHENO\tCADD_PHRED\n')
         #pdb.set_trace()
         common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['TR']),
                             str(record.info['TC'])))
