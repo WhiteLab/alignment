@@ -33,11 +33,14 @@ def gen_report(vcf):
         common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['TR']),
                             str(record.info['TC'])))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
+        temp = {}
         for ann in ann_list:
-            sys.stdout.write(common)
+            cur = ''
             for i in f_pos_list:
-                sys.stdout.write('\t' + ann[i])
-            sys.stdout.write('\n')
+                cur += '\t' + ann[i]
+            if cur not in temp:
+                sys.stdout.write(common + cur + '\n')
+                temp[cur] = 1
 
 
 if __name__ == "__main__":
