@@ -30,8 +30,8 @@ def gen_report(vcf):
                          'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
                          'CLIN_SIG\tSOMATIC\tPHENO\tCADD_PHRED\n')
         pdb.set_trace()
-        common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), record.info['TR'],
-                            record.info['TC']))
+        common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['TR']),
+                            str(record.info['TC'])))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         for ann in ann_list:
             sys.stdout.write(common)
