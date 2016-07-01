@@ -14,12 +14,13 @@ from mutect_pipe import mutect_pipe
 from mutect_merge_sort import mutect_merge_sort
 from snpeff_pipe import snpeff_pipe
 from upload_variants_to_swift import upload_variants_to_swift
+from annotation.annot_platypus_VEP import annot_platypus
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'],
-            config_data['refs']['analysis'], config_data['refs']['annotation'])
+            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['param']['germflag'])
 
 
 def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
@@ -27,7 +28,7 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)
-    (novosort, obj, cont, analysis, annotation) = parse_config(config_file)
+    (novosort, obj, cont, analysis, annotation, germ_flag) = parse_config(config_file)
     # create sample list
     samp_cmd = 'cut -f 2 ' + sample_pairs + ' > sample_list.txt;' + 'cut -f 3 ' + sample_pairs + ' >> sample_list.txt'
     call(samp_cmd, shell=True)
@@ -81,8 +82,16 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
     else:
         sys.stderr.write(date_time() + 'snpEff failed.\n')
         exit(1)
+    if germ_flag == 'Y':
+        sys.stderr.write(date_time() + 'Germ line call flag indicated\n')
+        check = annot_platypus(config_file, sample_pairs, ref_mnt)
+        if check == 0:
+            sys.stderr.write(date_time() + 'Germ line call complete\n')
+        else:
+            sys.stderr.write(date_time() + 'Error during germline calls.  Check output\n')
+
     # relocate stuff, then upload
-    mv_cmds = 'mv *.bai *.bam BAM;mv *eff* *sift* ANNOTATION; mv *out* *vcf* ANALYSIS'
+    mv_cmds = 'mv *.bai *.bam BAM; mv *out* *vcf* ANALYSIS; mv *eff* *sift* *vep* ANNOTATION;'
     call(mv_cmds, shell=True)
     check = upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation)
     if check == 0:
