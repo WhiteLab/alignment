@@ -11,8 +11,7 @@ from date_time import date_time
 def gen_report(vcf):
     vcf_in = VariantFile(vcf)
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0,
-               'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'SOMATIC': 0, 'PHENO': 0,
-               'CADD_PHRED': 0}
+               'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
 
     desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
@@ -27,7 +26,7 @@ def gen_report(vcf):
             desired[desc_list[i]] = 1
     sys.stdout.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tConsequence\tIMPACT\t'
                     'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
-                    'CLIN_SIG\tSOMATIC\tPHENO\tCADD_PHRED\n')
+                    'CLIN_SIG\tCADD_PHRED\n')
     for record in vcf_in.fetch():
         #pdb.set_trace()
         common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['TR']),
