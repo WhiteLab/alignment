@@ -39,14 +39,17 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         # check for germline call of file, skip if not present
         germ = sample + '.germline_calls.vcf'
         if os.path.isfile(germ):
-            swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + germ + ' -S ' + str(ONE_GB)\
-                        + ' --skip-identical --object-name ' + obj + '/' + sample + '/ANALYSIS/' + germ\
-                        + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
-            check += call(swift_cmd, shell=True)
+            suffix_list = ['.germline_calls.vcf', '.germline_pass.vcf', '.germline_pass.vep.vcf',
+                           '.germline_pass.vep.vcf.html', '.germline_pass.vep.vcf_summary.html']
+            for suffix in suffix_list:
+                swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + sample + suffix + ' -S ' + str(ONE_GB)\
+                            + ' --skip-identical --object-name ' + obj + '/' + sample + '/' + analysis + '/' + sample\
+                            + suffix + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
+                check += call(swift_cmd, shell=True)
 
             summary = sample + '.germline_pass.xls'
-            swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + summary + ' -S ' + str(ONE_GB)\
-                        + ' --skip-identical --object-name ' + obj + '/' + sample + '/ANALYSIS/' + summary\
+            swift_cmd = src_cmd + 'swift upload ' + cont + ' ANNOTATION/' + summary + ' -S ' + str(ONE_GB)\
+                        + ' --skip-identical --object-name ' + obj + '/' + sample + '/' + annotation + '/' + summary\
                         + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
             check += call(swift_cmd, shell=True)
             if check == 0:
