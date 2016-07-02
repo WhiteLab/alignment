@@ -63,10 +63,11 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         check = gen_report(out_vcf)
         if check == 0:
             sys.stderr.write(date_time() + 'Summary table of germline calls completed!\n')
-            return 0
         else:
             sys.stderr.write(date_time() + 'Summary table for ' + out_vcf + ' FAILED!\n')
             return 1
+
+    return 0
 if __name__ == "__main__":
     import argparse
 

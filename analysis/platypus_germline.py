@@ -43,9 +43,10 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
         try:
             f = subprocess.call(platypus_cmd, shell=True)
         except:
-            log(log_dir + sample + ".platypus.log", 'platypus germline variant calling failed for sample ' + sample + '\n')
-            exit(1)
-        return f
+            log(log_dir + sample + ".platypus.log", 'platypus germline variant calling failed for sample ' + sample
+                + '\n')
+            return f
+    return 0
 
 
 if __name__ == "__main__":
