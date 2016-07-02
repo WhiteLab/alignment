@@ -44,7 +44,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         info = line.rstrip('\n').split('\t')
         sample = info[0]
         if len(info) > 1:
-            sample = info[3]
+            sample = info[2]
         pass_filter(sample)
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
