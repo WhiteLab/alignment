@@ -73,7 +73,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SNP annotation.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
-    parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs')
+    parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs,'
+                                                                                           ' or sample list')
     parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
                         help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
 

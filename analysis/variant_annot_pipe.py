@@ -15,6 +15,7 @@ from mutect_merge_sort import mutect_merge_sort
 from snpeff_pipe import snpeff_pipe
 from upload_variants_to_swift import upload_variants_to_swift
 from annot_platypus_VEP import annot_platypus
+from platypus_germline import platypus_germline
 
 
 def parse_config(config_file):
@@ -84,7 +85,8 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
         exit(1)
     if germ_flag == 'Y':
         sys.stderr.write(date_time() + 'Germ line call flag indicated\n')
-        check = annot_platypus(config_file, sample_pairs, ref_mnt)
+        check = platypus_germline(config_file, sample_pairs, 'LOGS/', wg, ref_mnt)
+        check += annot_platypus(config_file, sample_pairs, ref_mnt)
         if check == 0:
             sys.stderr.write(date_time() + 'Germ line call complete\n')
         else:
