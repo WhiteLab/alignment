@@ -37,7 +37,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
     vep_cache = ref_mnt + '/' + vep_cache
     # scale back on the forking a bit
     if int(threads) > 2:
-        threads = str(int(threads) - 1)
+        threads = str(int(threads)/2)
     # parse sample file, use only last if pairs
     samp_fh = open(samp_list, 'r')
     for line in samp_fh:
