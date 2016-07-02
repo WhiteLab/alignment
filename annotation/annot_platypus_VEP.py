@@ -48,11 +48,12 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         pass_filter(sample)
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
+        in_vcf = sample + '.germline_pass.vcf'
         out_vcf = sample + '.germline_pass.vep.vcf'
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + out_vcf + ' --vcf -o ' + sample\
-                + '.germline_pass.vep.vcf --symbol --vcf_info_field ANN --canonical --html --variant_class --sift' \
-                ' both --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' + fasta +\
-                ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log;'
+        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
+                ' ANN --canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --fork ' \
+                + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> ' \
+                'LOGS/' + sample + '.vep.log;'
         check = subprocess.call(run_vep, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
