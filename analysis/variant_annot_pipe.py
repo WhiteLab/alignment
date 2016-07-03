@@ -93,7 +93,7 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
             sys.stderr.write(date_time() + 'Error during germline calls.  Check output\n')
 
     # relocate stuff, then upload
-    mv_cmds = 'mv *.bai *.bam BAM; mv *out* *vcf* ANALYSIS; mv *eff* *sift* *vep* ANNOTATION;'
+    mv_cmds = 'mv *.bai *.bam BAM; mv *.xls *eff* *sift* *vep* ANNOTATION; mv *out* *vcf* ANALYSIS;'
     call(mv_cmds, shell=True)
     check = upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation)
     if check == 0:
