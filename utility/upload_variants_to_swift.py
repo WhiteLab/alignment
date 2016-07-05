@@ -37,7 +37,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
             sys.stderr.write(date_time() + 'Uploading final BAMs for ' + sample + ' failed\n')
             exit(1)
         # check for germline call of file, skip if not present
-        germ = sample + '.germline_calls.vcf'
+        germ = 'ANALYSIS/' + sample + '.germline_calls.vcf'
         if os.path.isfile(germ):
             suffix_list = ['.germline_calls.vcf', '.germline_pass.vcf']
 
