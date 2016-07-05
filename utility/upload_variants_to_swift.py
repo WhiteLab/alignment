@@ -43,14 +43,14 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
 
             for suffix in suffix_list:
                 swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + sample + suffix + ' -S ' + str(ONE_GB)\
-                            + ' --skip-identical --object-name ' + obj + '/' + sample + '/' + analysis + '/' + sample\
+                            + ' --skip-identical --object-name ' + analysis + '/' + sample + '/' + '/' + sample\
                             + suffix + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
                 check += call(swift_cmd, shell=True)
             suffix_list = ['.germline_pass.vep.vcf', '.germline_pass.xls',
                            '.germline_pass.vep.vcf.html', '.germline_pass.vep.vcf_summary.html']
             for suffix in suffix_list:
                 swift_cmd = src_cmd + 'swift upload ' + cont + ' ANNOTATION/' + sample + suffix + ' -S ' + str(ONE_GB)\
-                            + ' --skip-identical --object-name ' + obj + '/' + sample + '/' + annotation + '/' + sample\
+                            + ' --skip-identical --object-name ' + annotation + '/' + sample + '/' + sample\
                             + suffix + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
                 check += call(swift_cmd, shell=True)
             if check == 0:
