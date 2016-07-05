@@ -11,11 +11,12 @@ from log import log
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag) = (
+    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim) = (
         config_data['tools']['cutadapt'], config_data['params']['qual'], config_data['params']['mqual'],
         config_data['params']['r1adapt'], config_data['params']['r2adapt'], config_data['params']['minlen'],
-        config_data['params']['r1trim'], config_data['params']['r2trim'], config_data['params']['aflag'])
-    return cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag
+        config_data['params']['r1trim'], config_data['params']['r2trim'], config_data['params']['aflag'],
+        config_data['params']['ntrim'])
+    return cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim
 
 
 def cutadapter(sample, end1, end2, config_file):
@@ -26,11 +27,11 @@ def cutadapter(sample, end1, end2, config_file):
     loc = log_dir + sample + '.cutadapt.log'
     temp1 = end1 + '.temp.gz'
     temp2 = end2 + '.temp.gz'
-    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag) = parse_config(config_file)
+    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim) = parse_config(config_file)
     aflag2 = aflag.upper()
     cutadapt_cmd = cutadapt_tool + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + ' -' + aflag + ' '\
-                   + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + temp1 \
-                   + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
+                   + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' + r2trim + '-n ' + ntrim \
+                   + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
     check = call(cutadapt_cmd, shell=True)
     if not check:
