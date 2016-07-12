@@ -11,7 +11,7 @@ def bid_swift_list(cont, obj, blist):
     fh = open(blist, 'r')
     for bid in fh:
         bid = bid.rstrip('\n')
-        swift_cmd = src_cmd + "swift list " + cont + " --prefix " + obj + "/" + bid
+        swift_cmd = src_cmd + "swift list " + cont + " --prefix " + obj + "/" + bid + "/"
         sys.stderr.write(date_time() + swift_cmd + "\n")
         try:
             call(swift_cmd, shell=True)
