@@ -13,6 +13,7 @@ def skip_lines(fh, stop):
         skip = next(fh)
     return 0
 
+
 def skip_to_summary(fh):
     flag = 0
     while(flag == 0):
@@ -32,9 +33,11 @@ def process_line(fh, stop):
         list_list.append(cur)
     return list_list
 
+
 def rm_parens(line):
     line = line.replace('(','').replace(')','')
     return line
+
 
 def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
@@ -65,7 +68,7 @@ def download_from_swift(cont, obj, lane_list):
             # min len enforced, scoring scheme, min base quality)
             temp.extend([m.group(1), m.group(2), m.group(3)])
             skip_to_summary(stat)
-            # use generic funtion to parse groups on lines, take what's needed, next group
+            # use generic function to parse groups on lines, take what's needed, next group
             # total reads pairs summary section
             group = process_line(stat, 5)
             # pdb.set_trace()
