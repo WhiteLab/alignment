@@ -18,7 +18,7 @@ def parse_config(config_file):
 def list_bam(cont, obj, sample, wait):
     ct = 0
     # added trailing slash since we're dealing with bids - otherwise will end up pulling more samples than intended
-    list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/'
+    list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/BAM/'
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
     flist = subprocess.check_output(list_cmd, shell=True)
     # Use to check on download status
@@ -116,8 +116,18 @@ def novosort_merge_pe(config_file, sample_list, wait):
                     sys.stderr.write(date_time() + 'novosort and picard merge failed for sample ' + sample + '\n')
                     exit(1)
         else:
-            mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam;mv ' + bai_list[0]\
-                     + ' ' + sample + '.merged.final.bam.bai'
+            try:
+                # first need to get bai file before renaming
+                dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai_list[0]
+                check = subprocess.call(dl_cmd, shell=True)
+                if check != 0:
+                    sys.stderr.write('Could not find bai file for ' + bam_list[0])
+                    exit(1)
+                mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai_list[0]\
+                        + ' ' + sample + '.merged.final.bam.bai'
+            except:
+                sys.stderr.write('Rename for single file failed.  Command was ' + mv_bam + '\n')
+                exit(1)
             sys.stderr.write(date_time() + mv_bam + ' Only one associated bam file, renaming\n')
             subprocess.call(mv_bam, shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
