@@ -8,45 +8,76 @@ from subprocess import check_output
 import subprocess
 
 
-def skip_lines(fh, stop):
-    for i in xrange(0, stop, 1):
-        skip = next(fh)
-    return 0
+# dumb helper function to remove parans and retun only last part of line
+def process_parens(cur):
+    info = cur.rstrip('\n').split()
+    data = info[-1].replace('(', '')
+    data = data.replace(')', '')
+    return data
 
 
-def skip_to_summary(fh):
-    flag = 0
-    while(flag == 0):
-        cur = next(fh)
-        cur = cur.rstrip('\n')
-        if cur == '=== Summary ===':
-            skip = next(fh)
-            flag = 1
-    return 0
+def parseCUTADAPT(CUTADAPT):
+    try:
+        fh = open(CUTADAPT, 'r')
+        flag = 0
+        stats = []
+        while flag == 0:
+            cur = next(fh)
+            if re.search('Total read', cur):
+                # total read pairs
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                # r1a pct
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                # r2a pct
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                # too short
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                # too rp pass
+                stats.append(process_parens(cur))
+                next(fh)
+                flag = 1
+        tot_bp_line = next(fh)
+        info = tot_bp_line.split()
+        tot_bp = int(info[-2].replace(',', ''))
+        # total bp
+        stats.append(str(tot_bp))
+        next(fh)
+        next(fh)
+        next(fh)
+        # calculate trimmed base pers per read as a pct
+        r1_qt_line = next(fh)
+        info = r1_qt_line.split()
+        r1_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100, 2)
+        #r1 trimmed
+        stats.append(str(r1_pct) + '%')
 
-
-def process_line(fh, stop):
-    list_list = []
-    for i in xrange(0, stop, 1):
-        cur = next(fh)
-        cur = cur.rstrip('\n').split()
-        list_list.append(cur)
-    return list_list
-
-
-def rm_parens(line):
-    line = line.replace('(','').replace(')','')
-    return line
+        r2_qt_line = next(fh)
+        info = r2_qt_line.split()
+        r2_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100, 2)
+        # r2 trimmed
+        stats.append(str(r2_pct) + '%')
+        # total written
+        tw = next(fh)
+        stats.append(process_parens(tw))
+        fh.close()
+        return stats
+    except:
+        sys.stderr.write(date_time() + 'Unable to open/process file ' + CUTADAPT + '\n')
+        exit(1)
+    #return tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass
 
 
 def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
     lanes = open(lane_list, 'r')
     head = ''
-    data = []
-    print 'BID\tread group\tmin length enforced\tphred score scheme\tmin score enforced\ttotal starting read pairs(rp)' \
-          '\trp too short\t% rp too short\trp passed\t% rp passed\ttotal starting base pairs(bp)\tread1 bp trimmed' \
-          '\tread2 bp trimmed\t% bp trimmed\ttotal bp written\t% bp written'
+    print 'BID\tread group\ttotal starting read pairs(rp)\t% r1 w/ adapter\t% r2 w/ adapter\trp too short\t' \
+          '% rp too short\trp passed\t% rp passed\ttotal starting base pairs(bp)\tread1 bp trimmed\tread2 bp trimmed' \
+          '\t% bp written'
     for line in lanes:
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
@@ -59,43 +90,14 @@ def download_from_swift(cont, obj, lane_list):
             except:
                 sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
                 exit(1)
-            stat = open(cur, 'r')
-            skip_lines(stat, 1)
-            temp = []
-            # pdb.set_trace()
-            params = next(stat)
-            m = re.search('-m (\d+) --quality-base=(\d+) -q (\d+)', params)
-            # min len enforced, scoring scheme, min base quality)
-            temp.extend([m.group(1), m.group(2), m.group(3)])
-            skip_to_summary(stat)
-            # use generic function to parse groups on lines, take what's needed, next group
-            # total reads pairs summary section
-            group = process_line(stat, 5)
-            # pdb.set_trace()
-            temp.append(group[0][4])
-            # skip next lines for now, may want in future if adapter trimming performed
-            group[3][6] = rm_parens(group[3][6])
-            temp.extend(group[3][5:7])
-            group[4][5] = rm_parens(group[4][5])
-            temp.extend(group[4][4:6])
-            skip_lines(stat, 1)
-            group = process_line(stat, 1)
-            temp.append(group[0][3])
-            skip_lines(stat, 2)
-            group = process_line(stat, 3)
-            group[0][3] = rm_parens(group[0][3])
-            temp.extend((group[1][2], group[2][2], group[0][3]))
-            group = process_line(stat, 1)
-            group[0][5] = rm_parens(group[0][5])
-            temp.extend((group[0][3], group[0][5]))
-            print bid + '\t' + lane + '\t' + '\t'.join(temp)
-            stat.close()
 
+            temp = parseCUTADAPT(cur)
+
+            print bid + '\t' + lane + '\t' + '\t'.join(temp)
 
     lanes.close()
     sys.stdout.write(head)
-    for datum in data:
-        sys.stdout.write(datum)
+
     return 0
 
 
