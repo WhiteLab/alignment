@@ -75,9 +75,8 @@ def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
     lanes = open(lane_list, 'r')
     head = ''
-    print 'BID\tread group\ttotal starting read pairs(rp)\t% r1 w/ adapter\t% r2 w/ adapter\trp too short\t' \
-          '% rp too short\trp passed\t% rp passed\ttotal starting base pairs(bp)\tread1 bp trimmed\tread2 bp trimmed' \
-          '\t% bp written'
+    print 'BID\tread group\ttotal starting read pairs(rp)\t% r1 w/ adapter\t% r2 w/ adapter\trp too short\t% rp passed' \
+          '\ttotal starting base pairs(bp)\tread1 bp trimmed\tread2 bp trimmed\t% bp written'
     for line in lanes:
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
