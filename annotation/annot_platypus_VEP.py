@@ -59,7 +59,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
             sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
         else:
             sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\nCommand used:'
-                                                                                              '\n' + run_vep)
+                                                                                              '\n' + run_vep + '\n')
             exit(1)
 
         check = gen_report(out_vcf, sample)
