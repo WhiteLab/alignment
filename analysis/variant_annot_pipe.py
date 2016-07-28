@@ -91,6 +91,7 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
             sys.stderr.write(date_time() + 'Germ line call complete\n')
         else:
             sys.stderr.write(date_time() + 'Error during germline calls.  Check output\n')
+            exit(1)
 
     # relocate stuff, then upload
     mv_cmds = 'mv *.bai *.bam BAM; mv *.xls *eff* *sift* *vep* ANNOTATION; mv *out* *vcf* ANALYSIS;'
