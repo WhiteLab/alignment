@@ -44,6 +44,7 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
             sl.write(cur[2] + '\n')
             temp[cur[2]] = 1
     sl.close()
+    fh .close()
     del temp
     # download and merge (if necessary) bam files
     if sm == 'n':
