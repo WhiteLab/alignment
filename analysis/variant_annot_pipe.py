@@ -31,9 +31,20 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
     call(mk_dir, shell=True)
     (novosort, obj, cont, analysis, annotation, germ_flag) = parse_config(config_file)
     # create sample list
-    samp_cmd = 'cut -f 2 ' + sample_pairs + ' > sample_list.txt;' + 'cut -f 3 ' + sample_pairs + ' >> sample_list.txt'
-    call(samp_cmd, shell=True)
     sample_list = 'sample_list.txt'
+    fh = open(sample_pairs, 'r')
+    sl = open(sample_list, 'w')
+    temp = {}
+    for line in fh:
+        cur = line.rstrip('\n').split('\t')
+        if cur[1] not in temp:
+            sl.write(cur[1] + '\n')
+            temp[cur[1]] = 1
+        if cur[2] not in temp:
+            sl.write(cur[2] + '\n')
+            temp[cur[2]] = 1
+    sl.close()
+    del temp
     # download and merge (if necessary) bam files
     if sm == 'n':
         check = novosort_merge_pe(config_file, sample_list, wait)

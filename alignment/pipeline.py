@@ -150,7 +150,7 @@ class Pipeline:
         SAMPLES[self.sample]['f2'] = self.end2
         RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
 
-        #initialize fail return values
+        # initialize fail return values
         check = 1
         if self.run_cut_flag == 'Y':
             check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
