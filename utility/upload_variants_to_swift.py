@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Uploads current directory contents to specified object and container')
     parser.add_argument('-c', '--container', action='store', dest='cont',
-                        help='Swfit container name to upload to.  i.e. PANCAN')
+                        help='Swift container name to upload to.  i.e. PANCAN')
     parser.add_argument('-o', '--object', action='store', dest='obj',
                         help='Swift object name root to use for aligned merged bam files.  i.e. ALIGN/2015-1234')
     parser.add_argument('-sl', '--sample_list', action='store', dest='sample_list', help='Sample list, one per line')

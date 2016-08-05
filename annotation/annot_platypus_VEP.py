@@ -40,34 +40,38 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         threads = str(int(threads)/2)
     # parse sample file, use only last if pairs
     samp_fh = open(samp_list, 'r')
+    # track to repvent repeat annotation if same sample used as comparison
+    samp_flag = {}
     for line in samp_fh:
         info = line.rstrip('\n').split('\t')
         sample = info[0]
         if len(info) > 1:
             sample = info[2]
-        pass_filter(sample)
-        mk_log_dir = 'mkdir LOGS'
-        subprocess.call(mk_log_dir, shell=True)
-        in_vcf = sample + '.germline_pass.vcf'
-        out_vcf = sample + '.germline_pass.vep.vcf'
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
-                ' ANN --canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --fork ' \
-                + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> ' \
-                'LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
-        check = subprocess.call(run_vep, shell=True)
-        if check == 0:
-            sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
-        else:
-            sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample + ' FAILED!\nCommand used:'
-                                                                                              '\n' + run_vep + '\n')
-            exit(1)
+        if sample not in samp_flag:
+            pass_filter(sample)
+            mk_log_dir = 'mkdir LOGS'
+            subprocess.call(mk_log_dir, shell=True)
+            in_vcf = sample + '.germline_pass.vcf'
+            out_vcf = sample + '.germline_pass.vep.vcf'
+            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
+                    ' ANN --canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --fork ' \
+                    + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> ' \
+                    'LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
+            check = subprocess.call(run_vep, shell=True)
+            if check == 0:
+                sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
+            else:
+                sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample
+                                 + ' FAILED!\nCommand used:\n' + run_vep + '\n')
+                exit(1)
 
-        check = gen_report(out_vcf, sample)
-        if check == 0:
-            sys.stderr.write(date_time() + 'Summary table of germline calls completed!\n')
-        else:
-            sys.stderr.write(date_time() + 'Summary table for ' + out_vcf + ' FAILED!\n')
-            return 1
+            check = gen_report(out_vcf, sample)
+            if check == 0:
+                sys.stderr.write(date_time() + 'Summary table of germline calls completed!\n')
+                samp_flag[samp_fh] = 1
+            else:
+                sys.stderr.write(date_time() + 'Summary table for ' + out_vcf + ' FAILED!\n')
+                return 1
 
     return 0
 if __name__ == "__main__":
