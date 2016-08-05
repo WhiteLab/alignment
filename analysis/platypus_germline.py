@@ -19,34 +19,42 @@ def parse_config(config_file, cflag):
 
 def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
     samp_fh = open(samp_list, 'r')
+    # only want to run germline once if norm being used multiple times as a comparison
+    samp_flag = {}
     for line in samp_fh:
         info = line.rstrip('\n').split('\t')
         sample = info[0]
         if len(info) > 1:
             sample = info[2]
-        if cflag == 'y':
-            (platypus, fasta, threads) = parse_config(config_file, cflag)
-            fasta = ref_mnt + '/' + fasta
-            platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
-                           + ".merged.final.bam -o " + sample + ".germline_calls.vcf --logFileName=" + log_dir + sample \
-                           + ".platypus.log" + " >> " + log_dir + sample + ".platypus.log 2>&1"
+        loc = log_dir + sample + ".platypus.log"
+        if sample not in samp_flag:
+
+            if cflag == 'y':
+                (platypus, fasta, threads) = parse_config(config_file, cflag)
+                fasta = ref_mnt + '/' + fasta
+                platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
+                               + ".merged.final.bam -o " + sample + ".germline_calls.vcf --logFileName=" + log_dir + sample \
+                               + ".platypus.log" + " >> " + log_dir + sample + ".platypus.log 2>&1"
+            else:
+                (platypus, fasta, threads, region_file, minVAF) = parse_config(config_file, cflag)
+                fasta = ref_mnt + '/' + fasta
+                regions = ref_mnt + '/' + region_file
+                platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
+                               + ".merged.final.bam --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq="\
+                               + minVAF + " --regions=" + regions + " --logFileName=" + log_dir + sample \
+                               + ".platypus.log >> " + log_dir + sample + ".platypus.log 2>&1"
+            log(log_dir + sample + ".platypus.log", date_time() + platypus_cmd + "\n")
+            f = 0
+            try:
+                f = subprocess.call(platypus_cmd, shell=True)
+                samp_flag[samp_fh] = 1
+            except:
+                log(loc, 'platypus germline variant calling failed for sample ' + sample
+                    + '\n')
+                return f
         else:
-            (platypus, fasta, threads, region_file, minVAF) = parse_config(config_file, cflag)
-            fasta = ref_mnt + '/' + fasta
-            regions = ref_mnt + '/' + region_file
-            platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" + sample \
-                           + ".merged.final.bam --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq="\
-                           + minVAF + " --regions=" + regions + " --logFileName=" + log_dir + sample \
-                           + ".platypus.log >> " + log_dir + sample + ".platypus.log 2>&1"
-        log(log_dir + sample + ".platypus.log", date_time() + platypus_cmd + "\n")
-        f = 0
-        try:
-            f = subprocess.call(platypus_cmd, shell=True)
-        except:
-            log(log_dir + sample + ".platypus.log", 'platypus germline variant calling failed for sample ' + sample
-                + '\n')
-            return f
-    return 0
+            log(loc, 'platypus already run on ' + sample + ' during this session, skipping!\n')
+        return 0
 
 
 if __name__ == "__main__":
