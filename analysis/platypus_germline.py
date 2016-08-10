@@ -26,6 +26,7 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
         sample = info[0]
         if len(info) > 1:
             sample = info[2]
+            sys.stderr.write(date_time() + 'Sample pairs detected. Processing ' + sample)
         loc = log_dir + sample + ".platypus.log"
         if sample not in samp_flag:
 
