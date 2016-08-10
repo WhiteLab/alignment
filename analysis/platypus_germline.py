@@ -48,7 +48,7 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
             f = 0
             try:
                 f = subprocess.call(platypus_cmd, shell=True)
-                samp_flag[samp_fh] = 1
+                samp_flag[sample] = 1
             except:
                 log(loc, 'platypus germline variant calling failed for sample ' + sample
                     + '\n')
