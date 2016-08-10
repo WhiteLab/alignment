@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-
+import pdb
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 import subprocess
@@ -18,6 +18,7 @@ def parse_config(config_file, cflag):
 
 
 def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
+    #pdb.set_trace()
     samp_fh = open(samp_list, 'r')
     # only want to run germline once if norm being used multiple times as a comparison
     samp_flag = {}
@@ -54,7 +55,7 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
                 return f
         else:
             log(loc, 'platypus already run on ' + sample + ' during this session, skipping!\n')
-        return 0
+    return 0
 
 
 if __name__ == "__main__":
