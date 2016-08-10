@@ -23,8 +23,8 @@ args = docopt(__doc__)
 fh = open(args['<list>'])
 th = args['<th>']
 cmd_list = []
-dir_mk = 'mkdir converted'
-subprocess.call(dir_mk, shell=True)
+#dir_mk = 'mkdir converted'
+#subprocess.call(dir_mk, shell=True)
 for line in fh:
     line = line.rstrip('\n')
     cmd = '/home/ubuntu/TOOLS/Scripts/utility/fastq_64_to_33.py ' + line
