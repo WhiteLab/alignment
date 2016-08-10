@@ -25,7 +25,8 @@ fn = args['<fastq>']
 fastq = gzip.open(fn, 'rb')
 indir = os.path.dirname(fn)
 bn = os.path.basename(fn)
-os.mkdir(indir + '/converted')
+if not os.path.isdir(indir + '/converted'):
+    os.mkdir(indir + '/converted')
 out = gzip.open(indir + '/converted/' + bn, 'wb')
 
 # code snippets obtained from https://github.com/vpiro/readtools/blob/master/PHRED_converter.py
