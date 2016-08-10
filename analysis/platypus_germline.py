@@ -27,9 +27,8 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
         if len(info) > 1:
             sample = info[2]
             sys.stderr.write(date_time() + 'Sample pairs detected. Processing ' + sample)
-        loc = log_dir + sample + ".platypus.log"
         if sample not in samp_flag:
-
+            loc = log_dir + sample + ".platypus.log"
             if cflag == 'y':
                 (platypus, fasta, threads) = parse_config(config_file, cflag)
                 fasta = ref_mnt + '/' + fasta
