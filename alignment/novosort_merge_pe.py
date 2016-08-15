@@ -78,9 +78,9 @@ def novosort_merge_pe(config_file, sample_list, wait):
     for sample in fh:
         sample = sample.rstrip('\n')
         if rmdup == 'Y':
-            (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
-        else:
             (bam_list, n) = list_bam(cont, obj, sample, wait, rmdup)
+        else:
+            (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait, rmdup)
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
