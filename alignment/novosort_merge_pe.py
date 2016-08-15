@@ -28,7 +28,7 @@ def list_bam(cont, obj, sample, wait, rmdup):
     bai_list = []
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
-        if rmdup == 'Y':
+        if rmdup == 'N':
             test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
         else:
             test = re.match('^\S+_\w*\d+\.bam$', fn)
