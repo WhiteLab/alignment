@@ -74,8 +74,8 @@ def novosort_merge_pe(config_file, sample_list, wait):
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
-                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G -kt -md " \
-                                    "-rd --output " + sample + '.merged.final.bam --index --tmpdir' \
+                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --kt --md " \
+                                    "--rd --output " + sample + '.merged.final.bam --index --tmpdir' \
                                                                               ' ./TMP ' + bam_string
                 sys.stderr.write(date_time() + novosort_merge_cmd + "\n")
                 try:
