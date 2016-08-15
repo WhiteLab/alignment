@@ -74,8 +74,9 @@ def novosort_merge_pe(config_file, sample_list, wait):
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
-                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
-                                        + sample + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string
+                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted " \
+                                    "--removeDuplicates --output " + sample + '.merged.final.bam --index --tmpdir' \
+                                                                              ' ./TMP ' + bam_string
                 sys.stderr.write(date_time() + novosort_merge_cmd + "\n")
                 try:
                     subprocess.check_output(novosort_merge_cmd, shell=True)
