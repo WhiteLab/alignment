@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import json
 import sys
+import os
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
@@ -22,6 +23,17 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'],
             config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'])
+
+
+def check_existing_bams(sample_list):
+    temp_list = []
+    test = open(sample_list, 'r')
+    for fn in test:
+        fn = fn.rstrip('\n')
+        if not os.path.isfile(fn):
+            temp_list.append(fn)
+    test.close()
+    return temp_list
 
 
 def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
@@ -69,14 +81,20 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
                 sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files failed.\n')
                 exit(1)
     else:
-        sys.stderr.write(date_time() + 'Skip merge indicated, downloading merged bam files\n')
-        check = get_merged_bams(config_file, sample_list, wait)
-        if check == 0:
-            sys.stderr.write(date_time() + 'Merged bam files successfully download\n')
+        # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
+        sys.stderr.write(date_time() + 'Skip merge indicated, checking for already merged bam files\n')
+        temp_list = check_existing_bams(sample_list)
+        if len(temp_list) > 0:
+            sys.stderr.write(date_time() + 'Missing files detected, downloading merged bam files\n')
+            check = get_merged_bams(config_file, temp_list, wait)
+            if check == 0:
+                sys.stderr.write(date_time() + 'Merged bam files successfully download\n')
+            else:
+                sys.stderr.write(date_time() + 'Merged bam file download failed.  Make sure container, object correctly'
+                                               ' configured in config file\n')
+                exit(1)
         else:
-            sys.stderr.write(
-                date_time() + 'Merged bam file download failed.  Make sure container, object correctly configured in config file\n')
-            exit(1)
+            sys.stderr.write(date_time() + 'All bams found.  Moving on\n')
     check = mutect_pipe(config_file, sample_pairs, ref_mnt)
     if check == 0:
         sys.stderr.write(date_time() + 'Mutect variant calls successful\n')
