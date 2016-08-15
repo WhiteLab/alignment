@@ -15,7 +15,7 @@ def parse_config(config_file):
            config_data['params']['ram'], config_data['params']['novaflag']
 
 
-def list_bam(cont, obj, sample, wait):
+def list_bam(cont, obj, sample, wait, rmdup):
     ct = 0
     # added trailing slash since we're dealing with bids - otherwise will end up pulling more samples than intended
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/BAM/'
@@ -28,7 +28,11 @@ def list_bam(cont, obj, sample, wait):
     bai_list = []
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
-        if re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn):
+        if rmdup == 'Y':
+            test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
+        else:
+            test = re.match('^\S+_\w*\d+\.bam$', fn)
+        if test:
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
             p.append(subprocess.Popen(dl_cmd, shell=True))
@@ -57,7 +61,10 @@ def list_bam(cont, obj, sample, wait):
         subprocess.call(sleep_cmd, shell=True)
     if f == 1:
         sys.stderr.write(date_time() + 'BAM download complete\n')
-        return bam_list, bai_list, ct
+        if rmdup == 'Y':
+            return bam_list, ct
+        else:
+            return bam_list, bai_list, ct
     else:
         sys.stderr.write(date_time() + 'BAM download failed\n')
         exit(1)
@@ -70,7 +77,10 @@ def novosort_merge_pe(config_file, sample_list, wait):
     subprocess.call(tmp_dir, shell=True)
     for sample in fh:
         sample = sample.rstrip('\n')
-        (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
+        if rmdup == 'Y':
+            (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
+        else:
+            (bam_list, n) = list_bam(cont, obj, sample, wait, rmdup)
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
