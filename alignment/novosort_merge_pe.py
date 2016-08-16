@@ -2,9 +2,9 @@
 import json
 import re
 import sys
-
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
+from log import log
 import subprocess
 
 
@@ -77,6 +77,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
     subprocess.call(tmp_dir, shell=True)
     for sample in fh:
         sample = sample.rstrip('\n')
+        loc = 'LOGS/' + sample + '.novosort_merge.log'
         if rmdup == 'Y':
             (bam_list, n) = list_bam(cont, obj, sample, wait, rmdup)
         else:
@@ -85,27 +86,27 @@ def novosort_merge_pe(config_file, sample_list, wait):
         if n > 1:
             if rmdup == 'Y':
                 novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G -f --rd --output " + sample \
-                                     + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string
-                sys.stderr.write(date_time() + novosort_merge_cmd + "\n")
+                                     + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
+                log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
                     subprocess.check_output(novosort_merge_cmd, shell=True)
                     # delete old bams to free up space
                     rm_bam = 'rm ' + bam_string
-                    sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
+                    log(loc, date_time() + 'Removing bams that were already merged\n')
                     subprocess.call(rm_bam, shell=True)
                 except:
-                    sys.stderr.write(date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
+                    log(loc, date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
                     exit(1)
 
             else:
                 novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
                                         + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
-                sys.stderr.write(date_time() + novosort_merge_cmd + "\n")
+                log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
                     subprocess.check_output(novosort_merge_cmd, shell=True)
                     # delete old bams to free up space
                     rm_bam = 'rm ' + bam_string
-                    sys.stderr.write(date_time() + 'Removing bams that were already merged\n')
+                    log(loc, date_time() + 'Removing bams that were already merged\n')
                     subprocess.call(rm_bam, shell=True)
                     # rm dups
                     picard_tmp = 'picard_tmp'
@@ -131,12 +132,12 @@ def novosort_merge_pe(config_file, sample_list, wait):
                 dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai_list[0]
                 check = subprocess.call(dl_cmd, shell=True)
                 if check != 0:
-                    sys.stderr.write('Could not find bai file for ' + bam_list[0])
+                    log(loc, 'Could not find bai file for ' + bam_list[0])
                     exit(1)
                 mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai_list[0]\
                         + ' ' + sample + '.merged.final.bam.bai'
             except:
-                sys.stderr.write('Rename for single file failed.  Command was ' + mv_bam + '\n')
+                log(loc, 'Rename for single file failed.  Command was ' + mv_bam + '\n')
                 exit(1)
             sys.stderr.write(date_time() + mv_bam + ' Only one associated bam file, renaming\n')
             subprocess.call(mv_bam, shell=True)
