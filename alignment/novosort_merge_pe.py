@@ -34,7 +34,6 @@ def list_bam(cont, obj, sample, threads, rmdup):
         else:
             test = re.match('^\S+_\w*\d+\.bam$', fn)
         if test:
-            sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
             p.append(dl_cmd)
             if fn[-3:] == 'bam':
@@ -136,6 +135,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
                     root = bam_list[0].replace('.bam', '')
                     get_name = '. /home/ubuntu/.novarc; swift list ' + cont + ' --prefix ' + root + ' | grep bai$'
                     bai = subprocess.check_output(get_name, shell=True)
+                    bai = bai.rstrip('\n')
                     dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai
                     check = subprocess.call(dl_cmd, shell=True)
                     if check != 0:
