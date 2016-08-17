@@ -49,8 +49,7 @@ def list_bam(cont, obj, sample, threads, rmdup):
     elif rmdup == 'Y':
         cur = bam_list[0]
         new = cur.replace('.bam', '.rmdup.srt.bam')
-        new_dl = '. /home/ubuntu/.novarc; rm ' + cur + ';swift download ' + cont + ' ' + obj + '/' + sample + '/BAM/'\
-                 + new
+        new_dl = '. /home/ubuntu/.novarc; swift download ' + cont + ' ' + new
         subprocess.call(new_dl, shell=True)
         bam_list[0] = new
     if f == 0:
