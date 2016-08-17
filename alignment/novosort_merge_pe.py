@@ -143,7 +143,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
                         exit(1)
                     mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai + ' ' + sample \
                              + '.merged.final.bam.bai'
-                    log(loc, date_time() + mv_bam)
+                    log(loc, date_time() + mv_bam + '\n')
                     subprocess.call(mv_bam, shell=True)
             except:
                 log(loc, 'Rename for single file failed.  Command was ' + mv_bam + '\n')
