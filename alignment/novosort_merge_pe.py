@@ -36,7 +36,7 @@ def list_bam(cont, obj, sample, threads, rmdup):
         if test:
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
-            p.append(subprocess.Popen(dl_cmd, shell=True))
+            p.append(dl_cmd)
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
                 ct += 1
@@ -141,8 +141,8 @@ def novosort_merge_pe(config_file, sample_list, wait):
                     if check != 0:
                         log(loc, 'Could not find bai file for ' + bai)
                         exit(1)
-                    mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai\
-                            + ' ' + sample + '.merged.final.bam.bai'
+                    mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai + ' ' + sample \
+                             + '.merged.final.bam.bai'
                     subprocess.call(mv_bam, shell=True)
             except:
                 log(loc, 'Rename for single file failed.  Command was ' + mv_bam + '\n')
