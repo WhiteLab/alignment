@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import json
 import sys
 import os
@@ -36,7 +36,7 @@ def check_existing_bams(sample_list):
     return temp_list
 
 
-def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
+def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
     # create eventual output location directories
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
@@ -89,7 +89,7 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
             temp_fn = open('temp_samp_list.txt', 'w')
             temp_fn.write('\n'.join(temp_list))
             temp_fn.close()
-            check = get_merged_bams(config_file, temp_fn, wait)
+            check = get_merged_bams(config_file, temp_fn)
             if check == 0:
                 sys.stderr.write(date_time() + 'Merged bam files successfully download\n')
             else:
@@ -147,8 +147,6 @@ if __name__ == "__main__":
                         help='Tumor/normal sample pair list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-w', '--wait', action='store', dest='wait',
-                        help='Wait time to download bam files.  900 (seconds) recommended')
     parser.add_argument('-k', '--karyo', action='store', dest='kflag',
                         help='Flag to perform karyotypic reordering of BAM files.  Only need if original reference used'
                              ' wasn\'t sorted in the manner. \'y\' to do so')
@@ -166,6 +164,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file, wait, kflag, ref_mnt, wg, sm) = (
-        inputs.sample_pairs, inputs.config_file, inputs.wait, inputs.kflag, inputs.ref_mnt, inputs.wg, inputs.sm)
-    variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm)
+    (sample_pairs, config_file, kflag, ref_mnt, wg, sm) = (
+        inputs.sample_pairs, inputs.config_file, inputs.kflag, inputs.ref_mnt, inputs.wg, inputs.sm)
+    variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm)
