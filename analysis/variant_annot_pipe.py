@@ -60,7 +60,7 @@ def variant_annot_pipe(config_file, sample_pairs, wait, kflag, ref_mnt, wg, sm):
     del temp
     # download and merge (if necessary) bam files
     if sm == 'n':
-        check = novosort_merge_pe(config_file, sample_list, wait)
+        check = novosort_merge_pe(config_file, sample_list)
         if check == 0:
             sys.stderr.write(date_time() + 'File download and merge complete!\n')
             # rm unmerged bams, no longer needed

@@ -16,6 +16,22 @@ def parse_config(config_file):
            config_data['params']['ram'], config_data['params']['novaflag']
 
 
+def list_unsorted_bam(bam_list, cont, threads):
+    p = []
+    for i in xrange(0, len(bam_list), 1):
+        bam_list[i] = bam_list[i].replace('.rmdup.srt.bam', '.bam')
+        dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' ' + bam_list[i]
+        p.append(dl_cmd)
+    f = job_manager(p, threads)
+    if f == 0:
+        sys.stderr.write(date_time() + 'BAM download complete\n')
+        return bam_list
+
+    else:
+        sys.stderr.write(date_time() + 'BAM download failed\n')
+        exit(1)
+
+
 def list_bam(cont, obj, sample, threads, rmdup):
     ct = 0
     # added trailing slash since we're dealing with bids - otherwise will end up pulling more samples than intended
@@ -29,10 +45,8 @@ def list_bam(cont, obj, sample, threads, rmdup):
     bai_list = []
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
-        if rmdup == 'N':
-            test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
-        else:
-            test = re.match('^\S+_\w*\d+\.bam$', fn)
+        test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
+
         if test:
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
             p.append(dl_cmd)
@@ -44,14 +58,7 @@ def list_bam(cont, obj, sample, threads, rmdup):
     f = 0
     if len(p) > 1:
         f = job_manager(p, threads)
-    # need to replace with rmdup version if nothing there to merge
-    elif rmdup == 'Y':
-        cur = bam_list[0]
-        new = cur.replace('.bam', '.rmdup.srt.bam')
-        new_dl = '. /home/ubuntu/.novarc; swift download ' + cont + ' ' + new
-        subprocess.call(new_dl, shell=True)
-        bam_list[0] = new
-    if f == 0:
+
         sys.stderr.write(date_time() + 'BAM download complete\n')
         if rmdup == 'Y':
             return bam_list, ct
@@ -62,7 +69,7 @@ def list_bam(cont, obj, sample, threads, rmdup):
         exit(1)
 
 
-def novosort_merge_pe(config_file, sample_list, wait):
+def novosort_merge_pe(config_file, sample_list):
     fh = open(sample_list, 'r')
     (novosort, java_tool, picard_tool, cont, obj, threads, ram, rmdup) = parse_config(config_file)
     tmp_dir = 'mkdir TMP'
@@ -77,7 +84,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
-                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G -f --rd --output " + sample \
+                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd --output " + sample \
                                      + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
                 log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
@@ -87,8 +94,25 @@ def novosort_merge_pe(config_file, sample_list, wait):
                     log(loc, date_time() + 'Removing bams that were already merged\n')
                     subprocess.call(rm_bam, shell=True)
                 except:
-                    log(loc, date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
-                    exit(1)
+                    log(loc, date_time() + 'novosort sort and merge failed for sample ' + sample + ', trying unsorted'
+                                                                                                   ' bams\n')
+                    rm_bam = 'rm ' + bam_string
+                    log(loc, date_time() + 'Removing bams that failed merge\n')
+                    subprocess.call(rm_bam, shell=True)
+                    bam_list = list_unsorted_bam(bam_list, cont, threads)
+                    bam_string = " ".join(bam_list)
+                    novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd --output " + sample \
+                                     + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
+                    log(loc, date_time() + novosort_merge_cmd + "\n")
+                    try:
+                        subprocess.check_output(novosort_merge_cmd, shell=True)
+                        rm_bam = 'rm ' + bam_string
+                        log(loc, date_time() + 'Removing bams that were already merged\n')
+                        subprocess.call(rm_bam, shell=True)
+                    except:
+                        log(loc, date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
+                        exit(1)
+
 
             else:
                 novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
@@ -161,13 +185,11 @@ if __name__ == "__main__":
     parser.add_argument('-sl', '--sample_list', action='store', dest='sample_list', help='Sample/project prefix list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-w', '--wait', action='store', dest='wait',
-                        help='Wait time to download bam files.  900 (seconds) recommended')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_list, config_file, wait) = (inputs.sample_list, inputs.config_file, inputs.wait)
-    novosort_merge_pe(config_file, sample_list, wait)
+    (sample_list, config_file) = (inputs.sample_list, inputs.config_file)
+    novosort_merge_pe(config_file, sample_list)
