@@ -6,6 +6,7 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from log import log
 import subprocess
+from job_manager import job_manager
 
 
 def parse_config(config_file):
@@ -15,7 +16,7 @@ def parse_config(config_file):
            config_data['params']['ram'], config_data['params']['novaflag']
 
 
-def list_bam(cont, obj, sample, wait, rmdup):
+def list_bam(cont, obj, sample, threads, rmdup):
     ct = 0
     # added trailing slash since we're dealing with bids - otherwise will end up pulling more samples than intended
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/BAM/'
@@ -41,25 +42,18 @@ def list_bam(cont, obj, sample, wait, rmdup):
                 ct += 1
             else:
                 bai_list.append(fn)
-    n = 0
     f = 0
-    x = len(p)
-
-    while n < wait:
-        sys.stderr.write(date_time() + 'Checking status of download processes. ' + str(n) + ' seconds have passed\n')
-        s = 0
-        for cur in p:
-            check = cur.poll()
-            if str(check) != 'None':
-                s += 1
-        if s == x:
-            f = 1
-            break
-        sys.stderr.write(date_time() + str(s) + ' of ' + str(x) + ' downloads have been completed\n')
-        n += 30
-        sleep_cmd = 'sleep 30s;'
-        subprocess.call(sleep_cmd, shell=True)
-    if f == 1:
+    if len(p) > 1:
+        f = job_manager(p, threads)
+    # need to replace with rmdup version if nothing there to merge
+    elif rmdup == 'Y':
+        cur = bam_list[0]
+        new = cur.replace('.bam', '.rmdup.srt.bam')
+        new_dl = '. /home/ubuntu/.novarc; rm ' + cur + ';swift download ' + cont + ' ' + obj + '/' + sample + '/BAM/'\
+                 + new
+        subprocess.call(new_dl, shell=True)
+        bam_list[0] = new
+    if f == 0:
         sys.stderr.write(date_time() + 'BAM download complete\n')
         if rmdup == 'Y':
             return bam_list, ct
@@ -79,9 +73,9 @@ def novosort_merge_pe(config_file, sample_list, wait):
         sample = sample.rstrip('\n')
         loc = 'LOGS/' + sample + '.novosort_merge.log'
         if rmdup == 'Y':
-            (bam_list, n) = list_bam(cont, obj, sample, wait, rmdup)
+            (bam_list, n) = list_bam(cont, obj, sample, threads, rmdup)
         else:
-            (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait, rmdup)
+            (bam_list, bai_list, n) = list_bam(cont, obj, sample, threads, rmdup)
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
@@ -129,13 +123,28 @@ def novosort_merge_pe(config_file, sample_list, wait):
         else:
             try:
                 # first need to get bai file before renaming
-                dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai_list[0]
-                check = subprocess.call(dl_cmd, shell=True)
-                if check != 0:
-                    log(loc, 'Could not find bai file for ' + bam_list[0])
-                    exit(1)
-                mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai_list[0]\
-                        + ' ' + sample + '.merged.final.bam.bai'
+                if rmdup == 'N':
+                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai_list[0]
+                    check = subprocess.call(dl_cmd, shell=True)
+                    if check != 0:
+                        log(loc, 'Could not find bai file for ' + bam_list[0])
+                        exit(1)
+                    mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai_list[0]\
+                            + ' ' + sample + '.merged.final.bam.bai'
+                    subprocess.call(mv_bam, shell=True)
+                else:
+                    # get name of rmdup bai file
+                    root = bam_list[0].replace('.bam', '')
+                    get_name = '. /home/ubuntu/.novarc; swift list ' + cont + ' --prefix ' + root + ' | grep bai$'
+                    bai = subprocess.check_output(get_name, shell=True)
+                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai
+                    check = subprocess.call(dl_cmd, shell=True)
+                    if check != 0:
+                        log(loc, 'Could not find bai file for ' + bai)
+                        exit(1)
+                    mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai\
+                            + ' ' + sample + '.merged.final.bam.bai'
+                    subprocess.call(mv_bam, shell=True)
             except:
                 log(loc, 'Rename for single file failed.  Command was ' + mv_bam + '\n')
                 exit(1)
