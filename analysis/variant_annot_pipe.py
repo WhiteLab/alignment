@@ -86,9 +86,10 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
         temp_list = check_existing_bams(sample_list)
         if len(temp_list) > 0:
             sys.stderr.write(date_time() + 'Missing files detected, downloading merged bam files\n')
-            temp_fn = open('temp_samp_list.txt', 'w')
-            temp_fn.write('\n'.join(temp_list))
-            temp_fn.close()
+            temp_fn = 'temp_samp_list.txt'
+            temp_fh = open(temp_fn, 'w')
+            temp_fh.write('\n'.join(temp_list))
+            temp_fh.close()
             check = get_merged_bams(config_file, temp_fn)
             if check == 0:
                 sys.stderr.write(date_time() + 'Merged bam files successfully download\n')
