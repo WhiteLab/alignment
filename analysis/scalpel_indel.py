@@ -36,7 +36,7 @@ def create_sample_list(sample_pairs):
 
 
 def scalpel_indel(pairs, log_dir, config_file):
-    (bed, fasta, cpus, scalpel) = parse_config(config_file)
+    (scalpel, bed, fasta, cpus) = parse_config(config_file)
     # use get_merged_bams api
     sample_list = 'sample_list.txt'
     if not os.path.isfile(sample_list):
@@ -57,7 +57,7 @@ def scalpel_indel(pairs, log_dir, config_file):
         if check != 0:
             sys.stderr.write(date_time() + 'Indel calling failed for pair ' + cur[0] + ' with command:\n' +
                              scalpel_cmd + '\n')
-        log(loc, + date_time() + 'Indel calling complete for pair ' + cur[0])
+        log(loc, date_time() + 'Indel calling complete for pair ' + cur[0])
     fh.close()
     sys.stderr.write(date_time() + 'Indel call completed\n')
 
