@@ -35,8 +35,10 @@ def create_sample_list(sample_pairs):
     del temp
 
 
-def scalpel_indel(pairs, log_dir, config_file):
+def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
     (scalpel, bed, fasta, cpus) = parse_config(config_file)
+    bed = ref_mnt + '/' + bed
+    fasta = ref_mnt + '/' + fasta
     # use get_merged_bams api
     sample_list = 'sample_list.txt'
     if not os.path.isfile(sample_list):
@@ -73,11 +75,14 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
+    parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
+                        help='Reference drive path - i.e. /mnt/cinder/REFS_XXXX')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, log_dir, config_file) = (inputs.sample_pairs, inputs.log_dir, inputs.config_file)
-    scalpel_indel(sample_pairs, log_dir, config_file)
+    (sample_pairs, log_dir, config_file, ref_mnt) = (inputs.sample_pairs, inputs.log_dir, inputs.config_file
+                                                     , inputs.ref_mnt)
+    scalpel_indel(sample_pairs, log_dir, config_file, ref_mnt)
