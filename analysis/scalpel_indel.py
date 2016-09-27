@@ -75,5 +75,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (pairs, log_dir, config_file) = (inputs.pairs, inputs.log_dir, inputs.config_file)
-    scalpel_indel(pairs, log_dir, config_file)
+    (sample_pairs, log_dir, config_file) = (inputs.sample_pairs, inputs.log_dir, inputs.config_file)
+    scalpel_indel(sample_pairs, log_dir, config_file)
