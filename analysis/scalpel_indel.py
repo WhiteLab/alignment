@@ -9,7 +9,6 @@ from subprocess import call
 from log import log
 
 
-
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['scalpel'], config_data['refs']['capture'], config_data['refs']['fa_ordered'], \
