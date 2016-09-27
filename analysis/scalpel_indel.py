@@ -4,9 +4,11 @@ import sys
 import json
 import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
 from date_time import date_time
 from subprocess import call
 from log import log
+from get_merged_bams import get_merged_bams
 
 
 def parse_config(config_file):
@@ -36,10 +38,12 @@ def create_sample_list(sample_pairs):
 def scalpel_indel(pairs, log_dir, config_file):
     (bed, fasta, cpus, scalpel) = parse_config(config_file)
     # use get_merged_bams api
-    if not os.path.isfile('sample_list.txt'):
+    sample_list = 'sample_list.txt'
+    if not os.path.isfile(sample_list):
         create_sample_list(pairs)
         sys.stderr.write(date_time() + 'Sample pairs list not created - creating one since this is being run likely '
                                        'outside of pipeline')
+        get_merged_bams(config_file, sample_list)
     fh = open(pairs, 'r')
     for line in fh:
         cur = line.rstrip('\n').split('\t')
