@@ -54,6 +54,7 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
         normal_bam = cur[2] + '.merged.final.bam'
         scalpel_cmd = scalpel + ' --somatic --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' + normal_bam \
                       + ' --bed ' + bed + ' --ref ' + fasta + ' 2>> ' + loc
+        sys.stderr.write(date_time() + 'Starting indel calls for ' + cur[0] + '\n')
         log(loc, date_time() + 'Starting indel calls for ' + cur[0] + ' with command:\n' + scalpel_cmd + '\n')
         check = call(scalpel_cmd, shell=True)
         if check != 0:
@@ -63,6 +64,7 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
         mv_cmd = 'mkdir ' + cur[0] + '; mv outdir/main/* ' + cur[0] + '; rm -rf outdir/main;'
         log(loc, date_time() + mv_cmd + '\n')
         call(mv_cmd, shell=True)
+        sys.stderr.write(date_time() + 'Completed indel calls for ' + cur[0] + '\n')
     fh.close()
     sys.stderr.write(date_time() + 'Indel call completed\n')
 
