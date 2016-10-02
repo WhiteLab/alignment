@@ -27,26 +27,29 @@ def pass_filter(sample):
     infile.close()
     out.close()
 
-def annot_scalpel(config_file, sample, ref_mnt):
+def annot_scalpel(config_file, sample_pairs, ref_mnt):
     (java, snpeff, snpsift, dbsnp, intervals) = parse_config(config_file)
-    pass_filter(sample)
-    out_fn = sample + '/' + sample + 'somatic.indel.PASS.vcf'
-    out_fn1 = sample + '/' + sample + 'somatic.indel.PASS.sift.vcf'
-    out_fn2 = sample + '/' + sample + 'somatic.indel.PASS.eff.vcf'
-    dbsnp = ref_mnt + '/' + dbsnp
-    mk_log_dir = 'mkdir LOGS'
-    subprocess.call(mk_log_dir, shell=True)
-    run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
-    run_snpeff = java + ' -jar ' + snpeff + ' eff -t hg19 '
-    run_snp = run_snpsift + ' ' + out_fn + ' > ' + out_fn1 + ' 2> LOGS/'\
-              + sample + '.snpeff.log;' + run_snpeff + ' ' + out_fn1 + ' -v > ' + out_fn2 \
-              + ' 2>> LOGS/' + sample + '.snpeff.log;'
-    check = subprocess.call(run_snp, shell=True)
-    if check == 0:
-        sys.stderr.write(date_time() + 'SNP annotation of indel calls completed!\n')
-    else:
-        sys.stderr.write(date_time() + 'SNP annotation of indel calls for ' + sample + ' FAILED!\n')
-        return 1
+    for line in sample_pairs:
+        cur = line.rstrip('\n').split('\t')
+        sample = cur[0]
+        pass_filter(sample)
+        out_fn = sample + '/' + sample + 'somatic.indel.PASS.vcf'
+        out_fn1 = sample + '/' + sample + 'somatic.indel.PASS.sift.vcf'
+        out_fn2 = sample + '/' + sample + 'somatic.indel.PASS.eff.vcf'
+        dbsnp = ref_mnt + '/' + dbsnp
+        mk_log_dir = 'mkdir LOGS'
+        subprocess.call(mk_log_dir, shell=True)
+        run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
+        run_snpeff = java + ' -jar ' + snpeff + ' eff -t hg19 '
+        run_snp = run_snpsift + ' ' + out_fn + ' > ' + out_fn1 + ' 2> LOGS/'\
+                  + sample + '.snpeff.log;' + run_snpeff + ' ' + out_fn1 + ' -v > ' + out_fn2 \
+                  + ' 2>> LOGS/' + sample + '.snpeff.log;'
+        check = subprocess.call(run_snp, shell=True)
+        if check == 0:
+            sys.stderr.write(date_time() + 'SNP annotation of indel calls completed!\n')
+        else:
+            sys.stderr.write(date_time() + 'SNP annotation of indel calls for ' + sample + ' FAILED!\n')
+            return 1
 
     #table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
     #            '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
