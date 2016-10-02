@@ -15,7 +15,7 @@ def parse_config(config_file):
 
 def pass_filter(sample):
     in_fn = sample + '/somatic.indel.vcf'
-    out_fn = sample + '/' + sample + 'somatic.indel.PASS.vcf'
+    out_fn = sample + '/' + sample + '.somatic_indel.PASS.vcf'
     out = open(out_fn, 'w')
     infile = open(in_fn, 'r')
     for line in infile:
@@ -28,6 +28,7 @@ def pass_filter(sample):
     infile.close()
     out.close()
 
+
 def annot_scalpel(config_file, sample_pairs, ref_mnt):
     (java, snpeff, snpsift, dbsnp, intervals, th) = parse_config(config_file)
     job_list = []
@@ -35,9 +36,9 @@ def annot_scalpel(config_file, sample_pairs, ref_mnt):
     for line in open(sample_pairs, 'r'):
         sample = line.rstrip('\n')
         pass_filter(sample)
-        out_fn = sample + '/' + sample + 'somatic.indel.PASS.vcf'
-        out_fn1 = sample + '/' + sample + 'somatic.indel.PASS.sift.vcf'
-        out_fn2 = sample + '/' + sample + 'somatic.indel.PASS.eff.vcf'
+        out_fn = sample + '/' + sample + '.somatic_indel.PASS.vcf'
+        out_fn1 = sample + '/' + sample + '.somatic_indel.PASS.sift.vcf'
+        out_fn2 = sample + '/' + sample + '.somatic_indel.PASS.eff.vcf'
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
@@ -46,22 +47,6 @@ def annot_scalpel(config_file, sample_pairs, ref_mnt):
                   + sample + '.snpeff.log;' + run_snpeff + ' ' + out_fn1 + ' -v > ' + out_fn2 \
                   + ' 2>> LOGS/' + sample + '.snpeff.log;'
         job_list.append(run_snp)
-        #check = subprocess.call(run_snp, shell=True)
-        #if check == 0:
-        #    sys.stderr.write(date_time() + 'SNP annotation of indel calls completed!\n')
-        #else:
-        #    sys.stderr.write(date_time() + 'SNP annotation of indel calls for ' + sample + ' FAILED!\n')
-        #    return 1
-
-    #table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
-    #            '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
-    #            '"EFF[0].BIOTYPE" "EFF[0].CODING" > ' + sample + '.germline_pass.xls'
-    #check = subprocess.call(table_cmd, shell=True)
-    #if check == 0:
-    #    sys.stderr.write(date_time() + 'Germline table created!\n')
-    #    return 0
-    #else:
-    #    sys.stderr.write(date_time() + 'Germline table failed!\n')
     job_manager(job_list, th)
     return 0
 
