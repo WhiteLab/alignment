@@ -31,13 +31,13 @@ def pass_filter(sample):
 def annot_scalpel(config_file, sample_pairs, ref_mnt):
     (java, snpeff, snpsift, dbsnp, intervals, th) = parse_config(config_file)
     job_list = []
+    dbsnp = ref_mnt + '/' + dbsnp
     for line in open(sample_pairs, 'r'):
         sample = line.rstrip('\n')
         pass_filter(sample)
         out_fn = sample + '/' + sample + 'somatic.indel.PASS.vcf'
         out_fn1 = sample + '/' + sample + 'somatic.indel.PASS.sift.vcf'
         out_fn2 = sample + '/' + sample + 'somatic.indel.PASS.eff.vcf'
-        dbsnp = ref_mnt + '/' + dbsnp
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
