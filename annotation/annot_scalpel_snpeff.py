@@ -32,8 +32,7 @@ def annot_scalpel(config_file, sample_pairs, ref_mnt):
     (java, snpeff, snpsift, dbsnp, intervals, th) = parse_config(config_file)
     job_list = []
     for line in sample_pairs:
-        cur = line.rstrip('\n').split('\t')
-        sample = cur[0]
+        sample = line.rstrip('\n')
         pass_filter(sample)
         out_fn = sample + '/' + sample + 'somatic.indel.PASS.vcf'
         out_fn1 = sample + '/' + sample + 'somatic.indel.PASS.sift.vcf'
