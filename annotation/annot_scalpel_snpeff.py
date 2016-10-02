@@ -5,12 +5,13 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 import subprocess
 import json
+from job_manager import job_manager
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['java'], config_data['tools']['snpEff'], config_data['tools']['snpsift'],
-            config_data['refs']['dbsnp'], config_data['refs']['intervals'])
+            config_data['refs']['dbsnp'], config_data['refs']['intervals'], config_data['params']['threads'])
 
 def pass_filter(sample):
     in_fn = sample + '/somatic.indel.vcf'
@@ -28,7 +29,8 @@ def pass_filter(sample):
     out.close()
 
 def annot_scalpel(config_file, sample_pairs, ref_mnt):
-    (java, snpeff, snpsift, dbsnp, intervals) = parse_config(config_file)
+    (java, snpeff, snpsift, dbsnp, intervals, th) = parse_config(config_file)
+    job_list = []
     for line in sample_pairs:
         cur = line.rstrip('\n').split('\t')
         sample = cur[0]
@@ -44,12 +46,13 @@ def annot_scalpel(config_file, sample_pairs, ref_mnt):
         run_snp = run_snpsift + ' ' + out_fn + ' > ' + out_fn1 + ' 2> LOGS/'\
                   + sample + '.snpeff.log;' + run_snpeff + ' ' + out_fn1 + ' -v > ' + out_fn2 \
                   + ' 2>> LOGS/' + sample + '.snpeff.log;'
-        check = subprocess.call(run_snp, shell=True)
-        if check == 0:
-            sys.stderr.write(date_time() + 'SNP annotation of indel calls completed!\n')
-        else:
-            sys.stderr.write(date_time() + 'SNP annotation of indel calls for ' + sample + ' FAILED!\n')
-            return 1
+        job_list.append(run_snp)
+        #check = subprocess.call(run_snp, shell=True)
+        #if check == 0:
+        #    sys.stderr.write(date_time() + 'SNP annotation of indel calls completed!\n')
+        #else:
+        #    sys.stderr.write(date_time() + 'SNP annotation of indel calls for ' + sample + ' FAILED!\n')
+        #    return 1
 
     #table_cmd = java + ' -jar ' + snpsift + ' extractFields ' + sample + '.germline_pass.eff.vcf CHROM POS ID REF ALT '\
     #            '"EFF[0].EFFECT" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" "EFF[0].GENE" ' \
@@ -60,6 +63,7 @@ def annot_scalpel(config_file, sample_pairs, ref_mnt):
     #    return 0
     #else:
     #    sys.stderr.write(date_time() + 'Germline table failed!\n')
+    job_manager(job_list, th)
     return 0
 
 if __name__ == "__main__":
