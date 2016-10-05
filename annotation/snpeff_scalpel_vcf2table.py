@@ -21,7 +21,7 @@ def convert_vcf(config_file, sample_pairs, suffix):
         out_xls = pair + '/' + pair + '.indels.xls'
         cmd = java + ' -jar ' + sift + ' extractFields ' + in_vcf + \
               ' CHROM POS REF ALT "EFF[0].EFFECT" "EFF[0].FUNCLASS" "EFF[0].CODON" "EFF[0].AA" "EFF[0].AA_LEN" ' \
-              '"EFF[0].GENE" "EFF[0].BIOTYPE" "EFF[0].CODING" MINCOV ALTCOV COVRATIO > ' + out_xls
+              '"EFF[0].GENE" "EFF[0].BIOTYPE" "EFF[0].CODING" MINCOV ALTCOV COVRATIO ID > ' + out_xls
         cmd_list.append(cmd)
     job_manager(cmd_list, th)
 if __name__ == "__main__":
