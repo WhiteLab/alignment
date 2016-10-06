@@ -15,7 +15,8 @@
     "report": "/home/ubuntu/TOOLS/Scripts/annotation/report.py",
     "platypus": "/home/ubuntu/TOOLS/Platypus/bin/Platypus.py",
     "gatk": "/home/ubuntu/TOOLS/GATK/GenomeAnalysisTK.jar",
-    "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-84/scripts/variant_effect_predictor/variant_effect_predictor.pl"
+    "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-84/scripts/variant_effect_predictor/variant_effect_predictor.pl",
+    "scalpel": "/home/ubuntu/TOOLS/scalpel-0.5.3/scalpel-discovery"
   },
   "refs": {
     "bwa": "REFS/bwa-0.7.8/hg19_karyo_ordered.fa",
