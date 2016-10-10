@@ -33,18 +33,19 @@ def annot_scalpel(config_file, sample_pairs, ref_mnt):
     job_list = []
     dbsnp = ref_mnt + '/' + dbsnp
     for line in open(sample_pairs, 'r'):
-        sample = line.rstrip('\n')
-        pass_filter(sample)
-        out_fn = sample + '/' + sample + '.somatic_indel.PASS.vcf'
-        out_fn1 = sample + '/' + sample + '.somatic_indel.PASS.sift.vcf'
-        out_fn2 = sample + '/' + sample + '.somatic_indel.PASS.eff.vcf'
+        pair = line.rstrip('\n').split('\t')
+        pair = pair[0]
+        pass_filter(pair)
+        out_fn = pair + '/' + pair + '.somatic_indel.PASS.vcf'
+        out_fn1 = pair + '/' + pair + '.somatic_indel.PASS.sift.vcf'
+        out_fn2 = pair + '/' + pair + '.somatic_indel.PASS.eff.vcf'
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
         run_snpeff = java + ' -jar ' + snpeff + ' eff -t hg19 '
         run_snp = run_snpsift + ' ' + out_fn + ' > ' + out_fn1 + ' 2> LOGS/'\
-                  + sample + '.snpeff.log;' + run_snpeff + ' ' + out_fn1 + ' -v > ' + out_fn2 \
-                  + ' 2>> LOGS/' + sample + '.snpeff.log;'
+                  + pair + '.snpeff.log;' + run_snpeff + ' ' + out_fn1 + ' -v > ' + out_fn2 \
+                  + ' 2>> LOGS/' + pair + '.snpeff.log;'
         job_list.append(run_snp)
     job_manager(job_list, th)
     return 0
