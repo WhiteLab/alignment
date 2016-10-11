@@ -16,7 +16,8 @@ def convert_vcf(config_file, sample_pairs, suffix):
     (java, sift, th) = parse_config(config_file)
     cmd_list = []
     for pair in open(sample_pairs, 'r'):
-        pair = pair.rstrip('\n')
+        pair = pair.rstrip('\n').split('\t')
+        pair = pair[0]
         in_vcf = pair + '/' + pair + suffix
         out_xls = pair + '/' + pair + '.indels.xls'
         cmd = java + ' -jar ' + sift + ' extractFields ' + in_vcf + \
