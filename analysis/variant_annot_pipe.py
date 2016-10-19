@@ -20,12 +20,14 @@ from annot_scalpel_snpeff import annot_scalpel
 from snpeff_scalpel_vcf2table import convert_vcf
 from annot_platypus_VEP import annot_platypus
 from platypus_germline import platypus_germline
+from scalpel_indel import scalpel_indel
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'],
-            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'])
+            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'],
+            config_data['params']['indelflag'])
 
 
 def check_existing_bams(sample_list):
@@ -44,7 +46,7 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)
-    (novosort, obj, cont, analysis, annotation, germ_flag) = parse_config(config_file)
+    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag) = parse_config(config_file)
     # create sample list
     sample_list = 'sample_list.txt'
     fh = open(sample_pairs, 'r')
