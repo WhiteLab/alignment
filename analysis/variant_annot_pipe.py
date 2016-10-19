@@ -15,6 +15,9 @@ from mutect_pipe import mutect_pipe
 from mutect_merge_sort import mutect_merge_sort
 from snpeff_pipe import snpeff_pipe
 from upload_variants_to_swift import upload_variants_to_swift
+from scalpel_indel import scalpel_indel
+from annot_scalpel_snpeff import annot_scalpel
+from snpeff_scalpel_vcf2table import convert_vcf
 from annot_platypus_VEP import annot_platypus
 from platypus_germline import platypus_germline
 
@@ -117,6 +120,26 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
     else:
         sys.stderr.write(date_time() + 'snpEff failed.\n')
         exit(1)
+    check = scalpel_indel(sample_pairs, 'LOGS/', config_file, ref_mnt)
+    if check == 0:
+        sys.stderr.write(date_time() + 'scalpel successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'scalpel failed.\n')
+        exit(1)
+    check = annot_scalpel(config_file, sample_pairs, ref_mnt)
+    if check == 0:
+        sys.stderr.write(date_time() + 'annot scalpel successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'annot scalpel failed.\n')
+        exit(1)
+    indel_vcf_suffix = '.somatic_indel.PASS.eff.vcf'
+    check = convert_vcf(config_file, sample_pairs, indel_vcf_suffix)
+    if check == 0:
+        sys.stderr.write(date_time() + 'scalpel vcf2table successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'scalpel vcf2table failed.\n')
+        exit(1)
+
     if germ_flag == 'Y':
         sys.stderr.write(date_time() + 'Germ line call flag indicated\n')
         check = platypus_germline(config_file, sample_pairs, 'LOGS/', wg, ref_mnt)

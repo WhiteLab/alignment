@@ -90,6 +90,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
                 exit(1)
         # upload log files
         mut_list = glob.glob('LOGS/' + pair + '.mut*')
+        mut_list.append(glob.glob('LOGS/' + pair + '.scalpel*'))
         for mut in mut_list:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + mut + ' -S ' + str(
                 ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/' + mut + ' >> LOGS/'\
@@ -109,6 +110,38 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         else:
             sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + '.snpeff.log' + ' failed!\n')
             exit(1)
+
+        # check for indel call files, upload in present
+        indel_vcf  = pair + '/' + pair + '.somatic_indel.filtered_FINAL.vcf'
+        if os.path.isfile(indel_vcf):
+            ana_list = glob.glob(pair + '/*PASS*')
+            ana_list.append(pair + '/normal')
+            ana_list.append(pair + '/tumor')
+            ana_list.append(glob.glob(pair + '/*.indel.vcf'))
+            ann_list = (pair + '/' + pair + '.somatic_indel.filtered_FINAL.vcf', pair + '/' + pair + '.indels.xls')
+            for ana in ana_list:
+                fn = ana
+                if not os.path.isdir(ana):
+                    fn = os.path.basename(ana)
+                swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + ana + ' --object-name ' + analysis + '/' + pair \
+                            + '/' + fn
+                check = call(swift_cmd, shell=True)
+                if check == 0:
+                    sys.stderr.write(date_time() + 'Uploading analysis vcf file ' + fn + ' successful!\n')
+                else:
+                    sys.stderr.write(date_time() + 'Uploading analysis vcf file ' + fn + ' failed!\n')
+                    exit(1)
+            for ann in ann_list:
+                fn = os.path.basename(ann)
+                swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + ann + ' --object-name ' + analysis + '/' + pair \
+                            + '/' + fn
+                check = call(swift_cmd, shell=True)
+                if check == 0:
+                    sys.stderr.write(date_time() + 'Uploading annotation vcf file ' + fn + ' successful!\n')
+                else:
+                    sys.stderr.write(date_time() + 'Uploading annotation vcf file ' + fn + ' failed!\n')
+                    exit(1)
+
     fh.close()
 
     return 0

@@ -27,7 +27,6 @@ def snpeff_pipe(config_file, sample_pairs, ref_mnt, cflag):
     run_snpsift = java + ' -jar ' + snpsift + ' annotate ' + dbsnp
     run_snpeff = java + ' -jar ' + snpeff + ' eff -t hg19 '
     for line in fh:
-        # array will store commands to run, next def will take care of job management using popen
         line = line.rstrip('\n')
         (sample, tumor_id, normal_id) = line.split('\t')
         # run snpsift first, then snpeff

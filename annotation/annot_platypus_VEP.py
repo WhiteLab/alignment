@@ -40,7 +40,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
         threads = str(int(threads)/2)
     # parse sample file, use only last if pairs
     samp_fh = open(samp_list, 'r')
-    # track to repvent repeat annotation if same sample used as comparison
+    # track to prevent repeat annotation if same sample used as comparison
     samp_flag = {}
     for line in samp_fh:
         info = line.rstrip('\n').split('\t')
