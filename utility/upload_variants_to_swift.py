@@ -90,7 +90,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
                 exit(1)
         # upload log files
         mut_list = glob.glob('LOGS/' + pair + '.mut*')
-        mut_list.append(glob.glob('LOGS/' + pair + '.scalpel*'))
+        mut_list.extend(glob.glob('LOGS/' + pair + '.scalpel*'))
         for mut in mut_list:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + mut + ' -S ' + str(
                 ONE_GB) + ' --skip-identical --object-name ' + analysis + '/' + pair + '/' + mut + ' >> LOGS/'\
@@ -117,7 +117,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
             ana_list = glob.glob(pair + '/*PASS*')
             ana_list.append(pair + '/normal')
             ana_list.append(pair + '/tumor')
-            ana_list.append(glob.glob(pair + '/*.indel.vcf'))
+            ana_list.extend(glob.glob(pair + '/*.indel.vcf'))
             ann_list = (pair + '/' + pair + '.somatic_indel.filtered_FINAL.vcf', pair + '/' + pair + '.indels.xls')
             for ana in ana_list:
                 fn = ana
