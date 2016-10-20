@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import json
 import os
@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import time
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
 

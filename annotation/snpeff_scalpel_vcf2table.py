@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import json
 from utility.job_manager import job_manager
 

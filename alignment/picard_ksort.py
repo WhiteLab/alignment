@@ -1,7 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 import json
 import subprocess
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 
 
@@ -22,7 +24,8 @@ def ksort(config_file, bam_list, flag, ref_mnt):
     for bam in fh:
         bam = bam.rstrip('\n')
         blist.append(bam)
-        ksort_cmd = java + ' -Xmx4g -jar ' + picard + ' ReorderSam INPUT=' + bam + '  REFERENCE=' + ref_mnt + '/' + fa + ' OUTPUT=' + bam + '.reordered CREATE_INDEX=True 2> LOGS/' + bam + '.log'
+        ksort_cmd = java + ' -Xmx4g -jar ' + picard + ' ReorderSam INPUT=' + bam + '  REFERENCE=' + ref_mnt + '/' \
+                    + fa + ' OUTPUT=' + bam + '.reordered CREATE_INDEX=True 2> LOGS/' + bam + '.log'
         sys.stderr.write(date_time() + 'Started reorder process for ' + bam + '\n' + ksort_cmd + '\n')
         k_proc.append(subprocess.Popen(ksort_cmd, shell=True))
     n = len(blist)

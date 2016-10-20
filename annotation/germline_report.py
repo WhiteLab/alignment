@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+
 from pysam import VariantFile
 import sys
+
 
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)

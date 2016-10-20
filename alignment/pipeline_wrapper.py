@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
 import re
 import argparse

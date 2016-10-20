@@ -1,7 +1,6 @@
-#!/usr/bin/python
-import sys
+#!/usr/bin/env python
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+import sys
 from date_time import date_time
 import subprocess
 

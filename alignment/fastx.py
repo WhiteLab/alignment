@@ -1,6 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 import sys
 import os
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from subprocess import Popen
 from subprocess import call
@@ -20,7 +22,8 @@ def fastx(fastx_tool, sample, end1, end2):
     fastx_cmd = 'gzip -dc ' + end2 + ' | ' + fastx_tool + ' -N -o ' + sample + '_2.qs'
     log(loc, date_time() + fastx_cmd + "\n")
     f2 = Popen(fastx_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
-    # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score didn't fit
+    # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred
+    # score didn't fit
     call('sleep 20s', shell=True)
 
     if str(f1.poll()) == '1' or str(f2.poll()) == '1':

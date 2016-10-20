@@ -1,10 +1,10 @@
 #!/usr/bin/env python
+
 import json
 import os
 import re
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+sys.path.append('/home/ubuntu/TOOLS/Scripts')
 from date_time import date_time
 from swiftclient import client
 from hashlib import md5

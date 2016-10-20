@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+
 import json
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
-
 from utility.date_time import date_time
 from subprocess import call
 from alignment.novosort_merge_pe import novosort_merge_pe

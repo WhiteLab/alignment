@@ -1,5 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from germline_report import gen_report
 from utility.date_time import date_time
 import subprocess

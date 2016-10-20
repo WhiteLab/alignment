@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+
 import glob
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
 from subprocess import call
-
 from date_time import date_time
 
 
@@ -114,9 +115,10 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         # check for indel call files, upload in present
         indel_vcf  = pair + '/' + pair + '.somatic_indel.PASS.eff.vcf'
         if os.path.isfile(indel_vcf):
-            ana_list = glob.glob(pair + '/*PASS*')
+            ana_list = glob.glob(pair + '/*PASS.sift*')
+            ana_list.extend(glob.glob(pair + '/*PASS.vcf'))
             ana_list.extend(glob.glob(pair + '/*.indel.vcf'))
-            ann_list = (pair + '/' + pair + '.indels.xls',)
+            ann_list = (pair + '/' + pair + '.indels.xls', indel_vcf)
             for ana in ana_list:
 
                 fn = os.path.basename(ana)
@@ -130,8 +132,8 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
                     exit(1)
             for ann in ann_list:
                 fn = os.path.basename(ann)
-                swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + ann + ' --object-name ' + analysis + '/' + pair \
-                            + '/' + fn
+                swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + ann + ' --object-name ' + annotation + '/' + pair \
+                            + '/OUTPUT/' + fn
                 check = call(swift_cmd, shell=True)
                 if check == 0:
                     sys.stderr.write(date_time() + 'Uploading annotation vcf file ' + fn + ' successful!\n')

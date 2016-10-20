@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+
 import json
 import os
 import re
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.job_manager import job_manager
 from utility.date_time import date_time
 import subprocess

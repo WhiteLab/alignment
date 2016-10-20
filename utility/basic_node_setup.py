@@ -2,8 +2,6 @@
 # written by Miguel Brown 2015-Feb-17. Sets up a pipeline vm, creates cinder blocks, and attaches
 
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import json
 import argparse
 from setup_vm import setup_vm
