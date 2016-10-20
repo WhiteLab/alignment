@@ -112,17 +112,14 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
             exit(1)
 
         # check for indel call files, upload in present
-        indel_vcf  = pair + '/' + pair + '.somatic_indel.filtered_FINAL.vcf'
+        indel_vcf  = pair + '/' + pair + '.somatic_indel.PASS.eff.vcf'
         if os.path.isfile(indel_vcf):
             ana_list = glob.glob(pair + '/*PASS*')
-            ana_list.append(pair + '/normal')
-            ana_list.append(pair + '/tumor')
             ana_list.extend(glob.glob(pair + '/*.indel.vcf'))
-            ann_list = (pair + '/' + pair + '.somatic_indel.filtered_FINAL.vcf', pair + '/' + pair + '.indels.xls')
+            ann_list = (pair + '/' + pair + '.indels.xls',)
             for ana in ana_list:
-                fn = ana
-                if not os.path.isdir(ana):
-                    fn = os.path.basename(ana)
+
+                fn = os.path.basename(ana)
                 swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + ana + ' --object-name ' + analysis + '/' + pair \
                             + '/' + fn
                 check = call(swift_cmd, shell=True)
