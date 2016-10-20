@@ -67,6 +67,7 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
         sys.stderr.write(date_time() + 'Completed indel calls for ' + cur[0] + '\n')
     fh.close()
     sys.stderr.write(date_time() + 'Indel call completed\n')
+    return 0
 
 
 if __name__ == "__main__":
