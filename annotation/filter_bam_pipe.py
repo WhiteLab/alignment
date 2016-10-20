@@ -4,7 +4,7 @@ import json
 import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from job_manager import job_manager
+from utility.job_manager import job_manager
 
 
 def parse_config(config_file):

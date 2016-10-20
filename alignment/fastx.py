@@ -1,12 +1,10 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import Popen
 from subprocess import call
-from log import log
+from utility.log import log
 
 
 def fastx(fastx_tool, sample, end1, end2):

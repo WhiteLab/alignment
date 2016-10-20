@@ -1,12 +1,9 @@
 #!/usr/bin/python
-import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
 import json
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import call
-from log import log
+from utility.log import log
 
 
 def parse_config(config_file):

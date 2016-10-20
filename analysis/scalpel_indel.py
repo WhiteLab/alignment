@@ -3,12 +3,10 @@
 import sys
 import json
 import os
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import call
-from log import log
-from get_merged_bams import get_merged_bams
+from utility.log import log
+from alignment.get_merged_bams import get_merged_bams
 
 
 def parse_config(config_file):

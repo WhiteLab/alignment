@@ -3,22 +3,18 @@ import json
 import sys
 import os
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/annotation')
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import call
-from novosort_merge_pe import novosort_merge_pe
-from picard_ksort import ksort
-from get_merged_bams import get_merged_bams
+from alignment.novosort_merge_pe import novosort_merge_pe
+from alignment.picard_ksort import ksort
+from alignment.get_merged_bams import get_merged_bams
 from mutect_pipe import mutect_pipe
 from mutect_merge_sort import mutect_merge_sort
-from snpeff_pipe import snpeff_pipe
-from upload_variants_to_swift import upload_variants_to_swift
-from scalpel_indel import scalpel_indel
-from annot_scalpel_snpeff import annot_scalpel
-from snpeff_scalpel_vcf2table import convert_vcf
-from annot_platypus_VEP import annot_platypus
+from annotation.snpeff_pipe import snpeff_pipe
+from utility.upload_variants_to_swift import upload_variants_to_swift
+from annotation.annot_scalpel_snpeff import annot_scalpel
+from annotation.snpeff_scalpel_vcf2table import convert_vcf
+from annotation.annot_platypus_VEP import annot_platypus
 from platypus_germline import platypus_germline
 from scalpel_indel import scalpel_indel
 

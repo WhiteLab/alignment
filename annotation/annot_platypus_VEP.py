@@ -1,8 +1,7 @@
 #!/usr/bin/python
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from germline_report import gen_report
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
 import json
 

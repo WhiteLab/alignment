@@ -1,10 +1,8 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
-from log import log
+from utility.log import log
 
 
 def picard_sort_pe(java_tool, picard_tool, picard_tmp, sample, log_dir):

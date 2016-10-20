@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-import re
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import check_output
 import subprocess
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import json
-from job_manager import job_manager
+from utility.job_manager import job_manager
 
 
 def parse_config(config_file):

@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import subprocess
 import json
 

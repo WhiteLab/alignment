@@ -1,10 +1,8 @@
 #!/usr/bin/python
 import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import check_output
-from download_from_swift import download_from_swift
 import subprocess
 
 

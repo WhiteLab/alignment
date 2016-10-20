@@ -1,10 +1,8 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
-from log import log
+from utility.log import log
 
 
 def novosort_sort_pe(novosort, sample, log_dir, threads, ram, rmdup):

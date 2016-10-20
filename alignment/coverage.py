@@ -1,11 +1,9 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import Popen
 from subprocess import call
-from job_manager import job_manager
+from utility.job_manager import job_manager
 
 
 def exome_coverage(bedtools2_tool, sample, exome_bed_ref, wait_flag):

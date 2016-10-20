@@ -2,18 +2,15 @@
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
 import os
 import re
 import argparse
 import json
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
-from download_from_swift import download_from_swift
+from utility.download_from_swift import download_from_swift
 from pipeline import Pipeline
-from log import log
+from utility.log import log
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f', '--file', action='store', dest='fn',

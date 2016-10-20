@@ -1,11 +1,8 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
 import re
-from date_time import date_time
+from utility.date_time import date_time
 from cutadapter import cutadapter
 from fastx import fastx
 from bwa_mem_pe import bwa_mem_pe
@@ -18,7 +15,7 @@ import coverage
 from subprocess import call
 import subprocess
 import json
-from log import log
+from utility.log import log
 from parse_qc import parse_qc
 
 

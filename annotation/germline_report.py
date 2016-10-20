@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 from pysam import VariantFile
 import sys
-import pdb
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
-
 
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)
