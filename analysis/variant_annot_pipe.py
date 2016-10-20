@@ -149,7 +149,7 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
             exit(1)
 
     # relocate stuff, then upload
-    mv_cmds = 'mv *.bai *.bam BAM; mv *.xls *eff* *sift* *vep* ANNOTATION; mv *out* *vcf* ANALYSIS;'
+    mv_cmds = 'rm -rf outdir; mv *.bai *.bam BAM; mv *.xls *eff* *sift* *vep* ANNOTATION; mv *out* *vcf* ANALYSIS;'
     call(mv_cmds, shell=True)
     check = upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation)
     if check == 0:

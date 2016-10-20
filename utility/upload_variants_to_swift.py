@@ -43,7 +43,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
 
             for suffix in suffix_list:
                 swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + sample + suffix + ' -S ' + str(ONE_GB)\
-                            + ' --skip-identical --object-name ' + analysis + '/' + sample + '/' + '/' + sample\
+                            + ' --skip-identical --object-name ' + analysis + '/' + sample + '/' + sample\
                             + suffix + ' >> LOGS/' + sample + '.upload.log 2>> LOGS/' + sample + '.upload.log'
                 check += call(swift_cmd, shell=True)
             suffix_list = ['.germline_pass.vep.vcf', '.germline_pass.xls',
@@ -65,7 +65,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
     suffix_list2 = ['.out.keep.eff.vcf', '.vcf.keep.eff.xls']
     fh = open(sample_pairs, 'r')
     for line in fh:
-        pair = line.split('\t')[0]
+        pair = line.rstrip('\n').split('\t')[0]
         # upload analysis files
         for suffix in suffix_list1:
             swift_cmd = src_cmd + 'swift upload ' + cont + ' ANALYSIS/' + pair + suffix + ' -S ' + str(
