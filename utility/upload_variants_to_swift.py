@@ -123,7 +123,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
 
                 fn = os.path.basename(ana)
                 swift_cmd = src_cmd + 'swift upload ' + cont + ' ' + ana + ' --object-name ' + analysis + '/' + pair \
-                            + '/' + fn
+                            + '/OUTPUT/' + fn
                 check = call(swift_cmd, shell=True)
                 if check == 0:
                     sys.stderr.write(date_time() + 'Uploading analysis vcf file ' + fn + ' successful!\n')
