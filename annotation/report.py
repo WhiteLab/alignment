@@ -38,8 +38,8 @@ class Reporter:
     def __identify_columns(self):
         self.columns = ['chr', 'pos', 'context', 'ref', 'alt', 'normal_ref_count',
                         'normal_alt_count', '%_normal_alt', 'tumor_ref_count', 'tumor_alt_count',
-                        '%_tumor_alt', 'T/N_%_alt_ratio', 'dbSnp_id', 'gene', 'effect', 'coding', 'codon_change',
-                        'amino_acid_change', 'amino_acid_length', 'mutect_call']
+                        '%_tumor_alt', 'T/N_%_alt_ratio', 'dbSnp_id', 'gene', 'impact', 'effect', 'coding',
+                        'codon_change', 'amino_acid_change', 'amino_acid_length']
         if self.c != 'n':
             self.columns.append('on/off-target')
             sys.stderr.write(date_time() + 'Interval list given - marking on/off target hits\n')
@@ -78,6 +78,43 @@ class Reporter:
         fmt = "{0:.2f}%".format(ratio)
         return ratio, fmt
 
+    def prioritize_impact(self, anno_dict, report, chrom, pos):
+        rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
+        top_gene = ''
+        f = 0
+        for impact in rank:
+            if impact in anno_dict:
+                gene = anno_dict[impact].group('gene_name')
+                if f == 0:
+                    top_gene = gene
+                    f = 1
+                    self.outstring += '\t'.join(report)
+                    self.outstring += '\t%s' % gene
+                    self.outstring += '\t%s' % anno_dict[impact].group('effect_impact')
+                    self.outstring += '\t%s' % anno_dict[impact].group('eff')
+                    self.outstring += '\t%s' % anno_dict[impact].group('gene_coding')
+                    self.outstring += '\t%s' % anno_dict[impact].group('codon_change')
+                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_change')
+                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_length')
+                    if self.c != 'n':
+                        flag = self.search_index(chrom, pos)
+                        self.outstring += '\t%s' % flag
+                    self.outstring += '\n'
+                if f == 1 and gene != top_gene and rank != 'MODIFIFER':
+                    self.outstring += '\t'.join(report)
+                    self.outstring += '\t%s' % gene
+                    self.outstring += '\t%s' % anno_dict[impact].group('effect_impact')
+                    self.outstring += '\t%s' % anno_dict[impact].group('eff')
+                    self.outstring += '\t%s' % anno_dict[impact].group('gene_coding')
+                    self.outstring += '\t%s' % anno_dict[impact].group('codon_change')
+                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_change')
+                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_length')
+                    if self.c != 'n':
+                        flag = self.search_index(chrom, pos)
+                        self.outstring += '\t%s' % flag
+                    self.outstring += '\n'
+        return 0
+
     def parse_infile(self):
 
         column_refs = ''  # lookup for irregularly placed columns
@@ -93,8 +130,10 @@ class Reporter:
                     continue
 
                 report = list()
-                report.append(line[column_refs.index('contig')])  # chromosome
-                report.append(line[column_refs.index('0')])  # position
+                chrom = line[column_refs.index('contig')]
+                pos = line[column_refs.index('0')]
+                report.append(chrom)  # chromosome
+                report.append(pos)  # position
                 # if context contains rs id, remove since it will be in another column
                 id_check = re.search('(\w+);rs(\d+)', line[column_refs.index('context')])
                 if id_check:
@@ -105,7 +144,8 @@ class Reporter:
                 report.append(line[column_refs.index('ALT_ALLELE')])  # alternative
                 report.append(line[column_refs.index('n_ref_count')])  # normal reference count
                 report.append(line[column_refs.index('n_alt_count')])  # normal alternative count
-                # calculate % normal and tumor coverage, keep both formatted and unforamtted version in order to calculate that ratio of the ratios
+                # calculate % normal and tumor coverage, keep both formatted and unformatted version in order
+                # to calculate that ratio of the ratios
                 (n_rat, n_fmt) = self.calc_pct(line[column_refs.index('n_ref_count')],
                                                line[column_refs.index('n_alt_count')])
                 report.append(n_fmt)
@@ -124,27 +164,34 @@ class Reporter:
                 else:
                     report.append('NA')
                 # Interpret the effects of the variant.
+                anno_dict = {}
                 for match in self.regex.finditer(line[7]):
                     # NOTE this is a hack for Kevin's request
                     if self.filter_missense_nonsense_only:
                         if match.group('functional_class') not in ['MISSENSE', 'NONSENSE']:
                             continue
+                    impact = match.group('effect_impact')
+                    if impact not in anno_dict:
+                        anno_dict[impact] = []
+                    anno_dict[impact].append(match)
 
-                    self.outstring += '\t'.join(report)
-                    self.outstring += '\t%s' % match.group('gene_name')
-                    self.outstring += '\t%s' % match.group('eff')
-                    self.outstring += '\t%s' % match.group('gene_coding')
-                    self.outstring += '\t%s' % match.group('codon_change')
-                    self.outstring += '\t%s' % match.group('amino_acid_change')
-                    self.outstring += '\t%s' % match.group('amino_acid_length')
-                    self.outstring += '\t%s' % line[-1]  # keep?
-                    if self.c != 'n':
-                        chrom = line[column_refs.index('contig')]
-                        pos = line[column_refs.index('0')]
-                        flag = self.search_index(chrom, pos)
-                        self.outstring += '\t%s' % flag
-                    self.outstring += '\n'
-                    break
+                    # self.outstring += '\t%s' % match.group('gene_name')
+                    # self.outstring += '\t%s' % match.group('effect_impact')
+                    # self.outstring += '\t%s' % match.group('eff')
+                    # self.outstring += '\t%s' % match.group('gene_coding')
+                    # self.outstring += '\t%s' % match.group('codon_change')
+                    # self.outstring += '\t%s' % match.group('amino_acid_change')
+                    # self.outstring += '\t%s' % match.group('amino_acid_length')
+                    #
+                    # if self.c != 'n':
+                    #     chrom = line[column_refs.index('contig')]
+                    #     pos = line[column_refs.index('0')]
+                    #     flag = self.search_index(chrom, pos)
+                    #     self.outstring += '\t%s' % flag
+                    # self.outstring += '\n'
+                    # break
+
+                self.prioritize_impact(anno_dict, report, chrom, pos)
 
         except IOError:
             print >> sys.stderr, "ERROR: Unable to open -i/--infile: " + self.infile
