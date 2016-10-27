@@ -20,7 +20,6 @@ def mutect_annot_vep_pipe(config_file, sample_pairs, ref_mnt):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     dbsnp = ref_mnt + '/' + dbsnp
-    vcache = ref_mnt + '/' + vcache
     vep_cache = ref_mnt + '/' + vep_cache
     # scale back on the forking a bit
     if int(threads) > 2:
