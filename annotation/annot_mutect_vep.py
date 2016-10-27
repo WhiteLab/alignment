@@ -33,8 +33,8 @@ def mutect_annot_vep_pipe(config_file, sample_pairs, ref_mnt):
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         loc = 'LOGS/' + sample + '.vep_anno.log'
-        in_vcf = sample + '.out.keep.vcf'
-        out_vcf = sample + '.out.keep.vep.vcf'
+        in_vcf = sample + '.vcf.keep'
+        out_vcf = sample + '.vep.vcf'
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --html --variant_class --no_whole_genome --offline --maf_exac --no_whole_genome ' \
                 '--fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache \
