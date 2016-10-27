@@ -84,35 +84,36 @@ class Reporter:
         f = 0
         for impact in rank:
             if impact in anno_dict:
-                gene = anno_dict[impact].group('gene_name')
-                if f == 0:
-                    top_gene = gene
-                    f = 1
-                    self.outstring += '\t'.join(report)
-                    self.outstring += '\t%s' % gene
-                    self.outstring += '\t%s' % anno_dict[impact].group('effect_impact')
-                    self.outstring += '\t%s' % anno_dict[impact].group('eff')
-                    self.outstring += '\t%s' % anno_dict[impact].group('gene_coding')
-                    self.outstring += '\t%s' % anno_dict[impact].group('codon_change')
-                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_change')
-                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_length')
-                    if self.c != 'n':
-                        flag = self.search_index(chrom, pos)
-                        self.outstring += '\t%s' % flag
-                    self.outstring += '\n'
-                if f == 1 and gene != top_gene and rank != 'MODIFIFER':
-                    self.outstring += '\t'.join(report)
-                    self.outstring += '\t%s' % gene
-                    self.outstring += '\t%s' % anno_dict[impact].group('effect_impact')
-                    self.outstring += '\t%s' % anno_dict[impact].group('eff')
-                    self.outstring += '\t%s' % anno_dict[impact].group('gene_coding')
-                    self.outstring += '\t%s' % anno_dict[impact].group('codon_change')
-                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_change')
-                    self.outstring += '\t%s' % anno_dict[impact].group('amino_acid_length')
-                    if self.c != 'n':
-                        flag = self.search_index(chrom, pos)
-                        self.outstring += '\t%s' % flag
-                    self.outstring += '\n'
+                for entry in anno_dict[impact]:
+                    gene = entry.group('gene_name')
+                    if f == 0:
+                        top_gene = gene
+                        f = 1
+                        self.outstring += '\t'.join(report)
+                        self.outstring += '\t%s' % gene
+                        self.outstring += '\t%s' % entry.group('effect_impact')
+                        self.outstring += '\t%s' % entry.group('eff')
+                        self.outstring += '\t%s' % entry.group('gene_coding')
+                        self.outstring += '\t%s' % entry.group('codon_change')
+                        self.outstring += '\t%s' % entry.group('amino_acid_change')
+                        self.outstring += '\t%s' % entry.group('amino_acid_length')
+                        if self.c != 'n':
+                            flag = self.search_index(chrom, pos)
+                            self.outstring += '\t%s' % flag
+                        self.outstring += '\n'
+                    if f == 1 and gene != top_gene and rank != 'MODIFIFER':
+                        self.outstring += '\t'.join(report)
+                        self.outstring += '\t%s' % gene
+                        self.outstring += '\t%s' % entry.group('effect_impact')
+                        self.outstring += '\t%s' % entry.group('eff')
+                        self.outstring += '\t%s' % entry.group('gene_coding')
+                        self.outstring += '\t%s' % entry.group('codon_change')
+                        self.outstring += '\t%s' % entry.group('amino_acid_change')
+                        self.outstring += '\t%s' % entry.group('amino_acid_length')
+                        if self.c != 'n':
+                            flag = self.search_index(chrom, pos)
+                            self.outstring += '\t%s' % flag
+                        self.outstring += '\n'
         return 0
 
     def parse_infile(self):
