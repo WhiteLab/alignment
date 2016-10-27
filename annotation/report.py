@@ -176,22 +176,6 @@ class Reporter:
                         anno_dict[impact] = []
                     anno_dict[impact].append(match)
 
-                    # self.outstring += '\t%s' % match.group('gene_name')
-                    # self.outstring += '\t%s' % match.group('effect_impact')
-                    # self.outstring += '\t%s' % match.group('eff')
-                    # self.outstring += '\t%s' % match.group('gene_coding')
-                    # self.outstring += '\t%s' % match.group('codon_change')
-                    # self.outstring += '\t%s' % match.group('amino_acid_change')
-                    # self.outstring += '\t%s' % match.group('amino_acid_length')
-                    #
-                    # if self.c != 'n':
-                    #     chrom = line[column_refs.index('contig')]
-                    #     pos = line[column_refs.index('0')]
-                    #     flag = self.search_index(chrom, pos)
-                    #     self.outstring += '\t%s' % flag
-                    # self.outstring += '\n'
-                    # break
-
                 self.prioritize_impact(anno_dict, report, chrom, pos)
 
         except IOError:
