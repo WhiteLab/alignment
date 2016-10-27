@@ -12,7 +12,7 @@ import json
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
-            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['refs']['vep_cache_version'],
+            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
             config_file['params']['threads'])
 
 
