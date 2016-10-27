@@ -19,7 +19,6 @@ def merge_sort(suffix_dict, pair, fai_list):
         head = ''
         for fn in suffix_dict['out']:
             fh = open(pair + '/' + fn, 'r')
-            head = ''
             head = next(fh)
             head += next(fh)
             for line in fh:
