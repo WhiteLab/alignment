@@ -38,7 +38,7 @@ def mutect_annot_vep_pipe(config_file, sample_pairs, ref_mnt):
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --variant_class --no_whole_genome --offline --maf_exac --no_whole_genome ' \
                 '--fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache \
-                + ' --plugin dbNSFP,' + dbsnp + ' 2>> ' + loc + ' >> ' + loc
+                + ' 2>> ' + loc + ' >> ' + loc
         log(loc, date_time() + 'Annotating sample ' + sample + '\n')
         check = subprocess.call(run_vep, shell=True)
         if check != 0:
