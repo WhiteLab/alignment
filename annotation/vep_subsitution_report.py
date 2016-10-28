@@ -120,7 +120,7 @@ def gen_report(vcf, out, c):
     loc = 'LOGS/' + parts[0] + '.vep_priority_report.log'
     log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
     mut_dict = create_ind(out)
-    log(loc, + date_time() + 'Created index for added mutect info\n')
+    log(loc, date_time() + 'Created index for added mutect info\n')
     on_dict = {}
     if c != 'n':
         on_dict = create_target(c)
