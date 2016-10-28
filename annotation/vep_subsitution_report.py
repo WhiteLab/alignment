@@ -19,7 +19,7 @@ def create_ind(out):
     h_list = (2, 25, 26, 37, 38)
     for line in mut_out:
         info = line.rstrip('\n').split('\t')
-        var_tup = info[0] + '\t' + info[1] + info[2] + info[3]
+        var_tup = '\t'.join((info[0] + info[1] + info[3] + info[4]))
         res_dict[var_tup] = {}
         for i in h_list:
             res_dict[var_tup][head[i]] = info[i]
