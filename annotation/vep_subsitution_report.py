@@ -124,7 +124,7 @@ def gen_report(vcf, out, c):
     on_dict = {}
     if c != 'n':
         on_dict = create_target(c)
-        log(loc, + date_time() + 'Target file given, creating index for on target info\n')
+        log(loc, date_time() + 'Target file given, creating index for on target info\n')
     vcf_in = VariantFile(vcf)
 
     out = open(parts[0] + '.vep_prioritized_impact_report.xls', 'w')
@@ -155,6 +155,7 @@ def gen_report(vcf, out, c):
         output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag, out)
 
     out.close()
+    log(loc, date_time() + 'Creating prioritized report for ' + vcf + ' complete!\n')
     return 0
 
 
