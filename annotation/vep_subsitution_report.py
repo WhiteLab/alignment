@@ -105,7 +105,7 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                 ExAC_MAF = ''
                 if len(ExAC_MAFs) > 1:
                     check = re.search(ref + ':(\S+)', ExAC_MAFs)
-                    ExAC_MAF = check.group(1)
+                    ExAC_MAF = check.group(0)
                 if f == 0:
                     top_gene = gene
                     f = 1
