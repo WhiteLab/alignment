@@ -146,7 +146,7 @@ def gen_report(vcf, out, c):
             'tumor_ref_count\ttumor_alt_count\t%_tumor_alt\tT/N_%_alt_ratio\tsnp_ID\tExAC_MAF\tgene\teffect\timpact'
             '\tbiotype\tcodon_change\tamino_acid_change\ton/off-target\n')
     for record in vcf_in.fetch():
-        (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, str(record.alts)
+        (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, record.alts[0]
 
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         tflag = 'NA'
