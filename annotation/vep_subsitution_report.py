@@ -65,7 +65,7 @@ def calc_pct(a, b):
     return ratio, fmt
 
 
-def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tflag):
+def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tflag, out):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
@@ -105,10 +105,12 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                     outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
+                out.write(outstring)
                 if f == 1 and gene != top_gene and rank != 'MODIFIFER':
                     outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
+                    out.write(outstring)
 
 
 def gen_report(vcf, out, c):
@@ -150,7 +152,7 @@ def gen_report(vcf, out, c):
         tflag = 'NA'
         if c != 'n':
             tflag = mark_target(chrom, pos, on_dict)
-        output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag)
+        output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag, out)
 
     out.close()
     return 0
