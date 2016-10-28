@@ -19,7 +19,7 @@ def create_ind(out):
     h_list = (2, 25, 26, 37, 38)
     for line in mut_out:
         info = line.rstrip('\n').split('\t')
-        var_tup = '\t'.join((info[0] + info[1] + info[3] + info[4]))
+        var_tup = '\t'.join((info[0], info[1], info[3], info[4]))
         res_dict[var_tup] = {}
         for i in h_list:
             res_dict[var_tup][head[i]] = info[i]
@@ -74,8 +74,8 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
     outstring = ''
     var_tup = '\t'.join((chrom , pos , ref , alt))
     (context,  norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct) = (mut_dict[var_tup]['context'],
-    mut_dict[var_tup]['normal_ref_count'], mut_dict[var_tup]['normal_alt_count'], mut_dict[var_tup]['tumor_ref_count'],
-    mut_dict[var_tup]['tumor_alt_count'])
+    mut_dict[var_tup]['n_ref_count'], mut_dict[var_tup]['n_alt_count'], mut_dict[var_tup]['t_ref_count'],
+    mut_dict[var_tup]['t_alt_count'])
     norm_alt_pct = '0'
     norm_alt_rf = 0.0
     tum_alt_pct = '0'
