@@ -102,8 +102,10 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                 ann[loc_dict['Consequence']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
                 ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']])
                 # need to parse exac maf to get desired allele freq, not all possible
-                check = re.search(ref + ':(\S+)', ExAC_MAFs)
-                ExAC_MAF = check.group(1)
+                ExAC_MAF = ''
+                if len(ExAC_MAFs) > 1:
+                    check = re.search(ref + ':(\S+)', ExAC_MAFs)
+                    ExAC_MAF = check.group(1)
                 if f == 0:
                     top_gene = gene
                     f = 1
