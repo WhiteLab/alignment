@@ -73,7 +73,7 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
     # index annotations by impact rank
     rank_dict = {}
     outstring = ''
-    var_tup = '\t'.join((chrom , pos , ref , alt))
+    var_tup = '\t'.join((chrom, pos, ref, alt))
     (context,  norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct) = (mut_dict[var_tup]['context'],
     mut_dict[var_tup]['n_ref_count'], mut_dict[var_tup]['n_alt_count'], mut_dict[var_tup]['t_ref_count'],
     mut_dict[var_tup]['t_alt_count'])
@@ -83,9 +83,9 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
     tum_alt_rf = 0.0
     tn_ratio = tum_alt_ct
     if int(norm_alt_ct) + int(norm_ref_ct) > 0:
-        (norm_alt_rf, norm_alt_pct) = calc_pct(norm_alt_ct, norm_ref_ct)
+        (norm_alt_rf, norm_alt_pct) = calc_pct(norm_ref_ct, norm_alt_ct)
     if int(tum_alt_ct) + int(tum_ref_ct) > 0:
-        (tum_alt_rf, tum_alt_pct) = calc_pct(tum_alt_ct, tum_ref_ct)
+        (tum_alt_rf, tum_alt_pct) = calc_pct(tum_ref_ct, tum_alt_ct)
     if norm_alt_rf > 0:
         tn_ratio = "{0:.2f}".format(tum_alt_rf/norm_alt_rf)
 
@@ -98,16 +98,19 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
         if impact in rank_dict:
             for ann in rank_dict[impact]:
                 #pdb.set_trace()
-                (gene, effect, aa, codon, snp_id, ExAC_MAF, biotype) = (ann[loc_dict['SYMBOL']],
+                (gene, effect, aa, codon, snp_id, ExAC_MAFs, biotype) = (ann[loc_dict['SYMBOL']],
                 ann[loc_dict['Consequence']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
                 ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']])
+                # need to parse exac maf to get desired allele freq, not all possible
+                check = re.search(ref + ':(\S+)', ExAC_MAFs)
+                ExAC_MAF = check.group(1)
                 if f == 0:
                     top_gene = gene
                     f = 1
                     outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
-                out.write(outstring)
+                    out.write(outstring)
                 if f == 1 and gene != top_gene and rank != 'MODIFIER':
                     outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
