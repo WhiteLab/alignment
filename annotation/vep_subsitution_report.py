@@ -3,9 +3,11 @@
 import argparse
 import os
 import sys
+import re
 from pysam import VariantFile
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
+from utility.log import log
 
 
 def create_ind(out):
@@ -25,15 +27,107 @@ def create_ind(out):
     return res_dict
 
 
+def create_target(cfile):
+        cindex = {}
+        fh = open(cfile, 'r')
+        for line in fh:
+            m = re.search('(chr\w+):(\d+)-(\d+)', line)
+            try:
+                (chrom, start, end) = (m.group(1), m.group(2), m.group(3))
+            except:
+                sys.stderr.write(line + ' doesn\'t fit format (chr\w+):(\d+)-(\d+), skipping\n')
+                continue
+            if chrom not in cindex:
+                cindex[chrom] = {}
+            cindex[chrom][(int(start))] = int(end)
+        return cindex
+
+
+def mark_target(chrom, pos, on_dict):
+    f = 0
+    if chrom in on_dict:
+        for start in sorted(on_dict[chrom]):
+            if start <= int(pos) <= on_dict[chrom][start]:
+                f = 1
+                break
+            elif start > int(pos):
+                break
+    status = "OFF"
+    if f == 1:
+        status = "ON"
+    return status
+
+
+def calc_pct(a, b):
+    # return both formatted and unformatted
+    ratio = float(b) / (float(a) + float(b)) * 100
+    fmt = "{0:.2f}%".format(ratio)
+    return ratio, fmt
+
+
+def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tflag):
+    rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
+    top_gene = ''
+    f = 0
+    # index annotations by impact rank
+    rank_dict = {}
+    outstring = ''
+    var_tup = '\t'.join((chrom , pos , ref , alt))
+    (context,  norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct) = (mut_dict[var_tup]['context'],
+    mut_dict[var_tup]['normal_ref_count'], mut_dict[var_tup]['normal_alt_count'], mut_dict[var_tup]['tumor_ref_count'],
+    mut_dict[var_tup]['tumor_alt_count'])
+    norm_alt_pct = '0'
+    norm_alt_rf = 0.0
+    tum_alt_pct = '0'
+    tum_alt_rf = 0.0
+    tn_ratio = tum_alt_ct
+    if int(norm_alt_ct) + int(norm_ref_ct) > 0:
+        (norm_alt_rf, norm_alt_pct) = calc_pct(norm_alt_ct, norm_ref_ct)
+    if int(tum_alt_ct) + int(tum_ref_ct) > 0:
+        (tum_alt_rf, tum_alt_pct) = calc_pct(tum_alt_ct, tum_ref_ct)
+    if norm_alt_rf > 0:
+        tn_ratio = "{0:.2f}".format(tum_alt_rf/norm_alt_rf)
+
+    for ann in ann_list:
+        impact = ann[loc_dict['IMPACT']]
+        if impact not in rank_dict:
+            rank_dict[impact] = []
+        rank_dict[impact].append(ann)
+    for impact in rank:
+        if impact in rank_dict:
+            for ann in rank_dict[impact]:
+                (gene, effect, aa, codon, snp_id, ExAC_MAF, biotype) = (ann[loc_dict['SYMBOL']],
+                ann[loc_dict['Consequence']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
+                ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']])
+                if f == 0:
+                    top_gene = gene
+                    f = 1
+                    outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
+                                            tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
+                                            effect, impact, biotype, codon, aa, tflag)) + '\n'
+                if f == 1 and gene != top_gene and rank != 'MODIFIFER':
+                    outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
+                                            tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
+                                            effect, impact, biotype, codon, aa, tflag)) + '\n'
+
+
 def gen_report(vcf, out, c):
     # open out file and index counts, context, etc
-    (mut_dict) = create_ind(out)
-    vcf_in = VariantFile(vcf)
     fn = os.path.basename(vcf)
     parts = fn.split('.')
-    out = open(parts[0] + '.germline_pass.xls', 'w')
-    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0,
-               'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
+    loc = 'LOGS/' + parts[0] + '.vep_priority_report.log'
+    log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
+    mut_dict = create_ind(out)
+    log(loc, + date_time() + 'Created index for added mutect info\n')
+    on_dict = {}
+    if c != 'n':
+        on_dict = create_target(c)
+        log(loc, + date_time() + 'Target file given, creating index for on target info\n')
+    vcf_in = VariantFile(vcf)
+
+    out = open(parts[0] + '.vep_prioritized_impact_report.xls', 'w')
+    desired = {'Consequence': '', 'IMPACT': '', 'SYMBOL': '', 'Amino_acids': '', 'Codons': '', 'Existing_variation': '',
+               'ExAC_MAF': '', 'BIOTYPE': ''}
 
     desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
@@ -45,27 +139,21 @@ def gen_report(vcf, out, c):
     for i in xrange(0, ann_size, 1):
         if desc_list[i] in desired:
             f_pos_list.append(i)
-            desired[desc_list[i]] = 1
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tConsequence\tIMPACT\t'
-                    'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
-                    'CLIN_SIG\tCADD_PHRED\n')
+            desired[desc_list[i]] = i
+    out.write('chr\tpos\tcontext\tref\talt\tnormal_ref_count\tnormal_alt_count\t%_normal_alt\t'
+            'tumor_ref_count\ttumor_alt_count\t%_tumor_alt\tT/N_%_alt_ratio\tsnp_ID\tExAC_MAF\tgene\teffect\timpact'
+            '\tbiotype\tcodon_change\tamino_acid_change\ton/off-target\n')
     for record in vcf_in.fetch():
-        #pdb.set_trace()
-        common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['TR']),
-                            str(record.info['TC'])))
+        (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, str(record.alts)
+
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
-        temp = {}
-        for ann in ann_list:
-            cur = ''
-            for i in f_pos_list:
-                cur += '\t' + ann[i]
-            if cur not in temp:
-                out.write(common + cur + '\n')
-                temp[cur] = 1
+        tflag = 'NA'
+        if c != 'n':
+            tflag = mark_target(chrom, pos, on_dict)
+        output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag)
+
     out.close()
     return 0
-
-
 
 
 def main():
