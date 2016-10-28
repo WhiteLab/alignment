@@ -104,7 +104,7 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                 # need to parse exac maf to get desired allele freq, not all possible
                 ExAC_MAF = ''
                 if len(ExAC_MAFs) > 1:
-                    maf_list = ExAC_MAFs.split('%')
+                    maf_list = ExAC_MAFs.split('&')
                     for maf in maf_list:
                         check = re.match(alt + ':(\S+)', maf)
                         if check:
