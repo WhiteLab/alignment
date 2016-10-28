@@ -116,7 +116,7 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
                     out.write(outstring)
-                if f == 1 and gene != top_gene and rank != 'MODIFIER':
+                if f == 1 and gene != top_gene and impact != 'MODIFIER':
                     outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
