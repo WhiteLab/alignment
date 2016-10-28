@@ -8,6 +8,7 @@ from pysam import VariantFile
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
+import pdb
 
 
 def create_ind(out):
@@ -96,6 +97,7 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
     for impact in rank:
         if impact in rank_dict:
             for ann in rank_dict[impact]:
+                #pdb.set_trace()
                 (gene, effect, aa, codon, snp_id, ExAC_MAF, biotype) = (ann[loc_dict['SYMBOL']],
                 ann[loc_dict['Consequence']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
                 ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']])
@@ -106,7 +108,7 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
                 out.write(outstring)
-                if f == 1 and gene != top_gene and rank != 'MODIFIFER':
+                if f == 1 and gene != top_gene and rank != 'MODIFIER':
                     outstring += '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct,
                                             tum_ref_ct, tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene,
                                             effect, impact, biotype, codon, aa, tflag)) + '\n'
@@ -147,7 +149,6 @@ def gen_report(vcf, out, c):
             '\tbiotype\tcodon_change\tamino_acid_change\ton/off-target\n')
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, record.alts[0]
-
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         tflag = 'NA'
         if c != 'n':
