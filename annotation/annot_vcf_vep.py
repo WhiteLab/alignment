@@ -16,10 +16,9 @@ def parse_config(config_file):
             config_data['params']['threads'])
 
 
-def mutect_annot_vep_pipe(config_file, sample_pairs, ref_mnt):
+def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
-    dbsnp = ref_mnt + '/' + dbsnp
     vep_cache = ref_mnt + '/' + vep_cache
     # scale back on the forking a bit
     if int(threads) > 2:
@@ -33,19 +32,19 @@ def mutect_annot_vep_pipe(config_file, sample_pairs, ref_mnt):
         mk_log_dir = 'mkdir LOGS'
         subprocess.call(mk_log_dir, shell=True)
         loc = 'LOGS/' + sample + '.vep_anno.log'
-        in_vcf = sample + '.vcf.keep'
-        out_vcf = sample + '.vep.vcf'
+        in_vcf = sample + in_suffix
+        out_vcf = sample + out_suffix
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --variant_class --no_whole_genome --offline --maf_exac --no_whole_genome ' \
                 '--fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache \
                 + ' 2>> ' + loc + ' >> ' + loc
-        log(loc, date_time() + 'Annotating sample ' + sample + '\n')
+        log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         check = subprocess.call(run_vep, shell=True)
         if check != 0:
-            log(loc, date_time() + 'VEP annotation for ' + sample + ' failed\n')
+            log(loc, date_time() + 'VEP annotation for ' + sample + in_suffix + ' failed\n')
             exit(1)
         else:
-            log(loc, date_time() + 'VEP annotation ' + sample + ' successful!\n')
+            log(loc, date_time() + 'VEP annotation ' + sample + in_suffix + ' successful!\n')
 
 if __name__ == "__main__":
     import argparse
@@ -54,6 +53,8 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs')
+    parser.add_argument('-is', '--in_suffix', action='store', dest='in_suffix', help='Suffix of input files')
+    parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output files')
     parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
                         help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
 
@@ -62,5 +63,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, ref_mnt) = (inputs.config_file, inputs.sample_pairs, inputs.ref_mnt)
-    mutect_annot_vep_pipe(config_file, sample_pairs, ref_mnt)
+    (config_file, sample_pairs, ref_mnt, in_suffix, out_suffix) = (inputs.config_file, inputs.sample_pairs,
+                                                                  inputs.ref_mnt, inputs.in_suffix, inputs.out_suffix)
+    annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix)

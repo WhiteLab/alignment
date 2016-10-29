@@ -26,7 +26,7 @@ def gen_report(vcf, sample):
                     'CLIN_SIG\tCADD_PHRED\n')
     for record in vcf_in.fetch():
         #pdb.set_trace()
-        common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['TR']),
+        common = '\t'.join((record.contig, str(record.pos), record.ref, record.alts[0], str(record.info['TR']),
                             str(record.info['TC'])))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         temp = {}
