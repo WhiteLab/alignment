@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import sys
+import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
-from utility.job_manager import job_manager
 from utility.log import log
 import subprocess
 import json
@@ -13,16 +13,13 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
-            config_data['params']['threads'], config_data['params']['pass_flag'])
+            config_data['params']['threads'])
 
 
-def pass_filter(sample, in_suffix, pflag):
+def pass_filter(sample, in_suffix):
     in_fn = sample + in_suffix
     pass_val = 'PASS'
     out_suffix = '.somatic_indel.PASS.vcf'
-    if pflag == 'sub':
-        out_suffix = '.keep.vcf'
-        pass_val = 'KEEP'
     out_fn = sample + out_suffix
     out = open(out_fn, 'w')
     infile = open(in_fn, 'r')
@@ -37,8 +34,8 @@ def pass_filter(sample, in_suffix, pflag):
     out.close()
 
 
-def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, pflag) = parse_config(config_file)
+def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
     # scale back on the forking a bit
@@ -55,8 +52,8 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         loc = 'LOGS/' + sample + '.vep_anno.log'
         in_vcf = sample + in_suffix
         out_vcf = sample + out_suffix
-        if pflag != 'N':
-            pass_filter(sample, in_suffix, pflag)
+        if source != 'scalpel':
+            pass_filter(sample, in_suffix)
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --variant_class --no_whole_genome --offline --maf_exac --no_whole_genome ' \
                 '--fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache \
@@ -76,6 +73,8 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs')
+    parser.add_argument('-so', '--source', action='store', dest='source', help='Variant call annot source - mutect or'
+                                                                               ' scalpel')
     parser.add_argument('-is', '--in_suffix', action='store', dest='in_suffix', help='Suffix of input files')
     parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output files')
     parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
@@ -86,6 +85,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, ref_mnt, in_suffix, out_suffix) = (inputs.config_file, inputs.sample_pairs,
-                                                                  inputs.ref_mnt, inputs.in_suffix, inputs.out_suffix)
-    annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix)
+    (config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source) = (inputs.config_file, inputs.sample_pairs,
+                                                    inputs.ref_mnt, inputs.in_suffix, inputs.out_suffix, inputs.source)
+    annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source)

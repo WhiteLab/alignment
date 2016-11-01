@@ -58,7 +58,6 @@
     "pdxflag": "N",
     "germflag": "Y",
     "indelflag": "Y",
-    "pass_flag": "indel",
     "min_VAF_GL": "0.3"
   }
 }
