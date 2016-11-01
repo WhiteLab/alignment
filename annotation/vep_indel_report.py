@@ -85,7 +85,7 @@ def gen_report(vcf):
             '\tbiotype\tcodon_change\tamino_acid_change\talt_cov\tnon_alt_cov\tvaf\n')
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
-                                                record.info['MINCOV'], record.info['ALTCOV'], record.info['COVRATIO'])
+                                str(record.info['MINCOV']), str(record.info['ALTCOV']), str(record.info['COVRATIO']))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, desired, out)
 
