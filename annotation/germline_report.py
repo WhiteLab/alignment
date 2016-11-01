@@ -4,7 +4,7 @@ from pysam import VariantFile
 import sys
 
 
-def output_highest_impact(common, ann_list, loc_dict, out):
+def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_dict, out):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
@@ -21,10 +21,11 @@ def output_highest_impact(common, ann_list, loc_dict, out):
         if impact in rank_dict:
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, variant_class, effect, aa, codon, snp_id, ExAC_MAFs, biotype) = (ann[loc_dict['SYMBOL']],
-                ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']], ann[loc_dict['Amino_acids']],
-                ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']],
-                ann[loc_dict['BIOTYPE']])
+                (gene, variant_class, effect, aa, codon, snp_id, ExAC_MAFs, biotype, sift, clin_sig, phred) = \
+                (ann[loc_dict['SYMBOL']], ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
+                 ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']],
+                 ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']], ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']],
+                 ann[loc_dict['CADD_PHRED']])
                 # need to parse exac maf to get desired allele freq, not all possible
                 ExAC_MAF = ''
                 if len(ExAC_MAFs) > 1:
@@ -36,12 +37,12 @@ def output_highest_impact(common, ann_list, loc_dict, out):
                 if f == 0:
                     top_gene = gene
                     f = 1
-                    outstring += '\t'.join((common, snp_id, ExAC_MAF, gene, variant_class,
-                                            effect, impact, biotype, codon, aa)) + '\n'
+                    outstring += '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, effect, impact, biotype, codon,
+                                            aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
                     out.write(outstring)
                 if f == 1 and gene != top_gene and impact != 'MODIFIER':
-                    outstring += '\t'.join((common, snp_id, ExAC_MAF, gene,
-                                            effect, impact, biotype, codon, aa)) + '\n'
+                    outstring += '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, effect, impact, biotype, codon,
+                                            aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
                     out.write(outstring)
 
 
@@ -62,15 +63,15 @@ def gen_report(vcf, sample):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tEffect\tIMPACT\t'
-                    'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
+    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tEffect\tIMPACT\t'
+                    'BIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
                     'CLIN_SIG\tCADD_PHRED\n')
     for record in vcf_in.fetch():
         #pdb.set_trace()
-        common = '\t'.join((record.contig, str(record.pos), record.ref, record.alts[0], str(record.info['TR']),
-                            str(record.info['TC'])))
+        (chrom, pos, ref, alt, alt_ct, tot_ct) = (record.contig, str(record.pos), record.ref, record.alts[0],
+                                                  str(record.info['TR']), str(record.info['TC']))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
-        output_highest_impact(common, ann_list, desired, out)
+        output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, desired, out)
     out.close()
     return 0
 
