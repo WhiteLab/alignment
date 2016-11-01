@@ -10,37 +10,6 @@ from utility.date_time import date_time
 from utility.log import log
 
 
-def create_target(cfile):
-        cindex = {}
-        fh = open(cfile, 'r')
-        for line in fh:
-            m = re.search('(chr\w+):(\d+)-(\d+)', line)
-            try:
-                (chrom, start, end) = (m.group(1), m.group(2), m.group(3))
-            except:
-                sys.stderr.write(line + ' doesn\'t fit format (chr\w+):(\d+)-(\d+), skipping\n')
-                continue
-            if chrom not in cindex:
-                cindex[chrom] = {}
-            cindex[chrom][(int(start))] = int(end)
-        return cindex
-
-
-def mark_target(chrom, pos, on_dict):
-    f = 0
-    if chrom in on_dict:
-        for start in sorted(on_dict[chrom]):
-            if start <= int(pos) <= on_dict[chrom][start]:
-                f = 1
-                break
-            elif start > int(pos):
-                break
-    status = "OFF"
-    if f == 1:
-        status = "ON"
-    return status
-
-
 def calc_pct(a, b):
     # return both formatted and unformatted
     ratio = float(b) / (float(a) + float(b)) * 100
@@ -48,7 +17,7 @@ def calc_pct(a, b):
     return ratio, fmt
 
 
-def output_highest_impact(chrom, pos, ref, alt, ann_list, loc_dict, tflag, out):
+def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, loc_dict, out):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
@@ -81,24 +50,20 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, loc_dict, tflag, out):
                     top_gene = gene
                     f = 1
                     outstring += '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, variant_class,
-                                            effect, impact, biotype, codon, aa, tflag)) + '\n'
+                                            effect, impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
                     out.write(outstring)
                 if f == 1 and gene != top_gene and impact != 'MODIFIER':
                     outstring += '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene,
-                                            effect, impact, biotype, codon, aa, tflag)) + '\n'
+                                            effect, impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
                     out.write(outstring)
 
 
-def gen_report(vcf, c):
+def gen_report(vcf):
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
     loc = 'LOGS/' + parts[0] + '.indels.vep_priority.report.log'
     log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
-    on_dict = {}
-    if c != 'n':
-        on_dict = create_target(c)
-        log(loc, date_time() + 'Target file given, creating index for on target info\n')
     vcf_in = VariantFile(vcf)
 
     out = open(parts[0] + '.indels.vep.prioritized_impact.report.xls', 'w')
@@ -117,14 +82,12 @@ def gen_report(vcf, c):
             f_pos_list.append(i)
             desired[desc_list[i]] = i
     out.write('chr\tpos\tcontext\tref\talt\tsnp_ID\tExAC_MAF\tgene\tvariant_class_effect\timpact'
-            '\tbiotype\tcodon_change\tamino_acid_change\ton/off-target\n')
+            '\tbiotype\tcodon_change\tamino_acid_change\talt_cov\tnon_alt_cov\tvaf\n')
     for record in vcf_in.fetch():
-        (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, record.alts[0]
+        (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
+                                                record.info['MINCOV'], record.info['ALTCOV'], record.info['COVRATIO'])
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
-        tflag = 'NA'
-        if c != 'n':
-            tflag = mark_target(chrom, pos, on_dict)
-        output_highest_impact(chrom, pos, ref, alt, ann_list, desired, tflag, out)
+        output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, desired, out)
 
     out.close()
     log(loc, date_time() + 'Creating prioritized report for ' + vcf + ' complete!\n')
@@ -136,15 +99,13 @@ def main():
         description='parse VEP annotated output into a digestable report, prioritizing highest impact calls.')
     parser.add_argument('-v', '--vcf', action='store', dest='vcf',
                         help='VEP annotated variant file')
-    parser.add_argument('-c', '--custom', action='store', dest='c',
-                        help='bed file to mark whether hit was on or off-target. if not desired, enter \'n\' ')
 
     if len(sys.argv) == 1:
         parser.print_help()
         exit(1)
     args = parser.parse_args()
 
-    gen_report(args.vcf, args.c)
+    gen_report(args.vcf)
 
 
 if __name__ == '__main__':
