@@ -81,7 +81,7 @@ def gen_report(vcf):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('chr\tpos\tcontext\tref\talt\tsnp_ID\tExAC_MAF\tgene\tvariant_class_effect\timpact'
+    out.write('chr\tpos\tref\talt\tsnp_ID\tExAC_MAF\tgene\tvariant_class_effect\teffect\timpact'
             '\tbiotype\tcodon_change\tamino_acid_change\talt_cov\tnon_alt_cov\tvaf\n')
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
