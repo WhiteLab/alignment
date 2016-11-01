@@ -13,11 +13,32 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
-            config_data['params']['threads'])
+            config_data['params']['threads'], config_data['params']['pass_flag'])
+
+
+def pass_filter(sample, in_suffix, pflag):
+    in_fn = sample + in_suffix
+    pass_val = 'PASS'
+    out_suffix = '.somatic_indel.PASS.vcf'
+    if pflag == 'sub':
+        out_suffix = '.keep.vcf'
+        pass_val = 'KEEP'
+    out_fn = sample + out_suffix
+    out = open(out_fn, 'w')
+    infile = open(in_fn, 'r')
+    for line in infile:
+        if line[0] == '#':
+            out.write(line)
+        else:
+            fields = line.split('\t')
+            if fields[6] == pass_val:
+                out.write(line)
+    infile.close()
+    out.close()
 
 
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, pflag) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
     # scale back on the forking a bit
@@ -34,6 +55,8 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         loc = 'LOGS/' + sample + '.vep_anno.log'
         in_vcf = sample + in_suffix
         out_vcf = sample + out_suffix
+        if pflag != 'N':
+            pass_filter(sample, in_suffix, pflag)
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --variant_class --no_whole_genome --offline --maf_exac --no_whole_genome ' \
                 '--fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache \
