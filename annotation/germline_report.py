@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import re
 from pysam import VariantFile
 import sys
 
