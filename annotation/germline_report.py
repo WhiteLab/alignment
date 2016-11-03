@@ -22,11 +22,15 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
         if impact in rank_dict:
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, variant_class, effect, aa, codon, snp_id, ExAC_MAFs, biotype, sift, clin_sig, phred) = \
+                (gene, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype, sift, clin_sig, phred) = \
                 (ann[loc_dict['SYMBOL']], ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
-                 ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']],
-                 ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']], ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']],
-                 ann[loc_dict['CADD_PHRED']])
+                 ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
+                 ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']],
+                 ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']], ann[loc_dict['CADD_PHRED']])
+                # Format amino acid change to be oldPOSnew
+                if len(aa) > 0:
+                    (old, new) = aa.split('/')
+                    aa = old + str(aa_pos + new)
                 # need to parse exac maf to get desired allele freq, not all possible
                 ExAC_MAF = ''
                 if len(ExAC_MAFs) > 1:
@@ -50,8 +54,9 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)
     out = open(sample + '.germline_pass.xls', 'w')
-    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0,
-               'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
+    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Protein_position': 0,
+               'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0, 'Existing_variation': 0, 'VARIANT_CLASS': 0,
+               'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
 
     desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
