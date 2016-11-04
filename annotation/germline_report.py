@@ -22,14 +22,15 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
         if impact in rank_dict:
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype, sift, clin_sig, phred) = \
-                (ann[loc_dict['SYMBOL']], ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
-                 ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
-                 ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']], ann[loc_dict['BIOTYPE']],
-                 ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']], ann[loc_dict['CADD_PHRED']])
+                (gene, tx_id, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype, sift, clin_sig,
+                 phred) = (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['VARIANT_CLASS']],
+                 ann[loc_dict['Consequence']], ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']],
+                 ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']],
+                 ann[loc_dict['BIOTYPE']], ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']],
+                 ann[loc_dict['CADD_PHRED']])
                 # Format amino acid change to be oldPOSnew
                 if len(aa) > 0:
-                    # if a snv, just aaPOS
+                    # if a snv modifier, just aaPOS
                     if len(aa) == 1:
                         aa += str(aa_pos)
                     else:
@@ -43,22 +44,22 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                         check = re.match(alt + ':(\S+)', maf)
                         if check:
                             ExAC_MAF = check.group(1)
+                cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, tx_id, effect, impact, biotype, codon,
+                                            aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
                 if f == 0:
                     top_gene = gene
                     f = 1
-                    outstring += '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, effect, impact, biotype, codon,
-                                            aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
+                    outstring += cur_var
                     out.write(outstring)
                 if f == 1 and gene != top_gene and impact != 'MODIFIER':
-                    outstring += '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, effect, impact, biotype, codon,
-                                            aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
+                    outstring += cur_var
                     out.write(outstring)
 
 
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)
     out = open(sample + '.germline_pass.xls', 'w')
-    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Protein_position': 0,
+    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0,
                'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0, 'Existing_variation': 0, 'VARIANT_CLASS': 0,
                'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
 
@@ -73,9 +74,9 @@ def gen_report(vcf, sample):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tEffect\tIMPACT\t'
-                    'BIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
-                    'CLIN_SIG\tCADD_PHRED\n')
+    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tTranscript_id\tEffect\t'
+              'IMPACT\tBIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\tCLIN_SIG\tC'
+              'ADD_PHRED\n')
     for record in vcf_in.fetch():
         #pdb.set_trace()
         (chrom, pos, ref, alt, alt_ct, tot_ct) = (record.contig, str(record.pos), record.ref, record.alts[0],

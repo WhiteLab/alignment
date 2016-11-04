@@ -34,10 +34,11 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
         if impact in rank_dict:
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, variant_class, effect, aa, codon, snp_id, ExAC_MAFs, biotype) = (ann[loc_dict['SYMBOL']],
-                ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']], ann[loc_dict['Amino_acids']],
-                ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']],
-                ann[loc_dict['BIOTYPE']])
+                (gene, tx_id, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype) = \
+                    (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['VARIANT_CLASS']],
+                     ann[loc_dict['Consequence']], ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']],
+                     ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']], ann[loc_dict['ExAC_MAF']],
+                     ann[loc_dict['BIOTYPE']])
                 # need to parse exac maf to get desired allele freq, not all possible
                 ExAC_MAF = ''
                 if len(ExAC_MAFs) > 1:
@@ -46,15 +47,23 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
                         check = re.match(alt + ':(\S+)', maf)
                         if check:
                             ExAC_MAF = check.group(1)
+                # Format amino acid change to be oldPOSnew
+                if len(aa) > 0:
+                    # if a snv modifier, just aaPOS
+                    if len(aa) == 1:
+                        aa += str(aa_pos)
+                    else:
+                        (old, new) = aa.split('/')
+                        aa = old + str(aa_pos + new)
+                cur_var = '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
+                                     impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
                 if f == 0:
                     top_gene = gene
                     f = 1
-                    outstring += '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, variant_class,
-                                            effect, impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
+                    outstring += cur_var
                     out.write(outstring)
                 if f == 1 and gene != top_gene and impact != 'MODIFIER':
-                    outstring += '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene,
-                                            effect, impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
+                    outstring += cur_var
                     out.write(outstring)
 
 
@@ -67,8 +76,8 @@ def gen_report(vcf):
     vcf_in = VariantFile(vcf)
 
     out = open(parts[0] + '.indels.vep.prioritized_impact.report.xls', 'w')
-    desired = {'Consequence': '', 'IMPACT': '', 'SYMBOL': '', 'Amino_acids': '', 'Codons': '', 'Existing_variation': '',
-               'ExAC_MAF': '', 'BIOTYPE': '', 'VARIANT_CLASS': ''}
+    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0, 'Amino_acids': 0,
+               'Codons': 0, 'Existing_variation': 0, 'ExAC_MAF': 0, 'BIOTYPE': 0, 'VARIANT_CLASS': 0}
 
     desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
@@ -81,7 +90,7 @@ def gen_report(vcf):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('chr\tpos\tref\talt\tsnp_ID\tExAC_MAF\tgene\tvariant_class_effect\teffect\timpact'
+    out.write('chr\tpos\tref\talt\tsnp_ID\tExAC_MAF\tgene\ttranscript_id\tvariant_class_effect\teffect\timpact'
             '\tbiotype\tcodon_change\tamino_acid_change\talt_cov\tnon_alt_cov\tvaf\n')
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
