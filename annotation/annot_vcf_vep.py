@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-import os
+from vep_subsitution_report import gen_report as gen_snv_report
+from vep_indel_report import gen_report as gen_indel_report
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
@@ -13,7 +14,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
-            config_data['params']['threads'])
+            config_data['params']['threads'], config_data['refs']['intervals'])
 
 
 def pass_filter(sample, in_suffix):
@@ -35,9 +36,10 @@ def pass_filter(sample, in_suffix):
 
 
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
+    intvl = ref_mnt + '/' + intvl
     # scale back on the forking a bit
     if int(threads) > 2:
         threads = str(int(threads)/2)
@@ -66,6 +68,17 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             exit(1)
         else:
             log(loc, date_time() + 'VEP annotation ' + sample + in_suffix + ' successful!\n')
+        if source == 'mutect':
+            check = gen_snv_report(out_vcf, sample + '.out.keep', intvl)
+            if check != 0:
+                log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
+                exit(1)
+        else:
+            check = gen_indel_report(out_vcf)
+            if check != 0:
+                log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
+                exit(1)
+    return 0
 
 if __name__ == "__main__":
     import argparse
