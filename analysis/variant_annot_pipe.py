@@ -11,10 +11,7 @@ from alignment.picard_ksort import ksort
 from alignment.get_merged_bams import get_merged_bams
 from mutect_pipe import mutect_pipe
 from mutect_merge_sort import mutect_merge_sort
-from annotation.snpeff_pipe import snpeff_pipe
 from utility.upload_variants_to_swift import upload_variants_to_swift
-from annotation.annot_scalpel_snpeff import annot_scalpel
-from annotation.snpeff_scalpel_vcf2table import convert_vcf
 from annotation.annot_platypus_VEP import annot_platypus
 from platypus_germline import platypus_germline
 from scalpel_indel import scalpel_indel
@@ -24,7 +21,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'],
             config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'],
-            config_data['params']['indelflag'])
+            config_data['params']['indelflag'], config_data['params']['annotator'])
 
 
 def check_existing_bams(sample_list):
@@ -38,12 +35,47 @@ def check_existing_bams(sample_list):
     return temp_list
 
 
+def snpEff(config_file, sample_pairs, ref_mnt, wg):
+    from annotation.snpeff_pipe import snpeff_pipe
+    from annotation.annot_scalpel_snpeff import annot_scalpel
+    from annotation.snpeff_scalpel_vcf2table import convert_vcf
+    check = snpeff_pipe(config_file, sample_pairs, ref_mnt, wg)
+    if check == 0:
+        sys.stderr.write(date_time() + 'snpEff successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'snpEff failed.\n')
+        exit(1)
+    check = annot_scalpel(config_file, sample_pairs, ref_mnt)
+    if check == 0:
+        sys.stderr.write(date_time() + 'annot scalpel successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'annot scalpel failed.\n')
+        exit(1)
+    indel_vcf_suffix = '.somatic_indel.PASS.eff.vcf'
+    check = convert_vcf(config_file, sample_pairs, indel_vcf_suffix)
+    if check == 0:
+        sys.stderr.write(date_time() + 'scalpel vcf2table successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'scalpel vcf2table failed.\n')
+        exit(1)
+
+
+def vep(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
+    from annotation.annot_vcf_vep import annot_vcf_vep_pipe
+    check = annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source)
+    if check == 0:
+        sys.stderr.write(date_time() + 'vep annotation of ' + source + ' output successful.\n')
+    else:
+        sys.stderr.write(date_time() + 'vep annotation of ' + source + ' output failed.\n')
+        exit(1)
+
+
 def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
     # create eventual output location directories
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)
-    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag) = parse_config(config_file)
+    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot) = parse_config(config_file)
     # create sample list
     sample_list = 'sample_list.txt'
     fh = open(sample_pairs, 'r')
@@ -112,32 +144,18 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
         sys.stderr.write(date_time() + 'Mutect file merge successful.\n')
     else:
         sys.stderr.write(date_time() + 'Mutect file merge failed.\n')
-
-    check = snpeff_pipe(config_file, sample_pairs, ref_mnt, wg)
-    if check == 0:
-        sys.stderr.write(date_time() + 'snpEff successful.\n')
-    else:
-        sys.stderr.write(date_time() + 'snpEff failed.\n')
-        exit(1)
+    # create def to do vep or snpeff mode for annotation
     check = scalpel_indel(sample_pairs, 'LOGS/', config_file, ref_mnt)
     if check == 0:
         sys.stderr.write(date_time() + 'scalpel successful.\n')
     else:
         sys.stderr.write(date_time() + 'scalpel failed.\n')
         exit(1)
-    check = annot_scalpel(config_file, sample_pairs, ref_mnt)
-    if check == 0:
-        sys.stderr.write(date_time() + 'annot scalpel successful.\n')
-    else:
-        sys.stderr.write(date_time() + 'annot scalpel failed.\n')
-        exit(1)
-    indel_vcf_suffix = '.somatic_indel.PASS.eff.vcf'
-    check = convert_vcf(config_file, sample_pairs, indel_vcf_suffix)
-    if check == 0:
-        sys.stderr.write(date_time() + 'scalpel vcf2table successful.\n')
-    else:
-        sys.stderr.write(date_time() + 'scalpel vcf2table failed.\n')
-        exit(1)
+
+    if annot == 'snpEff':
+        snpEff(config_file, sample_pairs, ref_mnt, wg)
+    if annot == 'vep':
+        vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.vep.vcf', 'mutect')
 
     if germ_flag == 'Y':
         sys.stderr.write(date_time() + 'Germ line call flag indicated\n')

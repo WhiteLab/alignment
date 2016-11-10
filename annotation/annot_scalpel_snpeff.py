@@ -12,6 +12,7 @@ def parse_config(config_file):
     return (config_data['tools']['java'], config_data['tools']['snpEff'], config_data['tools']['snpsift'],
             config_data['refs']['dbsnp'], config_data['refs']['intervals'], config_data['params']['threads'])
 
+
 def pass_filter(sample):
     in_fn = sample + '/somatic.indel.vcf'
     out_fn = sample + '/' + sample + '.somatic_indel.PASS.vcf'
