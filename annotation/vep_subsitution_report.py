@@ -124,10 +124,9 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                     top_gene = gene
                     f = 1
                     outstring += cur_var
-                    out.write(outstring)
                 if f == 1 and gene != top_gene and impact != 'MODIFIER':
                     outstring += cur_var
-                    out.write(outstring)
+    out.write(outstring)
 
 
 def gen_report(vcf, out, c):
