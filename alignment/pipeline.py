@@ -18,6 +18,7 @@ from subprocess import call
 import subprocess
 import json
 from utility.log import log
+from utility.upload_to_swift import upload_to_swift
 from parse_qc import parse_qc
 
 
@@ -229,7 +230,6 @@ class Pipeline:
         subprocess.call(mv_rest, shell=True)
         mv_config = ' cp ' + self.json_config + ' QC/'
         subprocess.call(mv_config, shell=True)
-        from upload_to_swift import upload_to_swift
         obj = self.obj + "/" + self.bid + "/"
 
         check = upload_to_swift(self.cont, obj)
