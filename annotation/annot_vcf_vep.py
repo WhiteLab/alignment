@@ -18,7 +18,7 @@ def parse_config(config_file):
 
 
 def pass_filter(sample, in_suffix):
-    in_fn = sample + in_suffix
+    in_fn = sample + '/somatic.' + in_suffix
     pass_val = 'PASS'
     out_suffix = '.somatic_indel.PASS.vcf'
     out_fn = sample + out_suffix

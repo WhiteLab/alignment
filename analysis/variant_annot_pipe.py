@@ -156,6 +156,7 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
         snpEff(config_file, sample_pairs, ref_mnt, wg)
     if annot == 'vep':
         vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.vep.vcf', 'mutect')
+        vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
 
     if germ_flag == 'Y':
         sys.stderr.write(date_time() + 'Germ line call flag indicated\n')
