@@ -122,6 +122,7 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg):
             missing_fn = 'to_merge.txt'
             missing_fh = open(missing_fn, 'w')
             missing_fh.write('\n'.join(miss_list))
+            missing_fh.close()
             run_novosort(config_file, missing_fn, obj)
     else:
         sys.stderr.write(date_time() + 'All bams found.  Moving on\n')
