@@ -35,6 +35,18 @@ def check_existing_bams(sample_list):
     return temp_list
 
 
+def run_novosort(config_file, sample_list, obj):
+        check = novosort_merge_pe(config_file, sample_list)
+        if check == 0:
+            sys.stderr.write(date_time() + 'File download and merge complete!\n')
+            # rm unmerged bams, no longer needed
+            rm_bam = 'rm -rf ' + obj
+            call(rm_bam, shell=True)
+        else:
+            sys.stderr.write(date_time() + 'File download and merge failed.\n')
+            exit(1)
+
+
 def snpEff(config_file, sample_pairs, ref_mnt, wg):
     from annotation.snpeff_pipe import snpeff_pipe
     from annotation.annot_scalpel_snpeff import annot_scalpel
@@ -70,7 +82,7 @@ def vep(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
         exit(1)
 
 
-def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
+def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg):
     # create eventual output location directories
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
@@ -93,46 +105,39 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm):
     fh .close()
     del temp
     # download and merge (if necessary) bam files
-    if sm == 'n':
-        check = novosort_merge_pe(config_file, sample_list)
-        if check == 0:
-            sys.stderr.write(date_time() + 'File download and merge complete!\n')
-            # rm unmerged bams, no longer needed
-            rm_bam = 'rm -rf ' + obj
-            call(rm_bam, shell=True)
+    temp_list = check_existing_bams(sample_list)
+
+    if len(temp_list) > 0:
+        sys.stderr.write(date_time() + 'Missing files detected, downloading merged bam files\n')
+        temp_fn = 'temp_samp_list.txt'
+        temp_fh = open(temp_fn, 'w')
+        temp_fh.write('\n'.join(temp_list))
+        temp_fh.close()
+        miss_list = get_merged_bams(config_file, temp_fn)
+        if len(miss_list) == 0:
+            sys.stderr.write(date_time() + 'Merged bam files successfully download\n')
         else:
-            sys.stderr.write(date_time() + 'File download and merge failed.\n')
-            exit(1)
-        if kflag == 'y':
-            # create bam list for ksort
-            bam_list = 'bam_list.txt'
-            blist_cmd = 'ls *.merged.final.bam > ' + bam_list
-            call(blist_cmd, shell=True)
-            check = ksort(config_file, bam_list, kflag, ref_mnt)
-            if check == 0:
-                sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files completed\n')
-            else:
-                sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files failed.\n')
-                exit(1)
+            sys.stderr.write(date_time() + 'Some merged bams appear to be missing, trying downloading constituent bams '
+                                           'then merging\n')
+            missing_fn = 'to_merge.txt'
+            missing_fh = open(missing_fn, 'w')
+            missing_fh.write('\n'.join(miss_list))
+            run_novosort(config_file, missing_fn, obj)
     else:
-        # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
-        sys.stderr.write(date_time() + 'Skip merge indicated, checking for already merged bam files\n')
-        temp_list = check_existing_bams(sample_list)
-        if len(temp_list) > 0:
-            sys.stderr.write(date_time() + 'Missing files detected, downloading merged bam files\n')
-            temp_fn = 'temp_samp_list.txt'
-            temp_fh = open(temp_fn, 'w')
-            temp_fh.write('\n'.join(temp_list))
-            temp_fh.close()
-            check = get_merged_bams(config_file, temp_fn)
-            if check == 0:
-                sys.stderr.write(date_time() + 'Merged bam files successfully download\n')
-            else:
-                sys.stderr.write(date_time() + 'Merged bam file download failed.  Make sure container, object correctly'
-                                               ' configured in config file\n')
-                exit(1)
+        sys.stderr.write(date_time() + 'All bams found.  Moving on\n')
+    if kflag == 'y':
+        # create bam list for ksort
+        bam_list = 'bam_list.txt'
+        blist_cmd = 'ls *.merged.final.bam > ' + bam_list
+        call(blist_cmd, shell=True)
+        check = ksort(config_file, bam_list, kflag, ref_mnt)
+        if check == 0:
+            sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files completed\n')
         else:
-            sys.stderr.write(date_time() + 'All bams found.  Moving on\n')
+            sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files failed.\n')
+            exit(1)
+    # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
+
     check = mutect_pipe(config_file, sample_pairs, ref_mnt)
     if check == 0:
         sys.stderr.write(date_time() + 'Mutect variant calls successful\n')
@@ -197,15 +202,12 @@ if __name__ == "__main__":
     parser.add_argument('-wg', '--whole-genome', action='store', dest='wg',
                         help='\'y\' or \'n\' flag if whole genome or not.  will determine whether to flag for on/off '
                              'target')
-    parser.add_argument('-sm', '--skip-merge', action='store', dest='sm',
-                        help='\'y\' or \'n\' flag to skip merge files.  Useful for repeating variant calls when BAMs'
-                             ' were already merged, sorted, etc the first time')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file, kflag, ref_mnt, wg, sm) = (
-        inputs.sample_pairs, inputs.config_file, inputs.kflag, inputs.ref_mnt, inputs.wg, inputs.sm)
-    variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg, sm)
+    (sample_pairs, config_file, kflag, ref_mnt, wg) = (
+        inputs.sample_pairs, inputs.config_file, inputs.kflag, inputs.ref_mnt, inputs.wg)
+    variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg)

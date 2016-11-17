@@ -29,6 +29,9 @@ def list_bam(cont, obj, sample, threads):
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' --output '\
                      + os.path.basename(fn)
             p.append(dl_cmd)
+    if len(p) < 1:
+        sys.stderr.write(date_time() + 'No merged bam found for ' + sample + '\n')
+        return 1
     f = job_manager(p, threads)
     if f == 0:
         sys.stderr.write(date_time() + 'BAM download complete\n')
@@ -40,10 +43,13 @@ def list_bam(cont, obj, sample, threads):
 def get_merged_bams(config_file, sample_list):
     fh = open(sample_list, 'r')
     (cont, obj, threads, ram) = parse_config(config_file)
+    missing = []
     for sample in fh:
         sample = sample.rstrip('\n')
-        list_bam(cont, obj, sample, threads)
-    return 0
+        check = list_bam(cont, obj, sample, threads)
+        if check != 0:
+            missing.append(sample)
+    return missing
 
 
 if __name__ == "__main__":
