@@ -49,12 +49,12 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
                             ExAC_MAF = check.group(1)
                 # Format amino acid change to be oldPOSnew
                 if len(aa) > 0:
-                    # if a snv modifier, just aaPOS
-                    if len(aa) == 1:
+                    # if a snv or syn, just aaPOS
+                    test = aa.split('/')
+                    if len(test) == 1:
                         aa += str(aa_pos)
                     else:
-                        (old, new) = aa.split('/')
-                        aa = old + str(aa_pos + new)
+                        aa = test[0] + str(aa_pos) + test[1]
                 cur_var = '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
                                      impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
                 if f == 0:

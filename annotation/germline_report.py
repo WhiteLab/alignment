@@ -30,12 +30,12 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                  ann[loc_dict['CADD_PHRED']])
                 # Format amino acid change to be oldPOSnew
                 if len(aa) > 0:
-                    # if a snv modifier, just aaPOS
-                    if len(aa) == 1:
+                    # if a snv or syn, just aaPOS
+                    test = aa.split('/')
+                    if len(test) == 1:
                         aa += str(aa_pos)
                     else:
-                        (old, new) = aa.split('/')
-                        aa = old + str(aa_pos + new)
+                        aa = test[0] + str(aa_pos) + test[1]
                 # need to parse exac maf to get desired allele freq, not all possible
                 ExAC_MAF = ''
                 if len(ExAC_MAFs) > 1:
