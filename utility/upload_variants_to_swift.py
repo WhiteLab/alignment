@@ -8,7 +8,7 @@ from subprocess import call
 from date_time import date_time
 
 
-def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation):
+def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation, annot_used):
     src_cmd = '. ~/.novarc;'
     ONE_GB = 1073741824
     fh = open(sample_list, 'r')
@@ -64,6 +64,9 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
     # upload analysis and annotation files
     suffix_list1 = ['.out', '.out.keep', '.vcf', '.vcf.keep']
     suffix_list2 = ['.out.keep.eff.vcf', '.vcf.keep.eff.xls']
+    if annot_used == 'vep':
+        suffix_list2 = ['.snv.vep.vcf', '.subsitutions.vep.prioritized_impact.report.xls', '.snv.vep.vcf.html',
+                        '.snv.vep.vcf_summary.html']
     fh = open(sample_pairs, 'r')
     for line in fh:
         pair = line.rstrip('\n').split('\t')[0]
@@ -105,20 +108,34 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
         swift_cmd = src_cmd + 'swift upload ' + cont + ' LOGS/' + pair + '.snpeff.log -S ' + str(
             ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/LOGS/' + pair\
                     + '.snpeff.log >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
+        if annot_used == 'vep':
+            swift_cmd = src_cmd + 'swift upload ' + cont + ' LOGS/' + pair + '.vep_anno.log -S ' + str(
+            ONE_GB) + ' --skip-identical --object-name ' + annotation + '/' + pair + '/LOGS/' + pair\
+                    + '.vep_anno.log >> LOGS/' + pair + '.upload.log 2>> LOGS/' + pair + '.upload.log'
         check = call(swift_cmd, shell=True)
         if check == 0:
-            sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + '.snpeff.log' + ' successful!\n')
+            sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + ' using ' + annot_used
+                             + ' successful!\n')
         else:
-            sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + '.snpeff.log' + ' failed!\n')
+            sys.stderr.write(date_time() + 'Uploading annotation log file ' + pair + ' using ' + annot_used
+                             + ' failed!\n')
             exit(1)
 
         # check for indel call files, upload in present
-        indel_vcf  = pair + '/' + pair + '.somatic_indel.PASS.eff.vcf'
+        indel_vcf = pair + '/' + pair + '.somatic_indel.PASS.eff.vcf'
+        if annot_used == 'vep':
+            indel_vcf  = pair + '/somatic.indel.vcf'
         if os.path.isfile(indel_vcf):
-            ana_list = glob.glob(pair + '/*PASS.sift*')
-            ana_list.extend(glob.glob(pair + '/*PASS.vcf'))
-            ana_list.extend(glob.glob(pair + '/*.indel.vcf'))
-            ann_list = (pair + '/' + pair + '.indels.xls', indel_vcf)
+            if annot_used == 'vep':
+                ana_list = glob.glob(pair + '/*indel*')
+                # need to rename variats subfile
+                ana_list.append(indel_vcf)
+                ann_list = glob.glob('ANNOTATION/' + pair + '*indel*')
+            else:
+                ana_list = glob.glob(pair + '/*PASS.sift*')
+                ana_list.extend(glob.glob(pair + '/*PASS.vcf'))
+                ana_list.extend(glob.glob(pair + '/*.indel.vcf'))
+                ann_list = (pair + '/' + pair + '.indels.xls', indel_vcf)
             for ana in ana_list:
 
                 fn = os.path.basename(ana)
@@ -161,12 +178,15 @@ if __name__ == "__main__":
                         help='Analysis output object root, i.e. ANALYSIS')
     parser.add_argument('-ann', '--annotation', action='store', dest='annotation',
                         help='Analysis output object root, i.e. ANNOTATION')
+    parser.add_argument('-anu', '--annot_used', action='store', dest='annot_used',
+                        help='Software used for annotation, likely snpeff or vep')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (cont, obj, sample_list, sample_pairs, analysis, annotation) = (
-        inputs.cont, inputs.obj, inputs.sample_list, inputs.sample_pairs, inputs.analysis, inputs.annotation)
-    upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation)
+    (cont, obj, sample_list, sample_pairs, analysis, annotation, annot_used) = (
+        inputs.cont, inputs.obj, inputs.sample_list, inputs.sample_pairs, inputs.analysis, inputs.annotation,
+        inputs.annot_used)
+    upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation, annot_used)

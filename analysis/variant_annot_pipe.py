@@ -87,7 +87,7 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg):
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)
-    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot) = parse_config(config_file)
+    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot_used) = parse_config(config_file)
     # create sample list
     sample_list = 'sample_list.txt'
     fh = open(sample_pairs, 'r')
@@ -158,9 +158,9 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg):
         sys.stderr.write(date_time() + 'scalpel failed.\n')
         exit(1)
 
-    if annot == 'snpEff':
+    if annot_used == 'snpEff':
         snpEff(config_file, sample_pairs, ref_mnt, wg)
-    if annot == 'vep':
+    if annot_used == 'vep':
         vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.snv.vep.vcf', 'mutect')
         vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
 
@@ -177,7 +177,7 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg):
     # relocate stuff, then upload
     mv_cmds = 'rm -rf outdir; mv *.bai *.bam BAM; mv *.xls *eff* *sift* *vep* ANNOTATION; mv *out* *vcf* ANALYSIS;'
     call(mv_cmds, shell=True)
-    check = upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation)
+    check = upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation, annot_used)
     if check == 0:
         sys.stderr.write(date_time() + 'Uploading data to swift successful!\n')
     else:
