@@ -8,7 +8,9 @@ from utility.log import log
 
 
 def picard_sort_pe(java_tool, picard_tool, picard_tmp, sample, log_dir):
-    picard_sort_pe_cmd = java_tool + " -Xmx8g -jar " + picard_tool + " SortSam CREATE_INDEX=true TMP_DIR=" + picard_tmp + " INPUT=" + sample + ".bam OUTPUT=" + sample + ".srt.bam SORT_ORDER=coordinate VALIDATION_STRINGENCY=LENIENT > " + log_dir + sample + ".picard.sort.pe.log 2>&1"
+    picard_sort_pe_cmd = java_tool + " -Xmx8g -jar " + picard_tool + " SortSam CREATE_INDEX=true TMP_DIR=" \
+                         + picard_tmp + " INPUT=" + sample + ".bam OUTPUT=" + sample + ".srt.bam SORT_ORDER=" \
+                        "coordinate VALIDATION_STRINGENCY=LENIENT > " + log_dir + sample + ".picard.sort.pe.log 2>&1"
     log(log_dir + sample + ".picard.sort.pe.log", date_time() + picard_sort_pe_cmd + "\n")
     try:
         subprocess.check_output(picard_sort_pe_cmd, shell=True)

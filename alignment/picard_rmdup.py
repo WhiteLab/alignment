@@ -8,7 +8,11 @@ from utility.log import log
 
 
 def picard_rmdup(java_tool, picard_tool, picard_tmp, sample, log_dir, ram):
-    picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true ASSUME_SORTED=true MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".srt.bam OUTPUT=" + sample + ".rmdup.srt.bam METRICS_FILE=" + sample + ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT > " + log_dir + sample + ".picard.rmdup.pe.log 2>&1"
+    picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates CREATE_INDEX=true " \
+                    "TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true ASSUME_SORTED=true " \
+                    "MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".srt.bam OUTPUT=" + sample \
+                       + ".rmdup.srt.bam METRICS_FILE=" + sample + ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT " \
+                                                                   "> " + log_dir + sample + ".picard.rmdup.pe.log 2>&1"
     log(log_dir + sample + ".picard.rmdup.pe.log", date_time() + picard_rmdup_cmd + "\n")
     call(picard_rmdup_cmd, shell=True)
 
