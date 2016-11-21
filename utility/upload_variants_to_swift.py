@@ -65,8 +65,7 @@ def upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, ann
     suffix_list1 = ['.out', '.out.keep', '.vcf', '.vcf.keep']
     suffix_list2 = ['.out.keep.eff.vcf', '.vcf.keep.eff.xls']
     if annot_used == 'vep':
-        suffix_list2 = ['.snv.vep.vcf', '.subsitutions.vep.prioritized_impact.report.xls', '.snv.vep.vcf.html',
-                        '.snv.vep.vcf_summary.html']
+        suffix_list2 = ['.snv.vep.vcf', '.subsitutions.vep.prioritized_impact.report.xls', '.snv.vep.vcf_summary.html']
     fh = open(sample_pairs, 'r')
     for line in fh:
         pair = line.rstrip('\n').split('\t')[0]
