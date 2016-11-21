@@ -35,6 +35,7 @@ def list_bam(cont, obj, sample, threads):
     f = job_manager(p, threads)
     if f == 0:
         sys.stderr.write(date_time() + 'BAM download complete\n')
+        return 0
     else:
         sys.stderr.write(date_time() + 'BAM download failed\n')
         exit(1)
