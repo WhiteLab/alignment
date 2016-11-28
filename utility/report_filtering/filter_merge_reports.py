@@ -3,7 +3,7 @@ import sys
 import re
 import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
-from utility.date_time import date_time
+#from utility.date_time import date_time
 
 
 def update_summary(summary, pair, reason):
@@ -27,7 +27,7 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary):
         if line == '\n':
             continue
         info = line.rstrip('\n').split('\t')
-        vtup = '\t'.join((info[0], info[1], info[2], info[3]))
+        vtup = '\t'.join(info[0:4])
         if vtup in banned_tup:
             summary = update_summary(summary, pair, 'panel')
             continue
@@ -43,7 +43,7 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary):
         if int(info[-3]) + int(info[-2]) < cov:
             summary = update_summary(summary, pair, 'low coverage')
             continue
-        valid = info[0] + '_' + info[1] + '_' + info[2] + '->' + info[3]
+        valid = info[6] + '-' + info[0] + '_' + info[1] + '_' + info[2] + '->' + info[3]
         if valid not in merged_tbl:
             merged_tbl[valid] = {}
         merged_tbl[valid][pair] = str(float(info[-1]) * 100)
@@ -75,13 +75,13 @@ def process_snv_report(pair, report, merged_tbl, summary):
         #if info[11] != biotype:
         #    summary = update_summary(summary, pair, 'wrong bioype')
         #    continue
-        if len(info[5]) > 0 and float(info[12]) > maf:
+        if len(info[13]) > 0 and float(info[13]) > maf:
             summary = update_summary(summary, pair, 'high maf')
             continue
-        if int(info[5]) + int(info[6]) < cov or int(info[5]) + int(info[6]) < cov:
+        if int(info[5]) + int(info[6]) < cov or int(info[8]) + int(info[9]) < cov:
             summary = update_summary(summary, pair, 'low coverage')
             continue
-        valid = info[0] + '_' + info[1] + '_' + info[3] + '->' + info[4]
+        valid = info[14] + '-' + info[0] + '_' + info[1] + '_' + info[3] + '->' + info[4]
         vaf = info[10].rstrip('%')
         if valid not in merged_tbl:
             merged_tbl[valid] = {}
@@ -89,20 +89,25 @@ def process_snv_report(pair, report, merged_tbl, summary):
     return merged_tbl, summary
 
 
-def filter_merge_reports(reports, panel):
+def filter_merge_reports(reports, panel, num_samp):
     banned_tup = {}
     summary = {}
     pairs = []
+    pair_dict = {}
     reasons = ('off target', 'low tn ratio', 'low impact', 'high maf', 'low coverage', 'panel')
     for line in open(panel):
         info = line.rstrip('\n').split('\t')
-        banned_tup['\t'.join(info[0:3])] = 0
+        banned_tup['\t'.join(info[0:4])] = 0
     merged_tbl = {}
     for report in open(reports):
         report = report.rstrip('\n')
         fn = os.path.basename(report)
-        (pair, vtype) = re.search('^(\d+-\d+_\d+-\d+)\.(\w+)\..*', fn)
-        pairs.append(pair)
+        basic = re.search('^(\d+-\d+_\d+-\d+)\.(\w+)\..*', fn)
+        (pair, vtype) = (basic.group(1), basic.group(2))
+        sys.stderr.write('Processing pair ' + pair + ' type ' + vtype + '\n')
+        if pair not in pair_dict:
+            pairs.append(pair)
+            pair_dict[pair] = 1
         if vtype == 'indels':
             (merged_tbl, summary) = process_indel_report(pair, report, merged_tbl, banned_tup, summary)
         else:
@@ -119,7 +124,11 @@ def filter_merge_reports(reports, panel):
         sum_tbl.write('\n')
     sum_tbl.close()
     sys.stdout.write('variant/sample\t' + '\t'.join(pairs))
+    min_ct = 0
     for var in merged_tbl:
+        if len(merged_tbl[var].keys()) < int(num_samp):
+            min_ct += 1
+            continue
         sys.stdout.write(var)
         for pair in pairs:
             if pair in merged_tbl[var]:
@@ -127,7 +136,7 @@ def filter_merge_reports(reports, panel):
             else:
                 sys.stdout.write('\t0')
         print
-
+    sys.stderr.write(str(min_ct) + ' variants didn\'t meet min sample count of ' + num_samp + '\n')
 
 if __name__ == "__main__":
     import argparse
@@ -138,11 +147,13 @@ if __name__ == "__main__":
                         help='List of report files')
     parser.add_argument('-p', '--panel', action='store', dest='panel',
                         help='Panel of normals')
+    parser.add_argument('-n', '--number_samples', action='store', dest='num_samp',
+                        help='Min number of samples to see a variant to report it')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (reports, panel) = (inputs.reports, inputs.panel)
-    filter_merge_reports(reports, panel)
+    (reports, panel, num_samp) = (inputs.reports, inputs.panel, inputs.num_samp)
+    filter_merge_reports(reports, panel, num_samp)
