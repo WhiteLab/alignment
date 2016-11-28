@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
+import re
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 
@@ -14,9 +15,8 @@ def create_pon(vlist):
     for fn in open(vlist):
         sys.stderr.write(date_time() + 'Processing ' + fn)
         fn = fn.rstrip('\n')
-        fn_base = os.path.basename(fn)
-        parts = fn_base.split('.')
-        (tum, norm) = parts[0].split('_')
+        bnids = re.search('(\d+-\d+)_(\d+-\d+)')
+        norm = bnids.group(2)
         vcf = open(fn)
         for line in vcf:
             if line[0] != '#':
