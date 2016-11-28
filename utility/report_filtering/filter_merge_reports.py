@@ -123,7 +123,7 @@ def filter_merge_reports(reports, panel, num_samp):
                 sum_tbl.write('\t0')
         sum_tbl.write('\n')
     sum_tbl.close()
-    sys.stdout.write('variant/sample\t' + '\t'.join(pairs))
+    sys.stdout.write('variant/sample\t' + '\t'.join(pairs) + '\n')
     min_ct = 0
     for var in merged_tbl:
         if len(merged_tbl[var].keys()) < int(num_samp):
