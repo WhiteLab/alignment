@@ -36,7 +36,7 @@ def create_pon(vlist):
         vcf.close()
     sys.stderr.write(date_time() + 'Outputting results\n')
     for tup in banned_tup:
-        sys.stdout.write(tup + '\t' + banned_tup[tup] + '\n')
+        sys.stdout.write(tup + '\t' + str(banned_tup[tup]) + '\n')
 
 if __name__ == "__main__":
     import argparse
