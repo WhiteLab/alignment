@@ -18,6 +18,7 @@ def create_pon(vlist):
         bnids = re.search('(\d+-\d+)_(\d+-\d+)', fn)
         norm = bnids.group(2)
         vcf = open(fn)
+        norm_flag[norm] = {}
         for line in vcf:
             if line[0] != '#':
                 info = line.rstrip('\n').split('\t')
@@ -27,7 +28,6 @@ def create_pon(vlist):
                         cur = '\t'.join((info[0], info[1], info[3], info[4]))
                         if cur not in banned_tup:
                             banned_tup[cur] = 1
-                            norm_flag[norm] = {}
                             norm_flag[norm][cur] = 1
                         elif cur not in norm_flag[norm]:
                             norm_flag[norm][cur] = 1
