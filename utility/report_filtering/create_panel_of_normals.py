@@ -15,7 +15,7 @@ def create_pon(vlist):
     for fn in open(vlist):
         sys.stderr.write(date_time() + 'Processing ' + fn)
         fn = fn.rstrip('\n')
-        bnids = re.search('(\d+-\d+)_(\d+-\d+)')
+        bnids = re.search('(\d+-\d+)_(\d+-\d+)', fn)
         norm = bnids.group(2)
         vcf = open(fn)
         for line in vcf:
