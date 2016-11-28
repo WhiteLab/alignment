@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import os
 import re
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
@@ -42,7 +41,7 @@ def create_pon(vlist):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Mutation annotation using variant effect predictor.')
+    parser = argparse.ArgumentParser(description='Creates panel of normals for vcf.')
     parser.add_argument('-l', '--list', action='store', dest='vlist',
                         help='List of vcf files')
 
