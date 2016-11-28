@@ -18,7 +18,8 @@ def create_pon(vlist):
         bnids = re.search('(\d+-\d+)_(\d+-\d+)', fn)
         norm = bnids.group(2)
         vcf = open(fn)
-        norm_flag[norm] = {}
+        if norm not in norm_flag:
+            norm_flag[norm] = {}
         for line in vcf:
             if line[0] != '#':
                 info = line.rstrip('\n').split('\t')
