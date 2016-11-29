@@ -30,6 +30,7 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary):
         vtup = '\t'.join(info[0:4])
         if vtup in banned_tup:
             summary = update_summary(summary, pair, 'panel')
+            sys.stderr.write(vtup + '\n')
             continue
         if info[10] in weak_impact:
             summary = update_summary(summary, pair, 'low impact')
@@ -63,6 +64,7 @@ def process_snv_report(pair, report, merged_tbl, summary):
         if line == '\n':
             continue
         info = line.rstrip('\n').split('\t')
+        valid = info[14] + '-' + info[0] + '_' + info[1] + '_' + info[3] + '->' + info[4]
         if info[-1] == 'OFF':
             summary = update_summary(summary, pair, 'off target')
             continue
@@ -81,7 +83,7 @@ def process_snv_report(pair, report, merged_tbl, summary):
         if int(info[5]) + int(info[6]) < cov or int(info[8]) + int(info[9]) < cov:
             summary = update_summary(summary, pair, 'low coverage')
             continue
-        valid = info[14] + '-' + info[0] + '_' + info[1] + '_' + info[3] + '->' + info[4]
+
         vaf = info[10].rstrip('%')
         if valid not in merged_tbl:
             merged_tbl[valid] = {}

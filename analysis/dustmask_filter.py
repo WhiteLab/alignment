@@ -7,8 +7,11 @@ from subprocess import call
 from utility.log import log
 
 
-def filter_indel(bedtools, bed_ref, vcf):
-    cmd = bedtools + ' intersect -header -v -a ' + vcf + ' -b ' + bed_ref + ' > '
+def filter_indel(bedtools, bed_ref, pair):
+    cmd = bedtools + ' intersect -header -v -a ' + pair + '/somatic.indel.vcf -b ' + bed_ref + ' > ' + pair \
+          + '.somatic.indel.dustmasked.vcf'
+    check = call(cmd, shell=True)
+    return check
 
 if __name__ == "__main__":
     import argparse
@@ -19,7 +22,7 @@ if __name__ == "__main__":
                         help='Location of bedtools')
     parser.add_argument('-r', '--bed_ref', action='store', dest='bed_ref',
                         help='Bed file for filtering')
-    parser.add_argument('-v', '--vcf', action='store', dest='vcf',
+    parser.add_argument('-sp', '--sample_pair', action='store', dest='pair',
                         help='vcf file to filter')
 
     if len(sys.argv) == 1:
@@ -27,5 +30,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (bedtools, bed_ref, vcf) = (inputs.bedtools, inputs.ref, inputs.vcf)
-    filter_indel(bedtools, bed_ref, vcf)
+    (bedtools, bed_ref, pair) = (inputs.bedtools, inputs.ref, inputs.pair)
+    filter_indel(bedtools, bed_ref, pair)

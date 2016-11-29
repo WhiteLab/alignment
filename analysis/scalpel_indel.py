@@ -8,6 +8,7 @@ from utility.date_time import date_time
 from subprocess import call
 from utility.log import log
 from alignment.get_merged_bams import get_merged_bams
+from dustmask_filter import filter_indel
 
 
 def parse_config(config_file):
@@ -65,6 +66,14 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
         log(loc, date_time() + mv_cmd + '\n')
         call(mv_cmd, shell=True)
         sys.stderr.write(date_time() + 'Completed indel calls for ' + cur[0] + '\n')
+        if dustmask_flag == 'Y':
+            log(loc, date_time() + 'Filter dustmask flag given\n')
+            check = filter_indel(bedtools, dustmask_bed, cur[0])
+            if check != 0:
+                sys.stderr.write(date_time() + 'Dustmask failed for ' + cur[0] + '\n')
+                exit(1)
+            else:
+                log(loc, date_time() + 'Dustmask complete for ' + cur[0] + '\n')
     fh.close()
     sys.stderr.write(date_time() + 'Indel call completed\n')
     return 0
