@@ -28,6 +28,7 @@
     "intervals_0base": "REFS/INTERVAL/capture_panel_3.0_interval_0base.txt",
     "fa_ordered": "REFS/FASTA/hg19_karyo_ordered.fa",
     "fai": "REFS/FASTA/hg19_karyo_ordered.fa.fai",
+    "dustmask": "REFS/BED/hg19_dustmasked_merged.bed",
     "vepCache": "REFS/VEP",
     "cadd": "CADD/capture_panel_v3_SNVs.tsv.gz",
     "dbsnp": "REFS/VCF/dbSNP_r142.vcf.gz",
@@ -58,6 +59,7 @@
     "pdxflag": "N",
     "germflag": "Y",
     "indelflag": "Y",
+    "dustmask_flag": "Y",
     "min_VAF_GL": "0.3",
     "annotator": "vep"
   }

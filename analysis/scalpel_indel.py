@@ -12,8 +12,9 @@ from alignment.get_merged_bams import get_merged_bams
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['tools']['scalpel'], config_data['refs']['capture'], config_data['refs']['fa_ordered'], \
-           config_data['params']['threads']
+    return config_data['tools']['scalpel'], config_data['tools']['bedtools'], config_data['refs']['capture'], \
+           config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['dustmask_flag'], \
+           config_data['refs']['dustmask']
 
 
 def create_sample_list(sample_pairs):
@@ -35,7 +36,7 @@ def create_sample_list(sample_pairs):
 
 
 def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
-    (scalpel, bed, fasta, cpus) = parse_config(config_file)
+    (scalpel, bedtools, bed, fasta, cpus, dustmask_flag, dustmask_bed) = parse_config(config_file)
     bed = ref_mnt + '/' + bed
     fasta = ref_mnt + '/' + fasta
     # use get_merged_bams api
