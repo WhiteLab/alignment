@@ -30,7 +30,6 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary):
         vtup = '\t'.join(info[0:4])
         if vtup in banned_tup:
             summary = update_summary(summary, pair, 'panel')
-            sys.stderr.write(vtup + '\n')
             continue
         if info[10] in weak_impact:
             summary = update_summary(summary, pair, 'low impact')

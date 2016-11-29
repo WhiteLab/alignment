@@ -14,11 +14,13 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
-            config_data['params']['threads'], config_data['refs']['intervals'])
+            config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'])
 
 
-def pass_filter(sample, in_suffix):
+def pass_filter(sample, in_suffix, dustmask_flag):
     in_fn = sample + '/somatic' + in_suffix
+    if dustmask_flag == 'Y':
+        in_fn = sample + '/' + sample + '.somatic.indel.dustmasked.vcf'
     pass_val = 'PASS'
     out_suffix = '.somatic_indel.PASS.vcf'
     out_fn = sample + out_suffix
@@ -36,7 +38,7 @@ def pass_filter(sample, in_suffix):
 
 
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
     intvl = ref_mnt + '/' + intvl
@@ -55,7 +57,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         in_vcf = sample + in_suffix
         out_vcf = sample + out_suffix
         if source == 'scalpel':
-            pass_filter(sample, in_suffix)
+            pass_filter(sample, in_suffix, dustmask_flag)
             in_vcf = sample + '.somatic_indel.PASS.vcf'
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --variant_class --no_whole_genome --offline --maf_exac --no_whole_genome ' \
