@@ -21,6 +21,8 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
+    # secondary hit flag to avoid excessive repeats
+    f1 = 0
     # index annotations by impact rank
     rank_dict = {}
     outstring = ''
@@ -61,8 +63,9 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
                     top_gene = gene
                     f = 1
                     outstring += cur_var
-                if f == 1 and gene != top_gene and impact != 'MODIFIER':
+                if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
                     outstring += cur_var
+                    f1 = 0
     out.write(outstring)
 
 
