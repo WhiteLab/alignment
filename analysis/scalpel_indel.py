@@ -40,6 +40,7 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
     (scalpel, bedtools, bed, fasta, cpus, dustmask_flag, dustmask_bed) = parse_config(config_file)
     bed = ref_mnt + '/' + bed
     fasta = ref_mnt + '/' + fasta
+    dustmask_bed = ref_mnt + '/' + dustmask_bed
     # use get_merged_bams api
     sample_list = 'sample_list.txt'
     if not os.path.isfile(sample_list):
