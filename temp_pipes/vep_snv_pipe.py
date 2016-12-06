@@ -13,8 +13,8 @@ def get_out_vcf(cont, obj, pairs):
         out = pair + '.out.keep'
         vcf = pair + '.vcf.keep'
         # output to cur dir to make vep work
-        cmd = src_cmd + 'swift download ' + cont + ' ' + dirname + out + ' --output ' + out + '; swift download ' + \
-              cont + ' ' + dirname + vcf + ' --output ' + vcf
+        cmd = src_cmd + 'swift download ' + cont + ' ' + dirname + out + ' --skip-identical  --output ' + out \
+              + '; swift download ' + cont + ' ' + dirname + vcf + ' --skip-identical --output ' + vcf
         call(cmd, shell=True)
 
 
