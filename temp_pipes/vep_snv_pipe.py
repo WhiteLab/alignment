@@ -5,7 +5,6 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from analysis.variant_annot_pipe import *
 
 
-
 def get_out_vcf(cont, obj, pairs):
     src_cmd = '. /home/ubuntu/.novarc;'
     for pair in open(pairs):
@@ -22,7 +21,7 @@ def get_out_vcf(cont, obj, pairs):
 def temp_annot_pipe(config_file, sample_pairs, ref_mnt):
     (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot_used) = parse_config(config_file)
     sys.stderr.write(date_time() + 'Downloading mutect out files and vcf files\n')
-    get_out_vcf(cont, obj, sample_pairs)
+    get_out_vcf(cont, analysis, sample_pairs)
     if annot_used == 'vep':
         vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.snv.vep.vcf', 'mutect')
 
