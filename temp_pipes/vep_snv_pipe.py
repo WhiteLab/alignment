@@ -7,7 +7,7 @@ from analysis.variant_annot_pipe import *
 
 
 def get_out_vcf(cont, obj, pairs):
-    src_cmd = '. /home/ubuntu/.novarc'
+    src_cmd = '. /home/ubuntu/.novarc;'
     for pair in open(pairs):
         pair = pair.rstrip('\n')
         dirname = obj + '/' + pair + '/OUTPUT/'
