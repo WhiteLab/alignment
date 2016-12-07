@@ -21,33 +21,34 @@ def temp_indel_pipe(config_file, sample_pairs, ref_mnt):
     m = 4
     x = 0
     f = 0
-    temp = sample_pairs
-    sample_pairs = open('temp_pairs.txt', 'w')
-    for pair in open(temp):
+    temp_name = 'temp_pairs.txt'
+    temp = open(temp_name, 'w')
+
+    for pair in open(sample_pairs):
         f = 0
         x += 1
-        sample_pairs.write(pair)
+        temp.write(pair)
         cmd = 'mkdir ' + pair
         call(cmd, shell=True)
         if x % m == 0:
             f = 1
-            sample_pairs.close()
+            temp.close()
             x = 0
-            check = scalpel_indel(sample_pairs, 'LOGS/', config_file, ref_mnt)
+            check = scalpel_indel(temp_name, 'LOGS/', config_file, ref_mnt)
             if check != 0:
                 sys.stderr.write(date_time() + 'scalpel failed around ' + pair + '\n')
-            vep(config_file, temp, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
+            vep(config_file, temp_name, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
             # leave only vcfs and reports for manual upload, clear out merged bams and sample_list, scalpel creates
             # one each time
             cleanup_bams()
-            sample_pairs = open('temp_pairs.txt', 'w')
-    sample_pairs.close()
+            temp = open(temp_name, 'w')
+    temp.close()
     if f == 0:
         # do remaining is total number of pairs left is less than m
-        check = scalpel_indel(sample_pairs, 'LOGS/', config_file, ref_mnt)
+        check = scalpel_indel(temp_name, 'LOGS/', config_file, ref_mnt)
         if check != 0:
             sys.stderr.write(date_time() + 'scalpel failed at last set \n')
-        vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
+        vep(config_file, temp_name, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
         # leave only vcfs and reports for manual upload, clear out merged bams and sample_list, scalpel creates
         # one each time
         cleanup_bams()
