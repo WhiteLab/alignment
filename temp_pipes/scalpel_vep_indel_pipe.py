@@ -22,7 +22,7 @@ def temp_indel_pipe(config_file, sample_pairs, ref_mnt):
     x = 0
     f = 0
     temp = open('temp_pairs.txt', 'w')
-    for pair in sample_pairs:
+    for pair in open(sample_pairs):
         f = 0
         x += 1
         temp.write(pair)
