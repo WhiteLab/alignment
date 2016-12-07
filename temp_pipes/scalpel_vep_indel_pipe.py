@@ -28,7 +28,8 @@ def temp_indel_pipe(config_file, sample_pairs, ref_mnt):
         f = 0
         x += 1
         temp.write(pair)
-        cmd = 'mkdir ' + pair
+        bnids = pair.rstrip('\n').split('\t')
+        cmd = 'mkdir ' + bnids[0]
         call(cmd, shell=True)
         if x % m == 0:
             f = 1
