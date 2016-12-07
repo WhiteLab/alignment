@@ -60,9 +60,6 @@ if __name__ == "__main__":
                         help='Tumor/normal sample pair list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-k', '--karyo', action='store', dest='kflag',
-                        help='Flag to perform karyotypic reordering of BAM files.  Only need if original reference used'
-                             ' wasn\'t sorted in the manner. \'y\' to do so')
     parser.add_argument('-r', '--reference', action='store', dest='ref_mnt',
                         help='Directory references are mounted, i.e. /mnt/cinder/REFS_XXX')
 
@@ -72,6 +69,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file, kflag, ref_mnt) = (
-        inputs.sample_pairs, inputs.config_file, inputs.kflag, inputs.ref_mnt)
+    (sample_pairs, config_file, ref_mnt) = (
+        inputs.sample_pairs, inputs.config_file, inputs.ref_mnt)
     temp_indel_pipe(config_file, sample_pairs, ref_mnt)
