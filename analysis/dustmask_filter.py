@@ -8,8 +8,8 @@ from utility.log import log
 
 
 def filter_indel(bedtools, bed_ref, pair):
-    cmd = bedtools + ' intersect -header -v -a ' + pair + '/somatic.indel.vcf -b ' + bed_ref + ' > ' + pair \
-          + '.somatic.indel.dustmasked.vcf'
+    cmd = bedtools + ' intersect -header -v -a ' + pair + '/somatic.indel.vcf -b ' + bed_ref + ' > ' + pair + '/' \
+          + pair + '.somatic.indel.dustmasked.vcf'
     check = call(cmd, shell=True)
     return check
 
