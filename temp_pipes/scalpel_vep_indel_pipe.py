@@ -35,7 +35,7 @@ def temp_indel_pipe(config_file, sample_pairs, ref_mnt):
             check = scalpel_indel(temp, 'LOGS/', config_file, ref_mnt)
             if check != 0:
                 sys.stderr.write(date_time() + 'scalpel failed around ' + pair + '\n')
-            vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
+            vep(config_file, temp, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
             # leave only vcfs and reports for manual upload, clear out merged bams and sample_list, scalpel creates
             # one each time
             cleanup_bams()
@@ -46,7 +46,7 @@ def temp_indel_pipe(config_file, sample_pairs, ref_mnt):
         check = scalpel_indel(temp, 'LOGS/', config_file, ref_mnt)
         if check != 0:
             sys.stderr.write(date_time() + 'scalpel failed at last set \n')
-        vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
+        vep(config_file, temp, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
         # leave only vcfs and reports for manual upload, clear out merged bams and sample_list, scalpel creates
         # one each time
         cleanup_bams()
