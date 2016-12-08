@@ -44,8 +44,6 @@ def capture_coverage(bedtools2_tool, sample, capture_bed_ref, wait_flag):
 
 if __name__ == "__main__":
     import argparse
-    import coverage
-
     parser = argparse.ArgumentParser(
         description='Bedtools coverage calculation module.  Typically run last in pipeline.  See coverage parameter.')
     parser.add_argument('-bt', '--bedtools', action='store', dest='bedtools2_tool', help='Location of bedtools2 tool.')
@@ -61,6 +59,7 @@ if __name__ == "__main__":
     inputs = parser.parse_args()
     bedtools2_tool = inputs.bedtools2_tool
     sample = inputs.sample
+    coverage = inputs.coverage
     action = inputs.coverage
     bedfile = inputs.bed_file
 

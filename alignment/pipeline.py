@@ -173,7 +173,8 @@ class Pipeline:
             # skip aligning if bam already exists
             if not os.path.isfile(self.sample + '.bam'):
                 check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
-                                   self.samtools_ref, self.sample, log_dir, self.threads)  # rest won't run until completed
+                                   self.samtools_ref, self.sample, log_dir, self.threads)
+                # rest won't run until completed
 
             else:
                 log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
