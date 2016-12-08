@@ -11,13 +11,13 @@ def novosort_sort_pe(novosort, sample, log_dir, threads, ram, rmdup):
     if rmdup == 'Y':
         logfile = sample + ".novosort.rmdup.sort.pe.log"
         novosort_sort_cmd = 'mkdir novosort_tmp;' + novosort + " -c " + threads + " -m " + ram \
-                            + "G --tmpdir novosort_tmp --rd --kt --o " + sample + ".rmdup.srt.bam --index  "\
+                            + "G --tmpdir novosort_tmp --rd --kt -o " + sample + ".rmdup.srt.bam --index  "\
                                + sample + ".bam > " + log_dir + logfile + " 2>&1"
         log(log_dir + logfile, date_time() + novosort_sort_cmd + "\n")
     else:
         logfile = sample + ".novosort.sort.pe.log"
         novosort_sort_cmd = 'mkdir novosort_tmp;' + novosort + " --threads " + threads + " --ram " \
-                               + ram + "G --tmpdir novosort_tmp --output " + sample + ".srt.bam --index  " \
+                               + ram + "G --tmpdir novosort_tmp -o " + sample + ".srt.bam --index  " \
                                + sample + ".bam > " + log_dir + logfile + " 2>&1"
         log(log_dir + logfile, date_time() + novosort_sort_cmd + "\n")
     f = 0

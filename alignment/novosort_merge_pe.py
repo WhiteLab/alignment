@@ -85,7 +85,7 @@ def novosort_merge_pe(config_file, sample_list):
         bam_string = " ".join(bam_list)
         if n > 1:
             if rmdup == 'Y':
-                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd --output " + sample \
+                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd -o " + sample \
                                      + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
                 log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
@@ -102,7 +102,7 @@ def novosort_merge_pe(config_file, sample_list):
                     subprocess.call(rm_bam, shell=True)
                     bam_list = list_unsorted_bam(bam_list, cont, threads)
                     bam_string = " ".join(bam_list)
-                    novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd --output " + sample \
+                    novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd -o " + sample \
                                      + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
                     log(loc, date_time() + novosort_merge_cmd + "\n")
                     try:
@@ -116,7 +116,7 @@ def novosort_merge_pe(config_file, sample_list):
 
 
             else:
-                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted --output "\
+                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted -o "\
                                         + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
                 log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
