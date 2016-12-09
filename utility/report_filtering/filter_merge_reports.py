@@ -15,7 +15,8 @@ def update_summary(summary, pair, reason):
     return summary
 
 
-def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, pos_gene, min_vaf, tn_dict, norms):
+def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, pos_gene, min_vaf, tn_dict, norms,
+                         vflag):
     cur = open(report)
     next(cur)
     maf = 0.01
@@ -28,8 +29,13 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
             continue
         info = line.rstrip('\n').split('\t')
         vtup = '\t'.join(info[0:4])
-        if float(info[-1]) < min_vaf:
-            summary = update_summary(summary, pair, 'low vaf')
+        if float(info[-1]) * 100 < min_vaf:
+            if vflag == 'y' and pair not in tn_dict:
+                summary = update_summary(summary, pair, 'low vaf')
+                continue
+            elif vflag == 'n':
+                summary = update_summary(summary, pair, 'low vaf')
+                continue
         if len(info[2]) > length or len(info[3]) > length:
             summary = update_summary(summary, pair, 'indel len')
             continue
@@ -39,9 +45,6 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
         if info[10] in weak_impact:
             summary = update_summary(summary, pair, 'low impact')
             continue
-        #if info[11] != biotype:
-        #    summary = update_summary(summary, pair, 'wrong bioype')
-        #    continue
         if len(info[5]) > 0 and float(info[5]) > maf:
             summary = update_summary(summary, pair, 'high maf')
             continue
@@ -69,13 +72,14 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
     return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
-def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_dict, norms):
+def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_dict, norms, vflag):
     merged_tbl[pair] = {}
     cur = open(report)
     next(cur)
     maf = 0.01
     tn = 2
     cov = 30
+    min_vaf = float(min_vaf)
     (tum, norm) = pair.split('_')
     # biotype = 'protein_coding'
     weak_impact = {'MODIFIER': 1, 'LOW': 1}
@@ -87,17 +91,18 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         if info[-1] == 'OFF':
             summary = update_summary(summary, pair, 'off target')
         if float(cur_vaf) < min_vaf:
-            summary = update_summary(summary, pair, 'low vaf')
-            continue
+            if vflag == 'y' and pair not in tn_dict:
+                summary = update_summary(summary, pair, 'low vaf')
+                continue
+            elif vflag == 'n':
+                summary = update_summary(summary, pair, 'low vaf')
+                continue
         if float(info[11]) <= tn:
             summary = update_summary(summary, pair, 'low tn ratio')
             continue
         if info[17] in weak_impact:
             summary = update_summary(summary, pair, 'low impact')
             continue
-        #if info[11] != biotype:
-        #    summary = update_summary(summary, pair, 'wrong bioype')
-        #    continue
         if len(info[13]) > 0 and float(info[13]) > maf:
             summary = update_summary(summary, pair, 'high maf')
             continue
@@ -125,7 +130,7 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
     return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
-def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string):
+def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, vflag):
     tn_dict = {}
     norms = {}
     for tn in tn_string.split(','):
@@ -156,10 +161,10 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
             pair_dict[pair] = 1
         if vtype == 'indels':
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_indel_report(pair, report, merged_tbl, banned_tup,
-                                                                summary, indel_max, pos_gene, min_vaf, tn_dict, norms)
+                                                        summary, indel_max, pos_gene, min_vaf, tn_dict, norms, vflag)
         else:
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_snv_report(pair, report, merged_tbl, summary,
-                                                                                 pos_gene, min_vaf, tn_dict, norms)
+                                                                            pos_gene, min_vaf, tn_dict, norms, vflag)
     sum_tbl = open('reject_summary.txt', 'w')
     sum_tbl.write('Pair/reason\t' + '\t'.join(reasons) + '\n')
     for pair in pairs:
@@ -215,6 +220,8 @@ if __name__ == "__main__":
                         help='Max indel length')
     parser.add_argument('-v', '--vaf', action='store', dest='vaf',
                         help='Min variant allele frequency')
+    parser.add_argument('-z', '--vflag', action='store', dest='vflag',
+                        help='\'y\' to limit to non-tumor/normal, \'n\' to apply to all')
     parser.add_argument('-t', '--tumor_normal', action='store', dest='tum_norm',
                         help='Comma-separated tumor-normal pair list to fix')
 
@@ -223,6 +230,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (reports, panel, num_samp, min_type, length, vaf, tn_string) = (inputs.reports, inputs.panel, inputs.num_samp,
-                                                        inputs.flag_type, inputs.length, inputs.vaf, inputs.tum_norm)
-    filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string)
+    (reports, panel, num_samp, min_type, length, vaf, tn_string, vflag) = (inputs.reports, inputs.panel,
+                        inputs.num_samp, inputs.flag_type, inputs.length, inputs.vaf, inputs.tum_norm, inputs.vflag)
+    filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, vflag)
