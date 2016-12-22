@@ -16,7 +16,7 @@ def parse_config(config_file, cflag):
     else:
         return config_data['tools']['platypus'], config_data['refs']['fa_ordered'], config_data['params']['threads'],\
                config_data['refs']['intervals_0base'], config_data['params']['min_VAF_GL'], \
-               config_data['refs']['samtools']
+               config_data['tools']['samtools']
 
 
 def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
