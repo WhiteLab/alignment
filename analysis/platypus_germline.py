@@ -45,7 +45,8 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
                 bam = sample + ".merged.final.bam"
                 if not (os.path.isfile(bam + '.bai') or os.path.isfile(bam[:-1] + 'i')):
                     log(loc, date_time() + bam + ' not indexed.  Indexing\n')
-                    cmd = samtools + ' index bam'
+                    cmd = samtools + ' index ' + bam
+                    log(loc, date_time() + cmd + '\n')
                     subprocess.call(cmd, shell=True)
                 platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" \
                                + bam + " --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq=" \
