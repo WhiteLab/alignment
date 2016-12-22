@@ -14,7 +14,7 @@ def cleanup_bams():
     call(cmd, shell=True)
 
 
-def temp_indel_pipe(config_file, samples, ref_mnt):
+def temp_germline_pipe(config_file, samples, ref_mnt):
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)
     sys.stderr.write(date_time() + 'Splitting up samples list\n')
@@ -27,14 +27,15 @@ def temp_indel_pipe(config_file, samples, ref_mnt):
     for sample in open(samples):
         f = 0
         x += 1
+        temp.write(sample)
 
-        bnid = sample.rstrip('\n')
-        temp.write(bnid)
         if x % m == 0:
             f = 1
             temp.close()
             x = 0
-            get_merged_bams(config_file, temp_name)
+            check = get_merged_bams(config_file, temp_name)
+            if check != 0:
+                sys.stderr.write('Can\'t find merged bams around ' + sample)
             check = platypus_germline(config_file, temp_name, 'LOGS/', 'n', ref_mnt)
             if check != 0:
                 sys.stderr.write(date_time() + 'platypus failed around ' + sample + '\n')
@@ -67,7 +68,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Mini temp pipe to run a part of variant_annot_pipe')
     parser.add_argument('-s', '--sample-list', action='store', dest='samples',
-                        help='Tumor/normal sample pair list')
+                        help='Single sample list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
     parser.add_argument('-r', '--reference', action='store', dest='ref_mnt',
@@ -81,4 +82,4 @@ if __name__ == "__main__":
     inputs = parser.parse_args()
     (sample_pairs, config_file, ref_mnt) = (
         inputs.samples, inputs.config_file, inputs.ref_mnt)
-    temp_indel_pipe(config_file, sample_pairs, ref_mnt)
+    temp_germline_pipe(config_file, sample_pairs, ref_mnt)
