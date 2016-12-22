@@ -34,7 +34,7 @@ def temp_germline_pipe(config_file, samples, ref_mnt):
             temp.close()
             x = 0
             check = get_merged_bams(config_file, temp_name)
-            if check != 0:
+            if len(check) != 0:
                 sys.stderr.write('Can\'t find merged bams around ' + sample)
             check = platypus_germline(config_file, temp_name, 'LOGS/', 'n', ref_mnt)
             if check != 0:

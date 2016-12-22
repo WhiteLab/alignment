@@ -6,6 +6,7 @@ from utility.date_time import date_time
 import subprocess
 from utility.log import log
 import json
+import os
 
 
 def parse_config(config_file, cflag):
@@ -14,7 +15,8 @@ def parse_config(config_file, cflag):
         return config_data['tools']['platypus'], config_data['refs']['fa_ordered'], config_data['params']['threads']
     else:
         return config_data['tools']['platypus'], config_data['refs']['fa_ordered'], config_data['params']['threads'],\
-               config_data['refs']['intervals_0base'], config_data['params']['min_VAF_GL']
+               config_data['refs']['intervals_0base'], config_data['params']['min_VAF_GL'], \
+               config_data['refs']['samtools']
 
 
 def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
@@ -37,14 +39,18 @@ def platypus_germline(config_file, samp_list, log_dir, cflag, ref_mnt):
                                + sample + ".merged.final.bam -o " + sample + ".germline_calls.vcf --logFileName=" \
                                + log_dir + sample + ".platypus.log" + " >> " + loc + " 2>&1"
             else:
-                (platypus, fasta, threads, region_file, minVAF) = parse_config(config_file, cflag)
+                (platypus, fasta, threads, region_file, minVAF, samtools) = parse_config(config_file, cflag)
                 fasta = ref_mnt + '/' + fasta
                 regions = ref_mnt + '/' + region_file
+                bam = sample + ".merged.final.bam"
+                if not (os.path.isfile(bam + '.bai') or os.path.isfile(bam[:-1] + 'i')):
+                    log(loc, date_time() + bam + ' not indexed.  Indexing\n')
+                    cmd = samtools + ' index bam'
+                    subprocess.call(cmd, shell=True)
                 platypus_cmd = platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta + " --bamFiles=" \
-                               + sample + ".merged.final.bam --filterDuplicates=0 -o " + sample \
-                               + ".germline_calls.vcf --minVarFreq=" + minVAF + " --regions=" + regions \
-                               + " --logFileName=" + log_dir + sample + ".platypus.log >> " + loc + " 2>&1"
-            log(log_dir + sample + ".platypus.log", date_time() + platypus_cmd + "\n")
+                               + bam + " --filterDuplicates=0 -o " + sample + ".germline_calls.vcf --minVarFreq=" \
+                               + minVAF + " --regions=" + regions + " --logFileName=" + loc + " >> " + loc + " 2>&1"
+            log(loc, date_time() + platypus_cmd + "\n")
             f = 0
             try:
                 f = subprocess.call(platypus_cmd, shell=True)
