@@ -49,9 +49,9 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
             summary = update_summary(summary, pair, 'high maf')
             continue
         if int(info[-3]) + int(info[-2]) < cov:
-            if float(info[-1]) * 100 < 20:
-                summary = update_summary(summary, pair, 'low coverage')
-                continue
+            #if float(info[-1]) * 100 < 20:
+            summary = update_summary(summary, pair, 'low coverage')
+            continue
         chr_pos = info[0] + '_' + info[1]
         if chr_pos not in pos_gene:
             # might be repeats in reports, skip if position reported already
@@ -108,9 +108,9 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
             summary = update_summary(summary, pair, 'high maf')
             continue
         if int(info[5]) + int(info[6]) < cov or int(info[8]) + int(info[9]) < cov:
-            if float(cur_vaf) < 20:
-                summary = update_summary(summary, pair, 'low coverage')
-                continue
+            # if float(cur_vaf) < 20:
+            summary = update_summary(summary, pair, 'low coverage')
+            continue
         chr_pos = info[0] + '_' + info[1]
         if chr_pos not in pos_gene:
             # might be repeats in reports, skip if position reported already
