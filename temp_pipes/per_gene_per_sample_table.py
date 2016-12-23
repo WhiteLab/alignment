@@ -30,7 +30,7 @@ def calc_coverage(sample_list, suffix, bed):
         sample = sample.rstrip('\n')
         slist.append(sample)
         cur = sample + suffix
-        temp_dict = gene_dict
+        temp_dict = gene_dict.copy()
         for entry in open(cur):
             info = entry.rstrip('\n').split('\t')
             if info[0] == 'all':
@@ -39,7 +39,7 @@ def calc_coverage(sample_list, suffix, bed):
             temp_dict[parts[0]]['tot_cov'] += (int(info[4]) * int(info[5]))
         for gene in gene_list:
             master_dict[gene][sample] = (float(temp_dict[gene]['tot_cov'])/temp_dict[gene]['len'])
-        temp_dict = {}
+
     sys.stderr.write(date_time() + 'Outputting results\n')
     sys.stdout.write('Gene/Sample')
     print '\t'.join(slist)
