@@ -32,6 +32,8 @@ def calc_coverage(sample_list, suffix, bed):
         temp_dict = gene_dict
         for entry in open(cur):
             info = entry.rstrip('\n').split('\t')
+            if info[0] == 'all':
+                break
             parts = info[3].split('_')
             temp_dict[parts[0]]['tot_cov'] += (int(info[4]) * int(info[5]))
         for gene in gene_list:
