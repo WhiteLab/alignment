@@ -3,7 +3,7 @@
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
-
+import copy
 
 def process_bed(bed):
     gene_list = []
@@ -30,7 +30,7 @@ def calc_coverage(sample_list, suffix, bed):
         sample = sample.rstrip('\n')
         slist.append(sample)
         cur = sample + suffix
-        temp_dict = gene_dict.copy()
+        temp_dict = copy.deepcopy(gene_dict.copy)
         for entry in open(cur):
             info = entry.rstrip('\n').split('\t')
             if info[0] == 'all':
