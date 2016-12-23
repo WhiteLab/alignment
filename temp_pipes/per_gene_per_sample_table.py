@@ -16,7 +16,8 @@ def process_bed(bed):
             gene_list.append(parts[0])
             gene_dict[parts[0]] = {}
             master_dict[parts[0]] = {}
-        gene_dict[parts[0]] = {'len': (int(info[2]) - int(info[1])), 'tot_cov': 0}
+            gene_dict[parts[0]] = {'len': 0, 'tot_cov': 0}
+        gene_dict[parts[0]]['len'] += (int(info[2]) - int(info[1]))
     return gene_list, gene_dict, master_dict
 
 
