@@ -30,7 +30,7 @@ def calc_coverage(sample_list, suffix, bed):
         sample = sample.rstrip('\n')
         slist.append(sample)
         cur = sample + suffix
-        temp_dict = copy.deepcopy(gene_dict.copy)
+        temp_dict = copy.deepcopy(gene_dict)
         for entry in open(cur):
             info = entry.rstrip('\n').split('\t')
             if info[0] == 'all':
