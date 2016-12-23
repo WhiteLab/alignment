@@ -38,6 +38,7 @@ def calc_coverage(sample_list, suffix, bed):
             temp_dict[parts[0]]['tot_cov'] += (int(info[4]) * int(info[5]))
         for gene in gene_list:
             master_dict[gene][sample] = (float(temp_dict[gene]['tot_cov'])/temp_dict[gene]['len'])
+        del temp_dict
     sys.stderr.write(date_time() + 'Outputting results\n')
     sys.stdout.write('Gene/Sample')
     print '\t'.join(slist)
