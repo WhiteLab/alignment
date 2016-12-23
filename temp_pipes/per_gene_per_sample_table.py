@@ -26,8 +26,8 @@ def calc_coverage(sample_list, suffix, bed):
     (gene_list, gene_dict, master_dict) = process_bed(bed)
     for sample in open(sample_list):
         sys.stderr.write(date_time() + 'Processing sample ' + sample)
-        slist.append(sample)
         sample = sample.rstrip('\n')
+        slist.append(sample)
         cur = sample + suffix
         temp_dict = gene_dict
         for entry in open(cur):
