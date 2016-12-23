@@ -10,8 +10,6 @@ def cleanup_bams():
         bnid = bnid.rstrip('\n')
         cmd = 'rm ' + bnid + '.merged.*;'
         call(cmd, shell=True)
-    cmd = 'rm sample_list.txt'
-    call(cmd, shell=True)
 
 
 def temp_germline_pipe(config_file, samples, ref_mnt):
