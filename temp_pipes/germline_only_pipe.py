@@ -6,7 +6,7 @@ from analysis.variant_annot_pipe import *
 
 
 def cleanup_bams():
-    for bnid in open('sample_list.txt'):
+    for bnid in open('temp_list.txt'):
         bnid = bnid.rstrip('\n')
         cmd = 'rm ' + bnid + '.merged.*;'
         call(cmd, shell=True)
@@ -19,7 +19,7 @@ def temp_germline_pipe(config_file, samples, ref_mnt):
     m = 4
     x = 0
     f = 0
-    temp_name = 'temp_pairs.txt'
+    temp_name = 'temp_list.txt'
     temp = open(temp_name, 'w')
 
     for sample in open(samples):
