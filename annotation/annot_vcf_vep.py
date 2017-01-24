@@ -62,7 +62,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             pass_filter(sample, in_suffix, dustmask_flag)
             in_vcf = sample + '.somatic_indel.PASS.vcf'
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
-                ' ANN --canonical --variant_class --write_cache --cache_region_size 500KB --no_whole_genome --offline' \
+                ' ANN --canonical --variant_class --write_cache --cache_region_size 500000 --no_whole_genome --offline' \
                 ' --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache \
                   + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
         log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
