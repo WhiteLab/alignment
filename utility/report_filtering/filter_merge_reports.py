@@ -5,6 +5,7 @@ import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import pdb
 
+
 def update_summary(summary, pair, reason):
     if pair not in summary:
         summary[pair] = {}
@@ -79,7 +80,7 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
     next(cur)
     maf = 0.01
     tn = 2
-    cov = 0
+    cov = 30
     min_vaf = float(min_vaf)
     (tum, norm) = pair.split('_')
     # biotype = 'protein_coding'
