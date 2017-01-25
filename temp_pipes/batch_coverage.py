@@ -26,11 +26,11 @@ def get_bam_name(bnid, src_cmd, cont):
                 bam = fn
             else:
                 bai = fn
-    return (dl_cmd, bam, bai)
+    return dl_cmd, bam, bai
 
-def calc_coverage(bedtools2_tool, sample, bedfile):
+
+def calc_coverage(bedtools2_tool, sample, bedfile, cont):
     src_cmd = '. /home/ubuntu/.novarc;'
-    cont = 'Colon_Cancer_RW_SP'
     job_list = []
     for bnid in open(sample):
         bnid = bnid.rstrip('\n')
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description='Bedtools coverage calculation module.  Typically run last in pipeline.  See coverage parameter.')
+    parser.add_argument('-c', '--container', action='store', dest='cont', help='Swift container location')
     parser.add_argument('-bt', '--bedtools', action='store', dest='bedtools2_tool', help='Location of bedtools2 tool.')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample list')
     parser.add_argument('-bf', '--bed_file', action='store', dest='bed_file', help='Bed file')
@@ -57,5 +58,6 @@ if __name__ == "__main__":
     bedtools2_tool = inputs.bedtools2_tool
     sample = inputs.sample
     bedfile = inputs.bed_file
+    cont = inputs.cont
 
-    calc_coverage(bedtools2_tool, sample, bedfile)
+    calc_coverage(bedtools2_tool, sample, bedfile, cont)
