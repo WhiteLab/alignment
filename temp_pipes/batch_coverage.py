@@ -19,7 +19,7 @@ def get_bam_name(bnid, src_cmd, cont):
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
         # test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
-        test = re.match('^\d+-\d+\.merged.final.ba[m|i]$', fn) or re.match('\d+-\d+\.merged.final.bam.bai$', fn)
+        test = re.match(bnid + '.merged.final.ba[m|i]$', fn) or re.match(bnid + '.merged.final.bam.bai$', fn)
         if test:
             dl_cmd += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
             if fn[-3:] == 'bam':
