@@ -42,11 +42,13 @@ def wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, pair):
         c_string = cur[0] + ':' + str(int(cur[1]) + 1) + '-' + str(int(cur[2]) + 1)
         loc = 'LOGS/' + pair + '_' + cur[0] + '.scalpel.log'
         cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
-                          + normal_bam + ' --bed ' + c_string + ' --ref ' + fasta + ' 2> ' + loc
+        + normal_bam + ' --window 600 --two-pass --bed ' + c_string + ' --ref ' + fasta + ' 2> ' + loc
         log(loc, date_time() + cmd + '\n')
         check = call(cmd, shell=True)
         if check != 0:
             return 1, cur[0], pair
+        mv_cmd = 'mkdir ' + cur[0] + '; mv outdir/main/* ' + cur[0] + '; rm -rf outdir/main;'
+        call(mv_cmd, shell=True)
     return 0
 
 
