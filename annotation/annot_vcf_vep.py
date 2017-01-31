@@ -14,7 +14,8 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
-            config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'])
+            config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'],
+            config_data['params']['wg_flag'])
 
 
 def pass_filter(sample, in_suffix, dustmask_flag):
@@ -38,7 +39,8 @@ def pass_filter(sample, in_suffix, dustmask_flag):
 
 
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag) \
+        = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
     intvl = ref_mnt + '/' + intvl
@@ -61,9 +63,17 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         if source == 'scalpel':
             pass_filter(sample, in_suffix, dustmask_flag)
             in_vcf = sample + '.somatic_indel.PASS.vcf'
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
-                ' ANN --canonical --variant_class --buffer_size 2000 --no_whole_genome --offline --maf_exac ' \
-                '--no_whole_genome --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache \
+        # run_vep = ''
+        if wg_flag == 'n':
+            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size 2000 ' \
+                        '--no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
+                      + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
+                      + loc
+        else:
+            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size 2000 --no_whole_genome ' \
+                        '--offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache \
                 + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
         log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         check = subprocess.call(run_vep, shell=True)
@@ -73,6 +83,8 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         else:
             log(loc, date_time() + 'VEP annotation ' + sample + in_suffix + ' successful!\n')
         if source == 'mutect':
+            if wg_flag == 'y':
+                intvl = 'n'
             check = gen_snv_report(out_vcf, sample + '.out.keep', intvl)
             if check != 0:
                 log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
