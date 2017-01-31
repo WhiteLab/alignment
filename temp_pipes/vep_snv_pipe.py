@@ -15,13 +15,20 @@ def get_out_vcf(cont, obj, pairs):
         # output to cur dir to make vep work
         cmd = src_cmd + 'swift download ' + cont + ' ' + dirname + out + ' --skip-identical  --output ' + out \
               + '; swift download ' + cont + ' ' + dirname + vcf + ' --skip-identical --output ' + vcf
-        call(cmd, shell=True)
+        sys.stderr.write(date_time() + cmd + '\n')
+        check = call(cmd, shell=True)
+        if check != 0:
+            return 1, pair
+    return 0, 'OK'
 
 
 def temp_annot_pipe(config_file, sample_pairs, ref_mnt):
     (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot_used) = parse_config(config_file)
     sys.stderr.write(date_time() + 'Downloading mutect out files and vcf files\n')
-    get_out_vcf(cont, analysis, sample_pairs)
+    check = get_out_vcf(cont, analysis, sample_pairs)
+    if check[0] != 0:
+        sys.stderr.write(date_time() + 'Could not get vcfs for ' + check[1] + '\n')
+        exit(1)
     if annot_used == 'vep':
         vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.snv.vep.vcf', 'mutect')
 
