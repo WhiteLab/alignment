@@ -33,9 +33,9 @@ def genome_coverage(bedtools2_tool, sample, genome_bed_ref, wait_flag):
 def capture_coverage(bedtools2_tool, sample, capture_bed_ref, wait_flag):
     prefix = capture_bed_ref[:-4]
     cc_t1_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + prefix + '_t1.bed' \
-                + " -sorted | grep all > " + sample + ".capture_t1.hist"
+                + " | grep all > " + sample + ".capture_t1.hist"
     cc_t2_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + prefix + '_t2.bed' \
-                + " -sorted | grep all > " + sample + ".capture_t2.hist"
+                + " | grep all > " + sample + ".capture_t2.hist"
     sys.stderr.write(date_time() + cc_t1_cmd + "\n" + cc_t2_cmd + "\n")
     if wait_flag == 0:
         Popen(cc_t1_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
