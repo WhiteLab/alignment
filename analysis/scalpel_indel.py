@@ -15,7 +15,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['scalpel'], config_data['tools']['bedtools'], config_data['refs']['capture'], \
            config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['dustmask_flag'],\
-           config_data['refs']['dustmask'], config_file['params']['wg_flag']
+           config_data['refs']['dustmask'], config_data['params']['wg_flag']
 
 
 def create_sample_list(sample_pairs):
