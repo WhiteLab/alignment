@@ -9,7 +9,8 @@ from utility.job_manager import job_manager
 
 
 def exome_coverage(bedtools2_tool, sample, exome_bed_ref, wait_flag):
-    exome_coverage_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + exome_bed_ref + " | grep all > " + sample + ".exome.hist"
+    exome_coverage_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + exome_bed_ref \
+                         + " | grep all > " + sample + ".exome.hist"
     sys.stderr.write(date_time() + exome_coverage_cmd + "\n")
     if wait_flag == 0:
         Popen(exome_coverage_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
@@ -19,7 +20,8 @@ def exome_coverage(bedtools2_tool, sample, exome_bed_ref, wait_flag):
 
 
 def genome_coverage(bedtools2_tool, sample, genome_bed_ref, wait_flag):
-    genome_coverage_cmd = bedtools2_tool + " genomecov -ibam " + sample + ".rmdup.srt.bam -g " + genome_bed_ref + " | grep genome > " + sample + ".genome.hist"
+    genome_coverage_cmd = bedtools2_tool + " genomecov -ibam " + sample + ".rmdup.srt.bam -g " + genome_bed_ref \
+                          + " | grep genome > " + sample + ".genome.hist"
     sys.stderr.write(date_time() + genome_coverage_cmd + "\n")
     if wait_flag == 0:
         Popen(genome_coverage_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
@@ -30,8 +32,10 @@ def genome_coverage(bedtools2_tool, sample, genome_bed_ref, wait_flag):
 
 def capture_coverage(bedtools2_tool, sample, capture_bed_ref, wait_flag):
     prefix = capture_bed_ref[:-4]
-    cc_t1_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + prefix + '_t1.bed' + " | grep all > " + sample + ".capture_t1.hist"
-    cc_t2_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + prefix + '_t2.bed' + " | grep all > " + sample + ".capture_t2.hist"
+    cc_t1_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + prefix + '_t1.bed' \
+                + " -sorted | grep all > " + sample + ".capture_t1.hist"
+    cc_t2_cmd = bedtools2_tool + " coverage -hist -abam " + sample + ".rmdup.srt.bam -b " + prefix + '_t2.bed' \
+                + " -sorted | grep all > " + sample + ".capture_t2.hist"
     sys.stderr.write(date_time() + cc_t1_cmd + "\n" + cc_t2_cmd + "\n")
     if wait_flag == 0:
         Popen(cc_t1_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)

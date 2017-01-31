@@ -17,7 +17,7 @@ def update_summary(summary, pair, reason):
 
 
 def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, pos_gene, min_vaf, tn_dict, norms,
-                         vflag):
+                         alt_vaf):
     cur = open(report)
     next(cur)
     maf = 0.01
@@ -30,11 +30,24 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
             continue
         info = line.rstrip('\n').split('\t')
         vtup = '\t'.join(info[0:4])
-        if float(info[-1]) * 100 < min_vaf:
-            if vflag == 'y' and pair not in tn_dict:
+        chr_pos = info[0] + '_' + info[1]
+        if chr_pos not in pos_gene:
+            # might be repeats in reports, skip if position reported already
+            pos_gene[chr_pos] = {}
+            pos_gene[chr_pos]['name'] = info[6]
+        if pair in pos_gene[chr_pos]:
+            continue
+        pos_gene[chr_pos][pair] = 1
+        valid = pos_gene[chr_pos]['name'] + '-' + info[0] + '_' + info[1] + '_' + info[2] + '->' + info[3]
+        vap = float(info[-1]) * 100
+        if pair not in tn_dict and norm in norms and valid in norms[norm]:
+            merged_tbl[valid][pair] = str(vap)
+            continue
+        if vap < alt_vaf:
+            if pair not in tn_dict:
                 summary = update_summary(summary, pair, 'low vaf')
                 continue
-            elif vflag == 'n':
+            elif vap < min_vaf:
                 summary = update_summary(summary, pair, 'low vaf')
                 continue
         if len(info[2]) > length or len(info[3]) > length:
@@ -53,20 +66,12 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
             #if float(info[-1]) * 100 < 20:
             summary = update_summary(summary, pair, 'low coverage')
             continue
-        chr_pos = info[0] + '_' + info[1]
-        if chr_pos not in pos_gene:
-            # might be repeats in reports, skip if position reported already
-            pos_gene[chr_pos] = {}
-            pos_gene[chr_pos]['name'] = info[6]
-        if pair in pos_gene[chr_pos]:
-            continue
-        pos_gene[chr_pos][pair] = 1
-        valid = pos_gene[chr_pos]['name'] + '-' + info[0] + '_' + info[1] + '_' + info[2] + '->' + info[3]
+
         if valid not in merged_tbl:
             merged_tbl[valid] = {}
         if valid not in norms[norm]:
             norms[norm][valid] = 0
-        merged_tbl[valid][pair] = str(float(info[-1]) * 100)
+        merged_tbl[valid][pair] = str(vap)
         norms[norm][valid] += 1
         if pair in tn_dict:
             tn_dict[pair][valid] = 1
@@ -74,14 +79,13 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
     return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
-def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_dict, norms, vflag):
+def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_dict, norms, alt_vaf):
     merged_tbl[pair] = {}
     cur = open(report)
     next(cur)
     maf = 0.01
     tn = 2
-    cov = 30
-    min_vaf = float(min_vaf)
+    cov = 0
     (tum, norm) = pair.split('_')
     # biotype = 'protein_coding'
     weak_impact = {'MODIFIER': 1, 'LOW': 1}
@@ -89,14 +93,26 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         if line == '\n':
             continue
         info = line.rstrip('\n').split('\t')
+        chr_pos = info[0] + '_' + info[1]
+        if chr_pos not in pos_gene:
+            # might be repeats in reports, skip if position reported already
+            pos_gene[chr_pos] = {}
+            pos_gene[chr_pos]['name'] = info[14]
+        if pair in pos_gene[chr_pos]:
+            continue
+        pos_gene[chr_pos][pair] = 1
+        valid = pos_gene[chr_pos]['name'] + '-' + info[0] + '_' + info[1] + '_' + info[3] + '->' + info[4]
         cur_vaf = info[10].rstrip('%')
+        if pair not in tn_dict and norm in norms and valid in norms[norm]:
+            merged_tbl[valid][pair] = cur_vaf
+            continue
         if info[-1] == 'OFF':
             summary = update_summary(summary, pair, 'off target')
-        if float(cur_vaf) < min_vaf:
-            if vflag == 'y' and pair not in tn_dict:
+        if float(cur_vaf) < alt_vaf:
+            if pair not in tn_dict:
                 summary = update_summary(summary, pair, 'low vaf')
                 continue
-            elif vflag == 'n':
+            elif float(cur_vaf) < min_vaf:
                 summary = update_summary(summary, pair, 'low vaf')
                 continue
         if float(info[11]) <= tn:
@@ -112,15 +128,7 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
             # if float(cur_vaf) < 20:
             summary = update_summary(summary, pair, 'low coverage')
             continue
-        chr_pos = info[0] + '_' + info[1]
-        if chr_pos not in pos_gene:
-            # might be repeats in reports, skip if position reported already
-            pos_gene[chr_pos] = {}
-            pos_gene[chr_pos]['name'] = info[14]
-        if pair in pos_gene[chr_pos]:
-            continue
-        pos_gene[chr_pos][pair] = 1
-        valid = pos_gene[chr_pos]['name'] + '-' + info[0] + '_' + info[1] + '_' + info[3] + '->' + info[4]
+
         if valid not in norms[norm]:
             norms[norm][valid] = 0
         if valid not in merged_tbl:
@@ -128,12 +136,13 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         merged_tbl[valid][pair] = cur_vaf
         norms[norm][valid] += 1
         if pair in tn_dict:
+            #pdb.set_trace()
             tn_dict[pair][valid] = 1
     cur.close()
     return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
-def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, vflag):
+def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, alt_vaf):
     tn_dict = {}
     norms = {}
     for tn in tn_string.split(','):
@@ -148,6 +157,7 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
     pos_gene = {}
     indel_max = int(length)
     min_vaf = float(vaf)
+    alt_vaf = float(alt_vaf)
     reasons = ('off target', 'low vaf', 'low tn ratio', 'indel len', 'low impact', 'high maf', 'low coverage', 'panel')
     for line in open(panel):
         info = line.rstrip('\n').split('\t')
@@ -164,10 +174,10 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
             pair_dict[pair] = 1
         if vtype == 'indels':
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_indel_report(pair, report, merged_tbl, banned_tup,
-                                                        summary, indel_max, pos_gene, min_vaf, tn_dict, norms, vflag)
+                                                        summary, indel_max, pos_gene, min_vaf, tn_dict, norms, alt_vaf)
         else:
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_snv_report(pair, report, merged_tbl, summary,
-                                                                            pos_gene, min_vaf, tn_dict, norms, vflag)
+                                                                            pos_gene, min_vaf, tn_dict, norms, alt_vaf)
     sum_tbl = open('reject_summary.txt', 'w')
     sum_tbl.write('Pair/reason\t' + '\t'.join(reasons) + '\n')
     for pair in pairs:
@@ -212,7 +222,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Creates merged reports and filters on vaf, impact, biotype, '
                                                  't/n ratio, panel of normals, coverage.')
     parser.add_argument('-r', '--reports', action='store', dest='reports',
-                        help='List of report files')
+                        help='List of report files.  TN reports must be listed first')
     parser.add_argument('-p', '--panel', action='store', dest='panel',
                         help='Panel of normals')
     parser.add_argument('-n', '--number_samples', action='store', dest='num_samp',
@@ -223,8 +233,8 @@ if __name__ == "__main__":
                         help='Max indel length')
     parser.add_argument('-v', '--vaf', action='store', dest='vaf',
                         help='Min variant allele frequency')
-    parser.add_argument('-z', '--vflag', action='store', dest='vflag',
-                        help='\'y\' to limit to non-tumor/normal, \'n\' to apply to all')
+    parser.add_argument('-z', '--vflag', action='store', dest='avaf',
+                        help='non-tumor/normal vaf')
     parser.add_argument('-t', '--tumor_normal', action='store', dest='tum_norm',
                         help='Comma-separated tumor-normal pair list to fix')
 
@@ -233,6 +243,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (reports, panel, num_samp, min_type, length, vaf, tn_string, vflag) = (inputs.reports, inputs.panel,
-                        inputs.num_samp, inputs.flag_type, inputs.length, inputs.vaf, inputs.tum_norm, inputs.vflag)
-    filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, vflag)
+    (reports, panel, num_samp, min_type, length, vaf, tn_string, avaf) = (inputs.reports, inputs.panel,
+            inputs.num_samp, inputs.flag_type, inputs.length, inputs.vaf, inputs.tum_norm, inputs.avaf)
+    filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, avaf)

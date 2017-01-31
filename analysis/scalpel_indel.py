@@ -15,7 +15,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['scalpel'], config_data['tools']['bedtools'], config_data['refs']['capture'], \
            config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['dustmask_flag'],\
-           config_data['refs']['dustmask']
+           config_data['refs']['dustmask'], config_file['params']['wg_flag']
 
 
 def create_sample_list(sample_pairs):
@@ -36,8 +36,23 @@ def create_sample_list(sample_pairs):
     del temp
 
 
+def wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, pair):
+    for coords in open(bed):
+        cur = coords.rstrip('\n').split('\t')
+        c_string = cur[0] + ':' + str(int(cur[1]) + 1) + '-' + str(int(cur[2]) + 1)
+        loc = 'LOGS/' + pair + '_' + cur[0] + '.scalpel.log'
+        cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
+                          + normal_bam + ' --bed ' + c_string + ' --ref ' + fasta + ' 2> ' + loc
+        log(loc, date_time() + cmd + '\n')
+        check = call(cmd, shell=True)
+        if check != 0:
+            return 1, cur[0], pair
+    return 0
+
+
+
 def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
-    (scalpel, bedtools, bed, fasta, cpus, dustmask_flag, dustmask_bed) = parse_config(config_file)
+    (scalpel, bedtools, bed, fasta, cpus, dustmask_flag, dustmask_bed, wg) = parse_config(config_file)
     bed = ref_mnt + '/' + bed
     fasta = ref_mnt + '/' + fasta
     dustmask_bed = ref_mnt + '/' + dustmask_bed
@@ -54,14 +69,22 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
         loc = log_dir + cur[0] + '.scalpel.log'
         tumor_bam = cur[1] + '.merged.final.bam'
         normal_bam = cur[2] + '.merged.final.bam'
-        scalpel_cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
-                      + normal_bam + ' --bed ' + bed + ' --ref ' + fasta + ' 2>> ' + loc
-        sys.stderr.write(date_time() + 'Starting indel calls for ' + cur[0] + '\n')
-        log(loc, date_time() + 'Starting indel calls for ' + cur[0] + ' with command:\n' + scalpel_cmd + '\n')
-        check = call(scalpel_cmd, shell=True)
-        if check != 0:
-            sys.stderr.write(date_time() + 'Indel calling failed for pair ' + cur[0] + ' with command:\n' +
-                             scalpel_cmd + '\n')
+        if wg == 'n':
+            scalpel_cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
+                          + normal_bam + ' --bed ' + bed + ' --ref ' + fasta + ' 2>> ' + loc
+            sys.stderr.write(date_time() + 'Starting indel calls for ' + cur[0] + '\n')
+            log(loc, date_time() + 'Starting indel calls for ' + cur[0] + ' in capture mode with command:\n'
+                + scalpel_cmd + '\n')
+            check = call(scalpel_cmd, shell=True)
+            if check != 0:
+                sys.stderr.write(date_time() + 'Indel calling failed for pair ' + cur[0] + ' with command:\n' +
+                                 scalpel_cmd + '\n')
+                exit(1)
+        else:
+            check = wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, cur[0])
+            if check[0] != 0:
+                sys.stderr.write('Scalpel failed for ' + cur[2] + ' at ' + cur[1] + '\n')
+                exit(1)
         log(loc, date_time() + 'Indel calling complete for pair ' + cur[0] + ' moving output files\n')
         mv_cmd = 'mkdir ' + cur[0] + '; mv outdir/main/* ' + cur[0] + '; rm -rf outdir/main;'
         log(loc, date_time() + mv_cmd + '\n')
