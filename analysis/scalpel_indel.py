@@ -38,7 +38,7 @@ def create_sample_list(sample_pairs):
 
 def wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, pair):
     # use half CPUS for memory purposes
-    cpus = str(round((float(cpus)/2), 0))
+    cpus = str(int(round((float(cpus)/2), 0)))
     for coords in open(bed):
         cur = coords.rstrip('\n').split('\t')
         c_string = cur[0] + ':' + str(int(cur[1]) + 1) + '-' + str(int(cur[2]) + 1)
