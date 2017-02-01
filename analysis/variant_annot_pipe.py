@@ -19,9 +19,9 @@ from scalpel_indel import scalpel_indel
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'],
-            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'],
-            config_data['params']['indelflag'], config_data['params']['annotator'])
+    return config_data['tools']['novosort'], config_data['refs']['obj'], config_data['refs']['cont'], \
+           config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'], \
+           config_data['params']['indelflag'], config_data['params']['annotator'], config_data['params']['wg_flag']
 
 
 def check_existing_bams(sample_list):
@@ -82,12 +82,12 @@ def vep(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
         exit(1)
 
 
-def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg):
+def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt):
     # create eventual output location directories
 
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     call(mk_dir, shell=True)
-    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot_used) = parse_config(config_file)
+    (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot_used, wg) = parse_config(config_file)
     # create sample list
     sample_list = 'sample_list.txt'
     fh = open(sample_pairs, 'r')
@@ -200,15 +200,12 @@ if __name__ == "__main__":
                              ' wasn\'t sorted in the manner. \'y\' to do so')
     parser.add_argument('-r', '--reference', action='store', dest='ref_mnt',
                         help='Directory references are mounted, i.e. /mnt/cinder/REFS_XXX')
-    parser.add_argument('-wg', '--whole-genome', action='store', dest='wg',
-                        help='\'y\' or \'n\' flag if whole genome or not.  will determine whether to flag for on/off '
-                             'target')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file, kflag, ref_mnt, wg) = (
-        inputs.sample_pairs, inputs.config_file, inputs.kflag, inputs.ref_mnt, inputs.wg)
-    variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt, wg)
+    (sample_pairs, config_file, kflag, ref_mnt) = (inputs.sample_pairs, inputs.config_file, inputs.kflag,
+                                                   inputs.ref_mnt)
+    variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt)
