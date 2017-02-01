@@ -37,6 +37,8 @@ def create_sample_list(sample_pairs):
 
 
 def wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, pair):
+    # use half CPUS for memory purposes
+    cpus = str(round((float(cpus)/2), 0))
     for coords in open(bed):
         cur = coords.rstrip('\n').split('\t')
         c_string = cur[0] + ':' + str(int(cur[1]) + 1) + '-' + str(int(cur[2]) + 1)
@@ -48,7 +50,10 @@ def wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, pair):
         if check != 0:
             return 1, cur[0], pair
         mv_cmd = 'mkdir ' + cur[0] + '; mv outdir/main/* ' + cur[0] + '; rm -rf outdir/main;'
-        call(mv_cmd, shell=True)
+        check = call(mv_cmd, shell=True)
+        if check != 0:
+            sys.stderr.write(date_time() + 'Failed to make dir for ' + cur[0] + ' with command ' + mv_cmd + '\n')
+            return 1, cur[0], pair
     return 0
 
 
