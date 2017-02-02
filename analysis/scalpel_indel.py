@@ -36,25 +36,19 @@ def create_sample_list(sample_pairs):
     del temp
 
 
-def wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, pair):
+def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file, ref_mnt):
     # use half CPUS for memory purposes
-    cpus = str(int(round((float(cpus)/2), 0)))
-    for coords in open(bed):
-        cur = coords.rstrip('\n').split('\t')
-        c_string = cur[0] + ':' + str(int(cur[1]) + 1) + '-' + str(int(cur[2]) + 1)
-        loc = 'LOGS/' + pair + '_' + cur[0] + '.scalpel.log'
-        cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
-        + normal_bam + ' --window 600 --two-pass --bed ' + c_string + ' --ref ' + fasta + ' 2> ' + loc
-        log(loc, date_time() + cmd + '\n')
-        check = call(cmd, shell=True)
-        if check != 0:
-            return 1, cur[0], pair
-        mv_cmd = 'mkdir ' + cur[0] + '; mv outdir/main/* ' + cur[0] + '; rm -rf outdir/main;'
-        check = call(mv_cmd, shell=True)
-        if check != 0:
-            sys.stderr.write(date_time() + 'Failed to make dir for ' + cur[0] + ' with command ' + mv_cmd + '\n')
-            return 1, cur[0], pair
-    return 0
+    # cpus = str(int(round((float(cpus)/2), 0)))
+    config_data = json.loads(open(config_file, 'r').read())
+    exome = ref_mnt + '/' + config_data['refs']['exome']
+    loc = 'LOGS/' + pair + '_' + pair + '.genome_as_exome.scalpel.log'
+    cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
+    + normal_bam + ' --window 600 --two-pass --bed ' + exome + ' --ref ' + fasta + ' 2> ' + loc
+    log(loc, date_time() + cmd + '\n')
+    check = call(cmd, shell=True)
+    if check != 0:
+        return 1, pair
+    return 0, pair
 
 
 
@@ -88,7 +82,7 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
                                  scalpel_cmd + '\n')
                 exit(1)
         else:
-            check = wg_mode(scalpel, tumor_bam, normal_bam, bed, fasta, cpus, cur[0])
+            check = wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, cur[0], config_file, ref_mnt)
             if check[0] != 0:
                 sys.stderr.write('Scalpel failed for ' + cur[2] + ' at ' + cur[1] + '\n')
                 exit(1)
