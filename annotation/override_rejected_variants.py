@@ -59,7 +59,7 @@ def recreate_analysis(out, vcf, vdict, pair):
         if line[0:6] == '#CHROM':
             break
     for line in vcf_fh:
-        out_cur = next(new_out_fh)
+        out_cur = next(out_fh)
         vcf_info = line.split('\t')
         if vcf_info[6] == 'PASS':
             new_out_fh.write(out_cur)
