@@ -103,7 +103,7 @@ def override_rejected_variants(config_file, table, ref_mnt):
             (var_dict[pair]['snv'], temp_vcf) = recreate_analysis(out, vcf, var_dict[pair]['snv'], pair)
     sys.stderr.write(date_time() + 'Annotating recovered variants\n')
     check = vep(config_file, pair_list, ref_mnt, '.temp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
-    if check == 0:
+    if check != 0:
         sys.stderr.write(date_time() + 'Running VEP failed.  Check parameters\n')
         exit(1)
     sys.stderr.write(date_time() + 'Recombining tables\n')
