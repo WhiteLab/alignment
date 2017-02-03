@@ -119,7 +119,7 @@ def override_rejected_variants(config_file, table, ref_mnt):
         new_info = new.split('\t')
         for line in old:
             info = line.split('\t')
-            if f == 0 and new_info[0] == info[0] and int(info) > int(new_info):
+            if f == 0 and new_info[0] == info[0] and int(info[1]) > int(new_info[1]):
                 nt.write(new)
                 try:
                     new = next(update)
