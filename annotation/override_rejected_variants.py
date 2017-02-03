@@ -91,7 +91,7 @@ def override_rejected_variants(config_file, table, ref_mnt):
     pair_list = 'pairs.txt'
     pair_fh = open(pair_list, 'w')
     ann_table_list = []
-    for pair in table:
+    for pair in var_dict:
         sys.stderr.write(date_time() + 'Processing ' + pair + '\n')
         pair_fh.write(pair + '\n')
         if 'snv' in var_dict[pair]:
