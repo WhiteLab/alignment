@@ -4,6 +4,7 @@ import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from analysis.variant_annot_pipe import *
 import subprocess
+import os
 
 
 def populate_table(table):
@@ -101,12 +102,16 @@ def override_rejected_variants(config_file, table, ref_mnt):
             ann_table_list.append(ann_table)
             (var_dict[pair]['snv'], temp_vcf) = recreate_analysis(out, vcf, var_dict[pair]['snv'], pair)
     sys.stderr.write(date_time() + 'Annotating recovered variants\n')
-    vep(config_file, pair_list, ref_mnt, '.temp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
+    check = vep(config_file, pair_list, ref_mnt, '.temp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
+    if check == 0:
+        sys.stderr.write(date_time() + 'Running VEP failed.  Check parameters\n')
+        exit(1)
     sys.stderr.write(date_time() + 'Recombining tables\n')
     # combine new entries into old reports
     for ann_table in ann_table_list:
         f = 0
-        parts = ann_table.split('.')
+        fn = os.path.basename(ann_table)
+        parts = fn.split('.')
         old = open(ann_table)
         to_integrate = parts[0] + '.subsitutions.vep.prioritized_impact.report.xls'
         update = open(to_integrate)
