@@ -80,6 +80,7 @@ def vep(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, so
     else:
         sys.stderr.write(date_time() + 'vep annotation of ' + source + ' output failed.\n')
         exit(1)
+    return 0
 
 
 def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt):
