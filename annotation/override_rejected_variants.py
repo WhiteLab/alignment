@@ -11,7 +11,7 @@ def populate_table(table):
     var_dict = {}
     for line in open(table):
         # format pair\tchrom\tpos\tref\talt\ttype
-        (pair, chrom, pos, ref, alt, ty) = line.rstrip('\n').split('\t')
+        (pair, chrom, pos, ref, alt) = line.rstrip('\n').split('\t')
         if pair not in var_dict:
             var_dict[pair] = {}
         ty = 'snv'
@@ -86,17 +86,21 @@ def recreate_analysis(out, vcf, vdict, pair):
 
 def override_rejected_variants(config_file, table, ref_mnt):
     (novosort, obj, cont, analysis, annotation, germ_flag, indel_flag, annot_used, wg) = parse_config(config_file)
+    sys.stderr.write(date_time() + 'Populating update table\n')
     var_dict = populate_table(table)
     pair_list = 'pairs.txt'
     pair_fh = open(pair_list, 'w')
     ann_table_list = []
     for pair in table:
+        sys.stderr.write(date_time() + 'Processing ' + pair + '\n')
         pair_fh.write(pair + '\n')
         if 'snv' in var_dict[pair]:
             (out, vcf, ann_table) = get_snv_files(cont, analysis, annotation, pair)
             ann_table_list.append(ann_table)
             (var_dict[pair]['snv'], temp_vcf) = recreate_analysis(out, vcf, var_dict[pair]['snv'], pair)
+    sys.stderr.write(date_time() + 'Annotating recovered variants\n')
     vep(config_file, pair_list, ref_mnt, '.tmp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
+    sys.stderr.write(date_time() + 'Recombining tables\n')
     # combine new entries into old reports
     for ann_table in ann_table_list:
         f = 0
@@ -124,6 +128,8 @@ def override_rejected_variants(config_file, table, ref_mnt):
         if f == 0:
             nt.write(new)
         nt.close()
+    sys.stderr.write('Fin!\n')
+
 
 if __name__ == "__main__":
     import argparse
