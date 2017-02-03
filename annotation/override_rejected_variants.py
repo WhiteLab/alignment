@@ -32,6 +32,8 @@ def get_snv_files(cont, analysis, annotation, pair):
     subprocess.call(get_out, shell=True)
     get_vcf = src_cmd + 'swift download ' + cont + ' ' + vcf
     subprocess.call(get_vcf, shell=True)
+    get_ann_table = src_cmd + 'swift download ' + cont + ' ' + ann_table
+    subprocess.call(get_ann_table, shell=True)
     return out, vcf, ann_table
 
 
