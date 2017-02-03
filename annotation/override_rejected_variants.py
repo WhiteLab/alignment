@@ -101,7 +101,7 @@ def override_rejected_variants(config_file, table, ref_mnt):
             ann_table_list.append(ann_table)
             (var_dict[pair]['snv'], temp_vcf) = recreate_analysis(out, vcf, var_dict[pair]['snv'], pair)
     sys.stderr.write(date_time() + 'Annotating recovered variants\n')
-    vep(config_file, pair_list, ref_mnt, '.tmp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
+    vep(config_file, pair_list, ref_mnt, '.temp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
     sys.stderr.write(date_time() + 'Recombining tables\n')
     # combine new entries into old reports
     for ann_table in ann_table_list:
