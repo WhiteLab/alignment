@@ -72,9 +72,9 @@ def snpEff(config_file, sample_pairs, ref_mnt, wg):
         exit(1)
 
 
-def vep(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
+def vep(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
     from annotation.annot_vcf_vep import annot_vcf_vep_pipe
-    check = annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source)
+    check = annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source)
     if check == 0:
         sys.stderr.write(date_time() + 'vep annotation of ' + source + ' output successful.\n')
     else:
@@ -161,8 +161,8 @@ def variant_annot_pipe(config_file, sample_pairs, kflag, ref_mnt):
     if annot_used == 'snpEff':
         snpEff(config_file, sample_pairs, ref_mnt, wg)
     if annot_used == 'vep':
-        vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.snv.vep.vcf', 'mutect')
-        vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'scalpel')
+        vep(config_file, sample_pairs, ref_mnt, '.vcf.keep', '.snv.vep.vcf', '.out.keep', 'mutect')
+        vep(config_file, sample_pairs, ref_mnt, '.indel.vcf', '.somatic.indel.vep.vcf', 'NA', 'scalpel')
 
     if germ_flag == 'Y':
         sys.stderr.write(date_time() + 'Germ line call flag indicated\n')

@@ -43,12 +43,16 @@ def recreate_analysis(out, vcf, vdict, pair):
     new_vcf = pair + '.curated.vcf.keep'
     temp_vcf = pair + '.temp.vcf'
     temp_vcf_fh = open(temp_vcf, 'w')
+    temp_out = pair + '.temp.out'
+    temp_out_fh = open(temp_out, 'w')
     new_out_fh = open(new_out, 'w')
     new_vcf_fh = open(new_vcf, 'w')
     head = next(out_fh)
     new_out_fh.write(head)
+    temp_out_fh.write(head)
     head = next(out_fh)
     new_out_fh.write(head)
+    temp_out_fh.write(head)
     for line in vcf_fh:
         new_vcf_fh.write(line)
         temp_vcf_fh.write(line)
@@ -68,6 +72,7 @@ def recreate_analysis(out, vcf, vdict, pair):
                 out_info[-1] = 'OVERRIDE'
                 vcf_info[6] = 'OVERRIDE'
                 new_out_fh.write('\t'.join(out_info) + '\n')
+                temp_out_fh.write('\t'.join(out_info) + '\n')
                 new_vcf_fh.write('\t'.join(vcf_info))
                 temp_vcf_fh.write('\t'.join(vcf_info))
     out_fh.close()
@@ -75,6 +80,7 @@ def recreate_analysis(out, vcf, vdict, pair):
     new_vcf_fh.close()
     new_out_fh.close()
     temp_vcf_fh.close()
+    temp_out_fh.close()
     return vdict, temp_vcf
 
 
@@ -90,11 +96,34 @@ def override_rejected_variants(config_file, table, ref_mnt):
             (out, vcf, ann_table) = get_snv_files(cont, analysis, annotation, pair)
             ann_table_list.append(ann_table)
             (var_dict[pair]['snv'], temp_vcf) = recreate_analysis(out, vcf, var_dict[pair]['snv'], pair)
-    vep(config_file, pair_list, ref_mnt, '.tmp.vcf', '.snv.curated.vcf', 'mutect')
+    vep(config_file, pair_list, ref_mnt, '.tmp.vcf', '.snv.curated.vcf', '.temp.out', 'mutect')
     # combine new entries into old reports
     for ann_table in ann_table_list:
+        f = 0
         parts = ann_table.split('.')
-
+        old = open(ann_table)
+        to_integrate = parts[0] + '.subsitutions.vep.prioritized_impact.report.xls'
+        update = open(to_integrate)
+        new_table = parts[0] + '.subsitutions.vep.curated_reports.xls'
+        nt = open(new_table, 'w')
+        head = next(old)
+        nt.write(head)
+        next(update)
+        new = next(update)
+        new_info = new.split('\t')
+        for line in old:
+            info = line.split('\t')
+            if f == 0 and new_info[0] == info[0] and int(info) > int(new_info):
+                nt.write(new)
+                try:
+                    new = next(update)
+                    new_info = new.split('\t')
+                except:
+                    f = 1
+            nt.write(line)
+        if f == 0:
+            nt.write(new)
+        nt.close()
 
 if __name__ == "__main__":
     import argparse

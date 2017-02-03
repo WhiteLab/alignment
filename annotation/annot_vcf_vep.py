@@ -38,7 +38,7 @@ def pass_filter(sample, in_suffix, dustmask_flag):
     out.close()
 
 
-def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source):
+def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag) \
         = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
@@ -72,9 +72,9 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
                       + loc
         else:
             run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size 2000 --no_whole_genome ' \
-                        '--offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache \
-                + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
+                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size 2000 ' \
+                        '--no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
+                      ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
         log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         check = subprocess.call(run_vep, shell=True)
         if check != 0:
@@ -85,7 +85,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         if source == 'mutect':
             if wg_flag == 'y':
                 intvl = 'n'
-            check = gen_snv_report(out_vcf, sample + '.out.keep', intvl)
+            check = gen_snv_report(out_vcf, sample + in_mutect, intvl)
             if check != 0:
                 log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
                 exit(1)
@@ -106,7 +106,9 @@ if __name__ == "__main__":
     parser.add_argument('-so', '--source', action='store', dest='source', help='Variant call annot source - mutect or'
                                                                                ' scalpel')
     parser.add_argument('-is', '--in_suffix', action='store', dest='in_suffix', help='Suffix of input files')
-    parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output files')
+    parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output vcf files')
+    parser.add_argument('-om', '--in_mutect', action='store', dest='in_mutect', help='Suffix of input mutect files, '
+                                                                                     'can be \'NA\' if not from mutect')
     parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
                         help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
 
@@ -115,6 +117,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source) = (inputs.config_file, inputs.sample_pairs,
-                                                    inputs.ref_mnt, inputs.in_suffix, inputs.out_suffix, inputs.source)
-    annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, source)
+    (config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
+            inputs.sample_pairs, inputs.ref_mnt, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
+    annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source)
