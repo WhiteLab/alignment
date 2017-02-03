@@ -107,7 +107,7 @@ if __name__ == "__main__":
                                                                                ' scalpel')
     parser.add_argument('-is', '--in_suffix', action='store', dest='in_suffix', help='Suffix of input files')
     parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output vcf files')
-    parser.add_argument('-om', '--in_mutect', action='store', dest='in_mutect', help='Suffix of input mutect files, '
+    parser.add_argument('-im', '--in_mutect', action='store', dest='in_mutect', help='Suffix of input mutect files, '
                                                                                      'can be \'NA\' if not from mutect')
     parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
                         help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
