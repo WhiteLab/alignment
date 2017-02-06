@@ -44,7 +44,7 @@ def recreate_analysis(out, vcf, vdict, pair):
     vcf_fh = open(vcf)
     new_out = pair + '.curated.out.keep'
     new_vcf = pair + '.curated.vcf.keep'
-    # new filter category added to quell VEP warninga
+    # new filter category added to quell VEP warnings
     added_header = '##FILTER=<ID=OVERRIDE,Description="Mutect call overridden by additional evidence">\n'
     temp_vcf = pair + '.temp.vcf'
     temp_vcf_fh = open(temp_vcf, 'w')
