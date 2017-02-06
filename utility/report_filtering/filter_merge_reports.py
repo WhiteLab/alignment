@@ -42,6 +42,7 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
         vap = float(info[-1]) * 100
         if pair not in tn_dict and norm in norms and valid in norms[norm]:
             merged_tbl[valid][pair] = str(vap)
+            norms[norm][valid] += 1
             continue
         if vap < alt_vaf:
             if pair not in tn_dict:
@@ -107,6 +108,7 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         cur_vaf = info[10].rstrip('%')
         if pair not in tn_dict and norm in norms and valid in norms[norm]:
             merged_tbl[valid][pair] = cur_vaf
+            norms[norm][valid] += 1
             continue
         if float(cur_vaf) < alt_vaf:
             if pair not in tn_dict:
