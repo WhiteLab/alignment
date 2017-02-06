@@ -93,6 +93,8 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         if line == '\n':
             continue
         info = line.rstrip('\n').split('\t')
+        if info[-1] == 'OFF':
+            summary = update_summary(summary, pair, 'off target')
         chr_pos = info[0] + '_' + info[1]
         if chr_pos not in pos_gene:
             # might be repeats in reports, skip if position reported already
@@ -106,8 +108,6 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         if pair not in tn_dict and norm in norms and valid in norms[norm]:
             merged_tbl[valid][pair] = cur_vaf
             continue
-        if info[-1] == 'OFF':
-            summary = update_summary(summary, pair, 'off target')
         if float(cur_vaf) < alt_vaf:
             if pair not in tn_dict:
                 summary = update_summary(summary, pair, 'low vaf')
