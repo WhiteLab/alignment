@@ -37,12 +37,21 @@ def print_header_cc(tbl, ccvsn, ranges):
     tbl.write(ccvsn + "_t2_zero_cov_bp\t" + ccvsn + "_t2_%zero_cov\n")
 
 
+def parseFastQC(FQC):
+    fh = open(FQC)
+    for i in xrange(8):
+        next(fh)
+    seq_len = next(fh)
+    vals = seq_len.rstrip('\n').split('_')
+    return vals[1]
+
+
 def parseFS(FS):
     fh = open(FS, 'r')
     line = next(fh)
     line = line.rstrip('\n')
     rd_ct = re.search('^(\d+)\s', line)
-    line = next(fh)
+    next(fh)
     line = next(fh)
     line = line.rstrip('\n')
     mapped = re.search('^(\d+).*\((\d+\.\d+)', line)
@@ -114,13 +123,14 @@ def parse_qc(config_file, sample, cflag):
         rawFlag = sample + '.bam.flagstats'
 
     rmdupFlag = sample + '.rmdup.srt.bam.flagstats'
-    qs = sample + '_1.qs'
+    # qs = sample + '_1.qs'
     tbl = open(sample + '.qc_stats.txt', 'w')
     json_out = open(sample + '.qc_stats.json', 'w')
     # get read length using line count of quality stats file
-    fq_rd_len = subprocess.check_output('wc -l ' + qs, shell=True)
-    wc_res = fq_rd_len.split()
-    rd_len = int(wc_res[0]) - 1
+    # fq_rd_len = subprocess.check_output('wc -l ' + qs, shell=True) deprecated, using fastqc output
+    # wc_res = fq_rd_len.split()
+    fqc_file = 'QC/' + sample + '_1_sequence_fastqc/fastqc_data.txt'
+    rd_len = int(parseFastQC(fqc_file))
     date_aligned = time.strftime("%c")
     (ccvsn, genome_size, range_list) = parse_config(config_file)
     ranges = range_list.split(',')

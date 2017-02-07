@@ -1,29 +1,43 @@
 DNAseq Paired End pipeline
 ===========================
-Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
+Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 February
 ## CRASH COURSE RUN:
-You don't have time to read through what each script does, and you're a BAMF.
+You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with OpenStack 
+is highly recommended.
 
 #####1) Set up vm - on head node, will give updates on set up
+VMs related to this pipeline have an image with the suffix DNAseqPEvx.xx and a date prefix.  Best to choose the latest.
+Image list can be viewed using:
 ```
-./basic_node_setup.py -id <vm_name> -j <json config file> -w 600 2> setup.log >> setup.log
+nova image-list
 ```
-Typical config file:
+Find the ID of the image and boot a vm from it.  You can get a list of "flavors;" this sets up number of cpus, ram, and
+ disk space.  An flavor with 8 cpus, 32GB RAM, and 400GB ephemeral is recommended.  Flavors can be listed using the 
+ following:
+```
+nova flavor-list
+```
+Boot vm with your open stack key:
+```
+nova boot --image <image-id> --flavor <flavor-id> --key-name your_key DESIRED_VM_NAME
+```
 
-{
-    "vm_image":{
-	"id":"83ed8fb4-6c27-40e5-9648-4e12605d6f16",
-	"flavor":"13",
-	"key":"your_vm_key"
-    },
+After issuing the command, you'll get an ID for your vm.  You can use this to track boot progress, listing the 
+current servers:
+```
+nova list
+```
+Be sure to transfer your .novarc credential files upon boot.
 
-    "cinder_ref":{
-	"id":"85655e73-6a89-4be0-9152-61059fb0af3c",
-	"size":"200"
-    }
-}
+#####2) Get reference files from object store
+Most can be found in the container MB_TEST, object prefix 2015DECREFS/ should get most of what is needed for alignment.
+**Be certain not to download to the root drive.  Ephemeral space is in /mnt, recommneded to make a working directory
+there**
+```
+sudo mkdir /mnt/WORK; sudo chown ubuntu:ubuntu /mnt/WORK; swift download MB_TEST --prefix 2015DECREFS/; mv 2015DECREFS
+REFS;
+```
 
-Things to check for post set-up: Does the vm exist?  Does the cinder volume exist?  Was the cinder volume attached? Was it mounted?
 #####2) Create job run files
 ##### a) Get list of fastq files to process from swift, one file per line
 ##### b) Use this list to create a run file, in this example for custom capture:
@@ -54,14 +68,14 @@ Resultant lane_list:
 
     "refs":{
 	"cont":"PANCAN", # container
-	"obj":"ALIGN_TESTCC", # object prefix
-	"capture":"REFS/BED/capture_panel_2.0.bed", # location of bed file with capture defs.  tiers are implied and have been created ahead of time
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/hg19_pe_config.json" # this file location
+	"obj":"ALIGN", # object prefix
+	"capture":"REFS/BED/capture_panel_3.0.bed", # location of bed file with capture defs.  tiers are implied and have been created ahead of time
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/complete_config.json" # this file location
     },
     "params":{
 	"threads":"8",
-	"ram":"24",
-	"cc_vsn":"V2", # custom capture version
+	"ram":"30",
+	"cc_vsn":"V3", # custom capture version
     }
 
 #####3) Pipeline run - QC:
@@ -74,7 +88,7 @@ Resultant lane_list:
                         Reference drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
 
-The pipeline will iterate throught the list upload files to swift, and delete on the cinder volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for conveniece after run using /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py:
+The pipeline will iterate throught the list upload files to swift, and delete on the volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for conveniece after run using /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py:
 ```
 /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
 ```

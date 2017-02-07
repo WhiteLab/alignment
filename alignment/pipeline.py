@@ -6,7 +6,7 @@ import os
 import re
 from utility.date_time import date_time
 from cutadapter import cutadapter
-from fastx import fastx
+# from fastx import fastx deprecated
 from bwa_mem_pe import bwa_mem_pe
 from novosort_sort_pe import novosort_sort_pe
 from filter_wrap import filter_wrap
@@ -68,7 +68,7 @@ class Pipeline:
         self.java_tool = self.config_data['tools']['java']
         self.samtools_tool = self.config_data['tools']['samtools']
         self.bwa_tool = self.config_data['tools']['bwa']
-        self.fastx_tool = self.config_data['tools']['fastx']
+        # self.fastx_tool = self.config_data['tools']['fastx'] fastx deprecated, replaced by fastqc
         self.cutadapter = self.config_data['tools']['cutadapt']
         self.bid = hgac_ID[0]
         self.sample = s.group(1)
@@ -193,8 +193,8 @@ class Pipeline:
         else:
             log(self.loc, date_time() + 'Sorted bam file already exists, skipping\n')
         # skip next steps in insert size already calculated
-        log(self.loc, date_time() + 'Getting fastq quality score stats\n')
-        fastx(self.fastx_tool, self.sample, self.end1, self.end2)  # will run independently of rest of output
+        # log(self.loc, date_time() + 'Getting fastq quality score stats\n')
+        # fastx(self.fastx_tool, self.sample, self.end1, self.end2)  # will run independently of rest of output
         if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
             log(self.loc, date_time() + 'Removing PCR duplicates\n')
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
@@ -235,7 +235,7 @@ class Pipeline:
 
         check = upload_to_swift(self.cont, obj)
         if check == 0:
-            log(self.loc, date_time() + 'Couchdb successfully updated\n')
+            # log(self.loc, date_time() + 'Couchdb successfully updated\n')
             self.status = 0
             log(self.loc,
                 date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")

@@ -5,17 +5,19 @@ import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from subprocess import call
+from subprocess import Popen
 from utility.log import log
+from fastqc import fastqc
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim) = (
-        config_data['tools']['cutadapt'], config_data['params']['qual'], config_data['params']['mqual'],
-        config_data['params']['r1adapt'], config_data['params']['r2adapt'], config_data['params']['minlen'],
-        config_data['params']['r1trim'], config_data['params']['r2trim'], config_data['params']['aflag'],
-        config_data['params']['ntrim'])
-    return cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim
+    (cutadapt_tool, fastqc_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim, threads) = (
+        config_data['tools']['cutadapt'], config_data['tools']['fastqc'], config_data['params']['qual'],
+        config_data['params']['mqual'], config_data['params']['r1adapt'], config_data['params']['r2adapt'],
+        config_data['params']['minlen'], config_data['params']['r1trim'], config_data['params']['r2trim'],
+        config_data['params']['aflag'], config_data['params']['ntrim'], config_data['params']['threads'])
+    return cutadapt_tool, fastqc_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim, threads
 
 
 def cutadapter(sample, end1, end2, config_file):
@@ -26,17 +28,23 @@ def cutadapter(sample, end1, end2, config_file):
     loc = log_dir + sample + '.cutadapt.log'
     temp1 = end1 + '.temp.gz'
     temp2 = end2 + '.temp.gz'
-    (cutadapt_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim) = parse_config(config_file)
+    (cutadapt_tool, fastqc_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim, threads) = \
+        parse_config(config_file)
     aflag2 = aflag.upper()
     cutadapt_cmd = cutadapt_tool + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + ' -' + aflag + ' '\
                    + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -n ' + ntrim \
                    + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
-    check = call(cutadapt_cmd, shell=True)
+    check = Popen(cutadapt_cmd, shell=True)
     if not check:
         log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
     else:
         log(loc, date_time() + 'Cutadapt failed.  Check log files\n')
+        exit(1)
+    # will run fastqc while cutadapt is running - assuming a vm of at least 4 cores
+    check = fastqc(fastqc_tool, sample, end1, end2, threads)
+    if check != 0:
+        log(loc, date_time() + 'Fast QC failed!\n')
         exit(1)
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
