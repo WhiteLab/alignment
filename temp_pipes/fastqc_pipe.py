@@ -10,7 +10,7 @@ from utility.job_manager import job_manager
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['tools']['fastqc'], \
+    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['tools']['fastqc'],\
            config_data['params']['threads']
 
 
