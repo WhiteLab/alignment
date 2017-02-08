@@ -3,7 +3,6 @@
 import sys
 import json
 import os
-import glob
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.job_manager import job_manager
 
@@ -29,9 +28,7 @@ def fastqc_pipe(flist, config_file):
         logfile = logdir + root + '.fastqc.log'
         fastqc_cmd = fastqc_tool + ' --noextract -o ' + outdir + ' ' + fq + ' 2> ' + logfile + ';'
         up_cmd = src_cmd + 'swift upload ' + cont + ' ' + logfile + ';'
-        up_list = glob.glob(outdir + root + '*')
-        for fn in up_list:
-            up_cmd += src_cmd + 'swift upload ' + cont + ' ' + fn + ';'
+        up_cmd += 'find ' + outdir + ' -name ' + root + '* | xargs -IFN swift upload ' + cont + ' FN;'
         cleanup = 'rm ' + fq + ';'
         final_cmd = dl_cmd + setup_cmd + fastqc_cmd + up_cmd + cleanup
         job_list.append(final_cmd)
