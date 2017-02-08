@@ -16,7 +16,7 @@ def parse_config(config_file):
 
 def fastqc_pipe(flist, config_file):
     (cont, obj, fastqc_tool, threads) = parse_config(config_file)
-    src_cmd = '. /home/ubuntu/.novarc'
+    src_cmd = '. /home/ubuntu/.novarc;'
     job_list = []
     for fq in open(flist):
         fq = fq.rstrip('\n')
