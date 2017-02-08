@@ -27,7 +27,7 @@ def fastqc_pipe(flist, config_file):
         logdir = obj + '/' + parts[1] + '/LOGS/'
         setup_cmd = 'mkdir -p ' + outdir + ' ' + logdir + ';'
         logfile = logdir + root + '.fastqc.log'
-        fastqc_cmd = fastqc_tool + ' -o ' + outdir + ' ' + fq + '2> ' + logfile + ';'
+        fastqc_cmd = fastqc_tool + ' -o ' + outdir + ' ' + fq + ' 2> ' + logfile + ';'
         up_cmd = src_cmd + 'swift upload ' + cont + ' ' + logfile + ';'
         up_list = glob.glob(outdir + root + '*')
         for fn in up_list:
