@@ -243,6 +243,7 @@ class Pipeline:
             log(self.loc, date_time() + "All but file upload succeeded\n")
             self.status = 1
 
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='DNA alignment paired-end QC pipeline')
