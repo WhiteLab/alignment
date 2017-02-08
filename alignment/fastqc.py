@@ -14,7 +14,7 @@ def fastqc(fastqc_tool, sample, end1, end2, t):
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
     loc = log_dir + sample + '.fastqc.log'
-    fastqc_cmd = fastqc_tool + ' --noextract -t ' + t + ' -o QC/ ' + end1 + ' ' + end2
+    fastqc_cmd = fastqc_tool + ' --extract -t ' + t + ' -o QC/ ' + end1 + ' ' + end2
     log(loc, date_time() + fastqc_cmd + "\n")
     f = Popen(fastqc_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
     # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score
