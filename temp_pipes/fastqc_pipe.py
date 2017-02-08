@@ -22,7 +22,7 @@ def fastqc_pipe(flist, config_file):
         fq = fq.rstrip('\n')
         root = os.path.basename(fq).replace('_sequence.txt.gz', '')
         parts = fq.split('/')
-        dl_cmd = src_cmd + 'swift download ' + cont + ' ' + fq
+        dl_cmd = src_cmd + 'swift download ' + cont + ' ' + fq + ';'
         outdir = obj + '/' + parts[1] + '/QC/'
         logdir = obj + '/' + parts[1] + '/LOGS/'
         setup_cmd = 'mkdir -p ' + outdir + ' ' + logdir + ';'
