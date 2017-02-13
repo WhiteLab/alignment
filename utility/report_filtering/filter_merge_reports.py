@@ -96,6 +96,7 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
         info = line.rstrip('\n').split('\t')
         if info[-1] == 'OFF':
             summary = update_summary(summary, pair, 'off target')
+            continue
         chr_pos = info[0] + '_' + info[1]
         if chr_pos not in pos_gene:
             # might be repeats in reports, skip if position reported already

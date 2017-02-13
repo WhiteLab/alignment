@@ -51,6 +51,7 @@
     "r2trim": "0",
     "ntrim": "1",
     "cc_vsn": "V3",
+    "wg_flag": "n",
     "genome_size": "3137161264",
     "ranges": "0.9,0.5,0.1",
     "cutflag": "Y",
