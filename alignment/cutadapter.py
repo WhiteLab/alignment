@@ -7,7 +7,7 @@ from utility.date_time import date_time
 from subprocess import call
 from subprocess import Popen
 from utility.log import log
-from fastqc import fastqc
+from alignment.fastqc import fastqc
 
 
 def parse_config(config_file):
