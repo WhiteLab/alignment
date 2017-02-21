@@ -37,14 +37,13 @@ def cutadapter(sample, end1, end2, config_file):
                    + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
     f = Popen(cutadapt_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
-    call('sleep 20s', shell=True)
+    time.sleep(20)
 
     if str(f.poll()) == '1':
         log(loc, date_time() + 'cutadapt returned an error.  Check your inputs and try again!\n')
         exit(1)
     else:
         log(loc, date_time() + 'cutadapt running ok.  Starting FastQC\n')
-        exit(1)
     # will run fastqc while cutadapt is running - assuming a vm of at least 4 cores
     check = fastqc(fastqc_tool, sample, end1, end2, threads)
     if check != 0:
