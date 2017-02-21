@@ -8,6 +8,7 @@ from subprocess import call
 from subprocess import Popen
 from utility.log import log
 from alignment.fastqc import fastqc
+import time
 
 
 def parse_config(config_file):
@@ -49,6 +50,12 @@ def cutadapter(sample, end1, end2, config_file):
     if check != 0:
         log(loc, date_time() + 'FastQC failed for sample! ' + sample + '\n')
         exit(1)
+    else:
+        log(loc, date_time() + 'FastQC completed running, checking on cutadapt\n')
+    # poll cutadapt until complete
+    while f.poll() is None:
+        time.sleep(10)
+    log(loc, date_time() + 'Cutadapt completed running, renaming files\n')
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
     return 0
