@@ -3,7 +3,6 @@
 import json
 import os
 import re
-import subprocess
 import sys
 import time
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
@@ -42,8 +41,9 @@ def parseFastQC(FQC):
     for i in xrange(8):
         next(fh)
     seq_len = next(fh)
-    vals = seq_len.rstrip('\n').split('_')
-    return vals[1]
+    vals = seq_len.rstrip('\n').split()
+    # split in case there is a range of read sizes in file
+    return vals[-1].split('-')[-2]
 
 
 def parseFS(FS):
