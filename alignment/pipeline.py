@@ -86,13 +86,15 @@ class Pipeline:
             suffix = self.seqtype + '.hist'
         hist = self.sample + '.' + suffix
         ins = self.sample + '.insert_metrics.hist'
-        f1 = self.sample + '_1.qs'
-        f2 = self.sample + '_2.qs'
+        # waiting for .qs now deprecated as we've now switched to fastqc
+        # f1 = self.sample + '_1.qs'
+        # f2 = self.sample + '_2.qs'
         fstat1 = self.sample + '.srt.bam.flagstats'
         if self.use_nova_flag == 'Y':
             fstat1 = self.sample + '.bam.flagstats'
         fstat2 = self.sample + '.rmdup.srt.bam.flagstats'
-        status = {hist: 0, ins: 0, f1: 0, f2: 0, fstat1: 0, fstat2: 0}
+        # status = {hist: 0, ins: 0, f1: 0, f2: 0, fstat1: 0, fstat2: 0}
+        status = {hist: 0, ins: 0, fstat1: 0, fstat2: 0}
         # currently giving 20 minutes to complete before giving up
         wait = 1200
         intvl = 30
