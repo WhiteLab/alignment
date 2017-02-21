@@ -19,6 +19,7 @@ def fastqc(fastqc_tool, sample, end1, end2, t):
     f = Popen(fastqc_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
     # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score
     #  didn't fit
+    call('sleep 20s', shell=True)
 
     if str(f.poll()) == '1':
         log(loc, date_time() + 'fastqc returned an error.  Check your inputs and try again!\n')
