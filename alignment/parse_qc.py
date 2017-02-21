@@ -43,7 +43,7 @@ def parseFastQC(FQC):
     seq_len = next(fh)
     vals = seq_len.rstrip('\n').split()
     # split in case there is a range of read sizes in file
-    return vals[-1].split('-')[-2]
+    return vals[-1].split('-')[-1]
 
 
 def parseFS(FS):
