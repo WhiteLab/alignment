@@ -13,7 +13,7 @@ def fastqc(fastqc_tool, sample, end1, end2, t):
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
     loc = log_dir + sample + '.fastqc.log'
-    fastqc_cmd = fastqc_tool + ' --extract -t ' + t + ' -o QC/ ' + end1 + ' ' + end2
+    fastqc_cmd = fastqc_tool + ' --extract -t ' + t + ' -o QC/ ' + end1 + ' ' + end2 + ' 2>> ' + loc
     log(loc, date_time() + fastqc_cmd + "\n")
     check = call(fastqc_cmd, shell=True)
     # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score
