@@ -3,7 +3,6 @@ import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
 from utility.date_time import date_time
-from subprocess import Popen
 from subprocess import call
 from utility.log import log
 
@@ -16,13 +15,12 @@ def fastqc(fastqc_tool, sample, end1, end2, t):
     loc = log_dir + sample + '.fastqc.log'
     fastqc_cmd = fastqc_tool + ' --extract -t ' + t + ' -o QC/ ' + end1 + ' ' + end2
     log(loc, date_time() + fastqc_cmd + "\n")
-    f = Popen(fastqc_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
+    check = call(fastqc_cmd, shell=True)
     # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score
     #  didn't fit
-    call('sleep 20s', shell=True)
 
-    if str(f.poll()) == '1':
-        log(loc, date_time() + 'fastqc returned an error.  Check your inputs and try again!\n')
+    if check != 0:
+        log(loc, date_time() + 'FastQC Failed for sample ' + sample + '\n')
         exit(1)
     return 0
 

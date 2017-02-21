@@ -35,16 +35,19 @@ def cutadapter(sample, end1, end2, config_file):
                    + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -n ' + ntrim \
                    + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
-    check = Popen(cutadapt_cmd, shell=True)
-    if not check:
-        log(loc, date_time() + 'Quality score trimming complete.  Replacing fastq on working directory\n')
+    f = Popen(cutadapt_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
+    call('sleep 20s', shell=True)
+
+    if str(f.poll()) == '1':
+        log(loc, date_time() + 'cutadapt returned an error.  Check your inputs and try again!\n')
+        exit(1)
     else:
-        log(loc, date_time() + 'Cutadapt failed.  Check log files\n')
+        log(loc, date_time() + 'cutadapt running ok.  Starting FastQC\n')
         exit(1)
     # will run fastqc while cutadapt is running - assuming a vm of at least 4 cores
     check = fastqc(fastqc_tool, sample, end1, end2, threads)
     if check != 0:
-        log(loc, date_time() + 'Fast QC failed!\n')
+        log(loc, date_time() + 'FastQC failed for sample! ' + sample + '\n')
         exit(1)
     rn_fq = 'mv ' + temp1 + ' ' + end1 + ';mv ' + temp2 + ' ' + end2
     call(rn_fq, shell=True)
