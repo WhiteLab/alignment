@@ -66,6 +66,8 @@ class Pipeline:
         self.novosort = self.config_data['tools']['novosort']
         self.picard_tool = self.config_data['tools']['picard']
         self.java_tool = self.config_data['tools']['java']
+        # setting java ram to 6GB
+        self.jram = '6'
         self.samtools_tool = self.config_data['tools']['samtools']
         self.bwa_tool = self.config_data['tools']['bwa']
         # self.fastx_tool = self.config_data['tools']['fastx'] fastx deprecated, replaced by fastqc
@@ -200,14 +202,14 @@ class Pipeline:
         if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
             log(self.loc, date_time() + 'Removing PCR duplicates\n')
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
-                         self.ram)  # rest won't run until completed
+                         self.jram)  # rest won't run until completed
         if self.use_nova_flag == 'Y':
             log(self.loc, date_time() + 'Duplicates removed using novosort.\n')
 
         log(self.loc, date_time() + 'Gathering SAM flag stats\n')
         flagstats(self.samtools_tool, self.sample)
         log(self.loc, date_time() + 'Calculating insert sizes\n')
-        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.ram)  # get insert size metrics.
+        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram)  # get insert size metrics.
 
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
