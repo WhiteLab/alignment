@@ -17,7 +17,7 @@ def create_bed(line, bed):
     if chrom not in b_dict:
         b_dict[chrom] = {}
     if pos not in b_dict[chrom]:
-        bed.write(chrom + '\t' + str(int(pos)-1) + '\t' + pos)
+        bed.write(chrom + '\t' + str(int(pos)-1) + '\t' + pos + '\n')
         b_dict[chrom][pos] = 1
     return var[0]
 
@@ -30,7 +30,7 @@ def build_jobs(samtools, bed, sample):
 
 def compile_results(slist):
     cov_dict = {}
-    for i in xrange(1,slist, 1):
+    for i in xrange(1, len(slist), 1):
         for line in open(slist[i] + '_covered.txt'):
             info = line.rstrip('\n').split('\t')
             if info[0] not in cov_dict:
@@ -46,7 +46,7 @@ def calc_pos_cov(table, samtools, out):
     head = next(fh)
     head = head.rstrip('\n').split('\t')
     # create bed file to get coverage
-    bed_fn = out + '.fn'
+    bed_fn = out + '.bed'
     bed = open(bed_fn, 'w')
     vlist = []
     # in the event an indel happens in one sample and snv in another at same position, don't process twice
@@ -58,7 +58,7 @@ def calc_pos_cov(table, samtools, out):
     job_list = []
     src_cmd = '. ~/.novarc;'
     # get bams, then build jobs
-    for i in xrange(1, head, 1):
+    for i in xrange(1, len(head), 1):
         sys.stderr.write(date_time() + 'Getting bam for ' + head[i] + '\n')
         bam = 'ALIGN/' + head[i] + '/BAM/' + head[i] + '.merged.final.bam'
         dl_cmd = src_cmd + 'swift download PDX --prefix ALIGN/' + head[i] + '/BAM/' + head[i] + '.merged.final.ba;'
@@ -85,7 +85,7 @@ def calc_pos_cov(table, samtools, out):
     out_fh.write('\t'.join(head) + '\n')
     for var in vlist:
         out_fh.write(var)
-        for i in xrange(1, head, 1):
+        for i in xrange(1, len(head), 1):
             m = re.search('\S+-(chr\w+)_(\d+)_\w+->\w+', var)
             (chrom, pos) = (m.group(1), m.group(2))
             if head[i] in cov_dict[chrom][pos]:
