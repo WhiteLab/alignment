@@ -87,7 +87,7 @@ def calc_pos_cov(table, samtools, out):
     sys.stderr.write(date_time() + 'Compiling results\n')
     cov_dict = compile_results(bnids)
     sys.stderr.write(date_time() + 'Writing to output table\n')
-    out_fh = open(out + '_variant_coverage_table.txt')
+    out_fh = open(out + '_variant_coverage_table.txt', 'w')
     out_fh.write('\t'.join(head) + '\n')
     for var in vlist:
         out_fh.write(var)
