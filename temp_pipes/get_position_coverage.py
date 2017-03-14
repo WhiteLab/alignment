@@ -31,7 +31,7 @@ def build_jobs(samtools, bed, sample):
 
 def compile_results(slist):
     cov_dict = {}
-    for i in xrange(1, len(slist), 1):
+    for i in xrange(0, len(slist), 1):
         for line in open(slist[i] + '_covered.txt'):
             info = line.rstrip('\n').split('\t')
             if info[0] not in cov_dict:
@@ -45,7 +45,11 @@ def compile_results(slist):
 def calc_pos_cov(table, samtools, out):
     fh = open(table)
     head = next(fh)
+    bnids = []
     head = head.rstrip('\n').split('\t')
+    for i in xrange(1, len(head), 1):
+        bnid = head[i].split('_')
+        bnids.append(bnid)
     # create bed file to get coverage
     bed_fn = out + '.bed'
     bed = open(bed_fn, 'w')
@@ -59,39 +63,39 @@ def calc_pos_cov(table, samtools, out):
     job_list = []
     src_cmd = '. ~/.novarc;'
     # get bams, then build jobs
-    for i in xrange(1, len(head), 1):
-        sys.stderr.write(date_time() + 'Getting bam for ' + head[i] + '\n')
-        bam = 'ALIGN/' + head[i] + '/BAM/' + head[i] + '.merged.final.bam'
-        dl_cmd = src_cmd + 'swift download PDX --prefix ALIGN/' + head[i] + '/BAM/' + head[i] + '.merged.final.ba;'
+    for i in xrange(0, len(bnids), 1):
+        sys.stderr.write(date_time() + 'Getting bam for ' + bnids[i] + '\n')
+        bam = 'ALIGN/' + bnids[i] + '/BAM/' + bnids[i] + '.merged.final.bam'
+        dl_cmd = src_cmd + 'swift download PDX --prefix ALIGN/' + bnids[i] + '/BAM/' + bnids[i] + '.merged.final.ba;'
         subprocess.call(dl_cmd, shell=True)
         # try pdx container, if not, try pancan
         if os.path.isfile(bam):
-            job_list.append(build_jobs(samtools, bed_fn, head[i]))
+            job_list.append(build_jobs(samtools, bed_fn, bnids[i]))
         else:
-            sys.stderr.write(date_time() + dl_cmd + '\nBam for sample ' + head[i] + ' not in PDX contaner, '
+            sys.stderr.write(date_time() + dl_cmd + '\nBam for sample ' + bnids[i] + ' not in PDX contaner, '
                                                                                     'trying PANCAN\n')
-            dl_cmd = src_cmd + 'swift download PANCAN --prefix ALIGN/' + head[i] + '/BAM/' + head[i] \
+            dl_cmd = src_cmd + 'swift download PANCAN --prefix ALIGN/' + bnids[i] + '/BAM/' + bnids[i] \
                      + '.merged.final.ba;'
             subprocess.call(dl_cmd, shell=True)
             if os.path.isfile(bam):
-                job_list.append(build_jobs(samtools, bed_fn, head[i]))
+                job_list.append(build_jobs(samtools, bed_fn, bnids[i]))
             else:
-                sys.stderr.write(date_time() + dl_cmd + '\nCould not find bam for ' + head[i] + '\n')
+                sys.stderr.write(date_time() + dl_cmd + '\nCould not find bam for ' + bnids[i] + '\n')
                 exit(1)
     sys.stderr.write('Running depth jobs\n')
     job_manager(job_list, '8')
     sys.stderr.write(date_time() + 'Compiling results\n')
-    cov_dict = compile_results(head)
+    cov_dict = compile_results(bnids)
     sys.stderr.write(date_time() + 'Writing to output table\n')
     out_fh = open(out + '_variant_coverage_table.txt')
     out_fh.write('\t'.join(head) + '\n')
     for var in vlist:
         out_fh.write(var)
-        for i in xrange(1, len(head), 1):
+        for i in xrange(0, len(bnids), 1):
             m = re.search('\S+-(chr\w+)_(\d+)_\w+->\w+', var)
             (chrom, pos) = (m.group(1), m.group(2))
-            if head[i] in cov_dict[chrom][pos]:
-                out_fh.write('\t' + cov_dict[chrom][pos][head[i]])
+            if bnids[i] in cov_dict[chrom][pos]:
+                out_fh.write('\t' + cov_dict[chrom][pos][bnids[i]])
             else:
                 out_fh.write('\t0')
         out_fh.write('\n')
