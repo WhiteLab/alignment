@@ -24,7 +24,8 @@ def create_bed(line, bed):
 
 def build_jobs(samtools, bed, sample):
     prefix = 'ALIGN/' + sample + '/BAM/'
-    cmd = samtools + ' depth -Q 20 -b ' + bed + prefix + sample + 'merged.final.bam > ' + sample + '_covered.txt;'
+    cmd = samtools + ' depth -Q 20 -b ' + bed + ' ' + prefix + sample + '.merged.final.bam > ' + sample \
+          + '_covered.txt;'
     return cmd
 
 
@@ -64,17 +65,18 @@ def calc_pos_cov(table, samtools, out):
         dl_cmd = src_cmd + 'swift download PDX --prefix ALIGN/' + head[i] + '/BAM/' + head[i] + '.merged.final.ba;'
         subprocess.call(dl_cmd, shell=True)
         # try pdx container, if not, try pancan
-        if not os.path.isfile(bam):
+        if os.path.isfile(bam):
             job_list.append(build_jobs(samtools, bed_fn, head[i]))
         else:
-            sys.stderr.write(date_time() + 'Bam for sample ' + head[i] + ' not in PDX contanier, trying PANCAN\n')
+            sys.stderr.write(date_time() + dl_cmd + '\nBam for sample ' + head[i] + ' not in PDX contaner, '
+                                                                                    'trying PANCAN\n')
             dl_cmd = src_cmd + 'swift download PANCAN --prefix ALIGN/' + head[i] + '/BAM/' + head[i] \
                      + '.merged.final.ba;'
             subprocess.call(dl_cmd, shell=True)
-            if not os.path.isfile(bam):
+            if os.path.isfile(bam):
                 job_list.append(build_jobs(samtools, bed_fn, head[i]))
             else:
-                sys.stderr.write('Could not find bam for ' + head[i] + '\n')
+                sys.stderr.write(date_time() + dl_cmd + '\nCould not find bam for ' + head[i] + '\n')
                 exit(1)
     sys.stderr.write('Running depth jobs\n')
     job_manager(job_list, '8')
