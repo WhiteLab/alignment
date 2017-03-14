@@ -64,14 +64,14 @@ def calc_pos_cov(table, samtools, out):
         dl_cmd = src_cmd + 'swift download PDX --prefix ALIGN/' + head[i] + '/BAM/' + head[i] + '.merged.final.ba;'
         subprocess.call(dl_cmd, shell=True)
         # try pdx container, if not, try pancan
-        if os.path.isfile(bam):
+        if not os.path.isfile(bam):
             job_list.append(build_jobs(samtools, bed_fn, head[i]))
         else:
             sys.stderr.write(date_time() + 'Bam for sample ' + head[i] + ' not in PDX contanier, trying PANCAN\n')
             dl_cmd = src_cmd + 'swift download PANCAN --prefix ALIGN/' + head[i] + '/BAM/' + head[i] \
                      + '.merged.final.ba;'
             subprocess.call(dl_cmd, shell=True)
-            if os.path.isfile(bam):
+            if not os.path.isfile(bam):
                 job_list.append(build_jobs(samtools, bed_fn, head[i]))
             else:
                 sys.stderr.write('Could not find bam for ' + head[i] + '\n')
