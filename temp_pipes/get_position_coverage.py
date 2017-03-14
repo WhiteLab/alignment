@@ -49,7 +49,7 @@ def calc_pos_cov(table, samtools, out):
     head = head.rstrip('\n').split('\t')
     for i in xrange(1, len(head), 1):
         bnid = head[i].split('_')
-        bnids.append(bnid)
+        bnids.append(bnid[0])
     # create bed file to get coverage
     bed_fn = out + '.bed'
     bed = open(bed_fn, 'w')
