@@ -53,7 +53,7 @@ def calc_coverage(sample_list, suffix, bed):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='SNP annotation.')
+    parser = argparse.ArgumentParser(description='Estimate per-gene, per-sample coverage.')
     parser.add_argument('-l', '--sample_list', action='store', dest='sample_list', help='list of sample names')
     parser.add_argument('-s', '--suffix', action='store', dest='suffix', help='Suffix of input files')
     parser.add_argument('-b', '--bed_ref', action='store', dest='bed_ref', help='Reference bed file')
