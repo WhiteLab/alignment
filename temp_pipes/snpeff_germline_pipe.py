@@ -28,7 +28,7 @@ def snpeff_pipe(config_file, sample_list, ref_mnt, novarc):
     source_novarc(novarc)
     for line in fh:
         line = line.rstrip('\n')
-        in_vcf = line + '.merged.final.bam.germline_calls.vcf'
+        in_vcf = obj + '/' + line + '.merged.final.bam.germline_calls.vcf'
         sift_vcf = obj + '/' + line + '.snpSift.vcf'
         final_vcf = obj + '/' + line + '.snpSift.snpEff.vcf'
         dl_vcf = 'swift download ' + cont + ' ' + obj + '/' + in_vcf + ';'
