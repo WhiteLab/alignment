@@ -12,7 +12,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['tools']['java'], config_data['tools']['snpEff'], config_data['tools']['snpsift'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['refs']['capture'],
-            config_data['params']['cont'], config_data['params']['obj'], config_data['params']['threads'])
+            config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['threads'])
 
 
 def snpeff_pipe(config_file, sample_list, ref_mnt, novarc):
