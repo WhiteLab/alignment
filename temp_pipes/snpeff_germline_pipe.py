@@ -31,7 +31,7 @@ def snpeff_pipe(config_file, sample_list, ref_mnt, novarc):
         in_vcf = obj + '/' + line + '.merged.final.bam.germline_calls.vcf'
         sift_vcf = obj + '/' + line + '.snpSift.vcf'
         final_vcf = obj + '/' + line + '.snpSift.snpEff.vcf'
-        dl_vcf = 'swift download ' + cont + ' ' + obj + '/' + in_vcf + ';'
+        dl_vcf = 'swift download ' + cont + ' ' + in_vcf + ';'
         log = 'LOGS/' + line + '.snpeff.log'
         run_cmd = dl_vcf + run_snpsift + ' ' + in_vcf + ' > ' + sift_vcf + ' 2> ' + log + ';' + run_snpeff + ' ' \
                   + sift_vcf + ' -v > ' + final_vcf + ' 2>> ' + log
