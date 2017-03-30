@@ -25,8 +25,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, variant_class, s
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
                 (gene, effect, aa, codon, biotype) = (ann[loc_dict['Gene_Name']], ann[loc_dict['Effect']],
-                 ann[loc_dict['Amino_Acid_Change']],
-                 ann[loc_dict['Codon_Change']], ann[loc_dict['Transcript_BioType']])
+                 ann[loc_dict['Amino_Acid_Change']], ann[loc_dict['Codon_Change']], ann[loc_dict['Transcript_BioType']])
                 # Format amino acid change to be oldPOSnew
 
                 cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, effect, impact, biotype, codon,
@@ -63,11 +62,10 @@ def gen_report(vcf, sample):
     out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\t\tEffect\t'
               'IMPACT\tBIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\n')
     for record in vcf_in.fetch():
-        #pdb.set_trace()
         if 'PASS' in record.filter:
 
             (chrom, pos, ref, alt, alt_ct, tot_ct, existing_variation) = (record.contig, str(record.pos),
-                                                                          record.ref, record.alts[0], str(record.info['TR']), str(record.info['TC']), record.id)
+                record.ref, record.alts[0], str(record.info['TR']), str(record.info['TC']), record.id)
             if existing_variation is None:
                 existing_variation = ''
             variant_class = 'SNV'
