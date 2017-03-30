@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re
+import pdb
 from pysam import VariantFile
 import sys
 
@@ -24,17 +24,10 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, variant_class, s
         if impact in rank_dict:
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, effect, aa_pos, aa, codon, biotype) = (ann[loc_dict['Gene_Name']], ann[loc_dict['Effect']],
-                 ann[loc_dict['Amino_Acid_length']], ann[loc_dict['Amino_Acid_Change']],
+                (gene, effect, aa, codon, biotype) = (ann[loc_dict['Gene_Name']], ann[loc_dict['Effect']],
+                 ann[loc_dict['Amino_Acid_Change']],
                  ann[loc_dict['Codon_Change']], ann[loc_dict['Transcript_BioType']])
                 # Format amino acid change to be oldPOSnew
-                if len(aa) > 0:
-                    # if a snv or syn, just aaPOS
-                    test = aa.split('/')
-                    if len(test) == 1:
-                        aa += str(aa_pos)
-                    else:
-                        aa = test[0] + str(aa_pos) + test[1]
 
                 cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, effect, impact, biotype, codon,
                                             aa, snp_id, variant_class)) + '\n'
@@ -51,13 +44,15 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, variant_class, s
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)
     out = open(sample + '.germline_snpEff_impact_filtered_pass.xls', 'w')
-    desired = {'Effect': 0, 'Effect_Impact': 0, 'Gene_Name': 0, 'Amino_Acid_length': 0,
-               'Amino_Acid_Change': 0, 'Codon_Change': 0, 'Transcipt_BioType': 0, 'Existing_variation': 0}
+    desired = {'Effect': 0, 'Effect_Impact': 0, 'Gene_Name': 0,
+               'Amino_Acid_Change': 0, 'Codon_Change': 0, 'Transcript_BioType': 0, 'Existing_variation': 0}
 
     desc_string = vcf_in.header.info['EFF'].record['Description']
-    desc_string = desc_string.lstrip('"')
-    desc_string = desc_string.rstrip('"')
+    desc_string = desc_string.replace('"', '')
+    desc_string = desc_string.replace('\'', '')
     desc_string = desc_string.replace('Predicted effects for this variant.Format: ', '')
+    desc_string = desc_string.replace(' ', '')
+    desc_string = desc_string.replace('(','|')
     f_pos_list = []
     desc_list = desc_string.split('|')
     ann_size = len(desc_list)
@@ -65,16 +60,25 @@ def gen_report(vcf, sample):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tTranscript_id\tEffect\t'
+    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\t\tEffect\t'
               'IMPACT\tBIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\n')
     for record in vcf_in.fetch():
         #pdb.set_trace()
-        if record.filter == 'PASS':
-            (chrom, pos, ref, alt, alt_ct, tot_ct, var_class, existing_variation) = (record.contig, str(record.pos),
-            record.ref, record.alts[0], str(record.info['TR']), str(record.info['TC']), record.info['VC'],
-                                                                                     str(record.info['RS']))
-            ann_list = [_.split('|') for _ in record.info['EFF'].split(',')]
-            output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, var_class, existing_variation, ann_list,
+        if 'PASS' in record.filter:
+
+            (chrom, pos, ref, alt, alt_ct, tot_ct, existing_variation) = (record.contig, str(record.pos),
+                                                                          record.ref, record.alts[0], str(record.info['TR']), str(record.info['TC']), record.id)
+            if existing_variation is None:
+                existing_variation = ''
+            variant_class = 'SNV'
+            if len(alt) > len(ref):
+                variant_class = 'INSERTION'
+            if len(ref) > len(alt):
+                variant_class = 'DELETION'
+            cur_info = record.info['EFF']
+            cur_info = cur_info.replace('(','|')
+            ann_list = [_.split('|') for _ in cur_info.split(',')]
+            output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, variant_class, existing_variation, ann_list,
                                   desired, out)
     out.close()
     return 0
