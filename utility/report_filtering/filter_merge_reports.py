@@ -148,10 +148,14 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
 def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, alt_vaf):
     tn_dict = {}
     norms = {}
-    for tn in tn_string.split(','):
-        tn_dict[tn] = {}
-        (tum, norm) = tn.split('_')
-        norms[norm] = {}
+    # adjust so that tn_string not needed, flag tracks whether list given or if norms should be populated with filename
+    tn_flag = 0
+    if len(tn_string) > 1:
+        tn_flag = 1
+        for tn in tn_string.split(','):
+            tn_dict[tn] = {}
+            (tum, norm) = tn.split('_')
+            norms[norm] = {}
     banned_tup = {}
     summary = {}
     pairs = []
@@ -175,6 +179,9 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
         if pair not in pair_dict:
             pairs.append(pair)
             pair_dict[pair] = 1
+            if tn_flag == 0:
+                (tum, norm) = pair.split('_')
+                norms[norm] = {}
         if vtype == 'indels':
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_indel_report(pair, report, merged_tbl, banned_tup,
                                                         summary, indel_max, pos_gene, min_vaf, tn_dict, norms, alt_vaf)
