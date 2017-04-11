@@ -17,13 +17,12 @@ def update_summary(summary, pair, reason):
 
 
 def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, pos_gene, min_vaf, tn_dict, norms,
-                         alt_vaf):
+                         alt_vaf, cov):
     cur = open(report)
     next(cur)
     maf = 0.01
     # biotype = 'protein_coding'
     weak_impact = {'MODIFIER': 1, 'LOW': 1}
-    cov = 0
     (tum, norm) = pair.split('_')
     for line in cur:
         if line == '\n':
@@ -80,13 +79,12 @@ def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, 
     return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
-def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_dict, norms, alt_vaf):
+def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_dict, norms, alt_vaf, cov):
     merged_tbl[pair] = {}
     cur = open(report)
     next(cur)
     maf = 0.01
     tn = 2
-    cov = 0
     (tum, norm) = pair.split('_')
     # biotype = 'protein_coding'
     weak_impact = {'MODIFIER': 1, 'LOW': 1}
@@ -145,7 +143,7 @@ def process_snv_report(pair, report, merged_tbl, summary, pos_gene, min_vaf, tn_
     return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
-def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, alt_vaf):
+def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, alt_vaf, cov):
     tn_dict = {}
     norms = {}
     # adjust so that tn_string not needed, flag tracks whether list given or if norms should be populated with filename
@@ -165,6 +163,7 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
     indel_max = int(length)
     min_vaf = float(vaf)
     alt_vaf = float(alt_vaf)
+    cov = int(cov)
     reasons = ('off target', 'low vaf', 'low tn ratio', 'indel len', 'low impact', 'high maf', 'low coverage', 'panel')
     for line in open(panel):
         info = line.rstrip('\n').split('\t')
@@ -184,10 +183,10 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
                 norms[norm] = {}
         if vtype == 'indels':
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_indel_report(pair, report, merged_tbl, banned_tup,
-                                                        summary, indel_max, pos_gene, min_vaf, tn_dict, norms, alt_vaf)
+                                                    summary, indel_max, pos_gene, min_vaf, tn_dict, norms, alt_vaf, cov)
         else:
             (merged_tbl, summary, pos_gene, tn_dict, norms) = process_snv_report(pair, report, merged_tbl, summary,
-                                                                            pos_gene, min_vaf, tn_dict, norms, alt_vaf)
+                                                                        pos_gene, min_vaf, tn_dict, norms, alt_vaf, cov)
     sum_tbl = open('reject_summary.txt', 'w')
     sum_tbl.write('Pair/reason\t' + '\t'.join(reasons) + '\n')
     for pair in pairs:
@@ -229,13 +228,15 @@ def filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_str
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Creates merged reports and filters on vaf, impact, biotype, '
-                                                 't/n ratio, panel of normals, coverage.')
+    parser = argparse.ArgumentParser(description='Creates merged variant/vaf reports and filters on vaf, impact, '
+                                                 'biotype, t/n ratio, panel of normals, coverage.')
     parser.add_argument('-r', '--reports', action='store', dest='reports',
                         help='List of report files.  TN reports must be listed first')
     parser.add_argument('-p', '--panel', action='store', dest='panel',
                         help='Panel of normals')
     parser.add_argument('-n', '--number_samples', action='store', dest='num_samp',
+                        help='Min number of samples to see a variant to report it')
+    parser.add_argument('-c', '--min_coverage', action='store', dest='cov',
                         help='Min number of samples to see a variant to report it')
     parser.add_argument('-f', '--flag_type', action='store', dest='flag_type',
                         help='Filter min sample on \'all\', or \'within\' sample group')
@@ -253,6 +254,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (reports, panel, num_samp, min_type, length, vaf, tn_string, avaf) = (inputs.reports, inputs.panel,
-            inputs.num_samp, inputs.flag_type, inputs.length, inputs.vaf, inputs.tum_norm, inputs.avaf)
-    filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, avaf)
+    (reports, panel, num_samp, min_type, length, vaf, tn_string, avaf, cov) = (inputs.reports, inputs.panel,
+            inputs.num_samp, inputs.flag_type, inputs.length, inputs.vaf, inputs.tum_norm, inputs.avaf, inputs.cov)
+    filter_merge_reports(reports, panel, num_samp, min_type, length, vaf, tn_string, avaf, cov)
