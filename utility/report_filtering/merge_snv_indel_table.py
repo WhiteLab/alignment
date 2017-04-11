@@ -6,67 +6,47 @@ import re
 import pdb
 
 
-def process_indel_report(pair, report, merged_tbl, banned_tup, summary, length, pos_gene, min_vaf, tn_dict, norms,
-                         alt_vaf, cov):
+def process_indel_report(pair, report, indel_head_list, indel_head_dict, pos_gene, alt_vaf, cov, banned_tup, length,
+                         vclass):
     cur = open(report)
     next(cur)
     maf = 0.01
     # biotype = 'protein_coding'
     weak_impact = {'MODIFIER': 1, 'LOW': 1}
-    (tum, norm) = pair.split('_')
+    # 'gene', 'chr', 'pos', 'ref', 'alt', 'alt_cov', 'vaf', 'snp_ID', 'ExAC_MAF', 'impact', 'effect', 'codon_change', 'amino_acid_change'
     for line in cur:
         if line == '\n':
             continue
         info = line.rstrip('\n').split('\t')
-        vtup = '\t'.join(info[0:4])
-        chr_pos = info[0] + '_' + info[1]
+        vtup = '\t'.join((info[indel_head_dict['chr']], info[indel_head_dict['pos']], info[indel_head_dict['ref']],
+                          info[indel_head_dict['alt']]))
+        chr_pos = info[indel_head_dict['gene']] + '_' + info[indel_head_dict['pos']]
         if chr_pos not in pos_gene:
             # might be repeats in reports, skip if position reported already
             pos_gene[chr_pos] = {}
-            pos_gene[chr_pos]['name'] = info[6]
+            pos_gene[chr_pos]['name'] = info[indel_head_dict['gene']]
         if pair in pos_gene[chr_pos]:
             continue
         pos_gene[chr_pos][pair] = 1
-        valid = pos_gene[chr_pos]['name'] + '-' + info[0] + '_' + info[1] + '_' + info[2] + '->' + info[3]
-        vap = float(info[-1]) * 100
-        if pair not in tn_dict and norm in norms and valid in norms[norm]:
-            merged_tbl[valid][pair] = str(vap)
-            norms[norm][valid] += 1
-            continue
+        vap = float(info[indel_head_dict['vaf']]) * 100
         if vap < alt_vaf:
-            if pair not in tn_dict:
-                summary = update_summary(summary, pair, 'low vaf')
-                continue
-            elif vap < min_vaf:
-                summary = update_summary(summary, pair, 'low vaf')
-                continue
-        if len(info[2]) > length or len(info[3]) > length:
-            summary = update_summary(summary, pair, 'indel len')
+            continue
+        if len(info[indel_head_dict['ref']]) > length or len(info[indel_head_dict['alt']]) > length:
             continue
         if vtup in banned_tup:
-            summary = update_summary(summary, pair, 'panel')
             continue
-        if info[10] in weak_impact:
-            summary = update_summary(summary, pair, 'low impact')
+        if info[indel_head_dict['impact']] in weak_impact:
             continue
-        if len(info[5]) > 0 and float(info[5]) > maf:
-            summary = update_summary(summary, pair, 'high maf')
+        if len(info[indel_head_dict['ExAC_MAF']]) > 0 and float(info[indel_head_dict['ExAC_MAF']]) > maf:
             continue
-        if int(info[-3]) + int(info[-2]) < cov:
-            #if float(info[-1]) * 100 < 20:
-            summary = update_summary(summary, pair, 'low coverage')
+        if int(info[indel_head_dict['alt_cov']])/float(info[indel_head_dict['vaf']]) < cov:
             continue
-
-        if valid not in merged_tbl:
-            merged_tbl[valid] = {}
-        if valid not in norms[norm]:
-            norms[norm][valid] = 0
-        merged_tbl[valid][pair] = str(vap)
-        norms[norm][valid] += 1
-        if pair in tn_dict:
-            tn_dict[pair][valid] = 1
+        sys.stdout.write(pair + '\t' + info[vclass])
+        info[indel_head_dict['vaf']] = str(vap) + '%'
+        for key in indel_head_list:
+            sys.stdout.write('\t' + info[indel_head_dict[key]])
+        print
     cur.close()
-    return merged_tbl, summary, pos_gene, tn_dict, norms
 
 
 def process_snv_report(pair, report, snv_head_list, snv_head_dict, tn_ratio, pos_gene, alt_vaf, cov):
@@ -95,7 +75,7 @@ def process_snv_report(pair, report, snv_head_list, snv_head_dict, tn_ratio, pos
 
         if float(cur_vaf) < alt_vaf:
             continue
-        if float(info[snv_head_dict[tn_ratio]]) <= tn:
+        if float(info[tn_ratio]) <= tn:
             continue
         if info[snv_head_dict['impact']] in weak_impact:
             continue
@@ -113,7 +93,7 @@ def process_snv_report(pair, report, snv_head_list, snv_head_dict, tn_ratio, pos
 
 def filter_merge_reports(reports, panel, length, alt_vaf, cov):
     snv_suffix = '.subsitutions.vep.prioritized_impact.report.xls'
-    indel_suffix = '.indels.vep.prioritized_impact.report.xls'
+    # indel_suffix = '.indels.vep.prioritized_impact.report.xls'
 
     head = 'Sample_pair\tTYPE\tGENE\tCHROM\tPOS\tREF\tALT\tALT_CT\tALT_PCT\tsnp ID\tExAC_MAF\tIMPACT\tEFFECT\t' \
            '\tCODON_CHANGE\tAMINO_ACID_CHANGE'
@@ -126,17 +106,28 @@ def filter_merge_reports(reports, panel, length, alt_vaf, cov):
     tn_ratio = 9
     indel_head_list = ('gene', 'chr', 'pos', 'ref', 'alt', 'alt_cov', 'vaf', 'snp_ID', 'ExAC_MAF',
                      'impact', 'effect', 'codon_change', 'amino_acid_change')
-    indel_head_dict = {'gene': 6, 'chr': 0, 'pos': 1, 'ref': 2, 'alt': 3, 'alt_cov': 14, 'vaf':16 , 'snp_ID': 4,
+    indel_head_dict = {'gene': 6, 'chr': 0, 'pos': 1, 'ref': 2, 'alt': 3, 'alt_cov': 14, 'vaf': 16, 'snp_ID': 4,
                        'ExAC_MAF': 5, 'impact': 10, 'effect': 9, 'codon_change': 11, 'amino_acid_change': 12}
     vclass = 8
+    banned_tup = {}
+    length = int(length)
+    alt_vaf = int(alt_vaf)
+    cov = int(cov)
+    for line in open(panel):
+        info = line.rstrip('\n').split('\t')
+        banned_tup['\t'.join(info[0:4])] = 0
     pos_gene = {}
     for report in open(reports):
         report = report.rstrip('\n')
         fn = os.path.basename(report)
-        m = re.search('^(\d+-\d+)(\S+)', fn)
+        m = re.search('^(\d+-\d+_\d+-\d+)(\S+)', fn)
         (pair, suffix) = (m.group(1), m.group(2))
         if suffix == snv_suffix:
             process_snv_report(pair, report, snv_head_list, snv_head_dict, tn_ratio, pos_gene, alt_vaf, cov)
+        else:
+            process_indel_report(pair, report, indel_head_list, indel_head_dict, pos_gene, alt_vaf, cov, banned_tup,
+                                length, vclass)
+
 
 if __name__ == "__main__":
     import argparse
