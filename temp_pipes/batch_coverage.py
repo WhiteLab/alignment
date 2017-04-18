@@ -8,8 +8,8 @@ import subprocess
 from utility.job_manager import job_manager
 
 
-def get_bam_name(bnid, src_cmd, cont):
-    list_cmd = src_cmd + 'swift list ' + cont + ' --prefix ALIGN/' + bnid + '/BAM/'
+def get_bam_name(bnid, src_cmd, cont, obj):
+    list_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + obj + '/' + bnid + '/BAM/'
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
     flist = subprocess.check_output(list_cmd, shell=True)
     # Use to check on download status
@@ -46,6 +46,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Bedtools coverage calculation module.  Typically run last in pipeline.  See coverage parameter.')
     parser.add_argument('-c', '--container', action='store', dest='cont', help='Swift container location')
+    parser.add_argument('-o', '--object', action='store', dest='obj', help='Swift object prefix')
     parser.add_argument('-bt', '--bedtools', action='store', dest='bedtools2_tool', help='Location of bedtools2 tool.')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample list')
     parser.add_argument('-bf', '--bed_file', action='store', dest='bed_file', help='Bed file')
@@ -59,5 +60,6 @@ if __name__ == "__main__":
     sample = inputs.sample
     bedfile = inputs.bed_file
     cont = inputs.cont
+    obj = inputs.obj
 
-    calc_coverage(bedtools2_tool, sample, bedfile, cont)
+    calc_coverage(bedtools2_tool, sample, bedfile, cont, obj)
