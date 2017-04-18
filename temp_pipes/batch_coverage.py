@@ -29,12 +29,12 @@ def get_bam_name(bnid, src_cmd, cont, obj):
     return dl_cmd, bam, bai
 
 
-def calc_coverage(bedtools2_tool, sample, bedfile, cont):
+def calc_coverage(bedtools2_tool, sample, bedfile, cont, obj):
     src_cmd = '. /home/ubuntu/.novarc;'
     job_list = []
     for bnid in open(sample):
         bnid = bnid.rstrip('\n')
-        (dl_cmd, bam, bai) = get_bam_name(bnid, src_cmd, cont)
+        (dl_cmd, bam, bai) = get_bam_name(bnid, src_cmd, cont, obj)
         bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam + ' -b ' + bedfile + ' > ' + bnid + '.hist;'
         cleanup = 'rm ' + bam + ' ' + bai + ';'
         final = dl_cmd + bed_cmd + cleanup
