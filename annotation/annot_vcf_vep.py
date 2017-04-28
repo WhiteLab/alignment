@@ -82,6 +82,8 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         except:
             log(loc, date_time() + 'VEP failed.  Trying smaller buffer size\n')
             buffer_size = str(int(buffer_size)/2)
+            clean_up = 'rm ' + out_suffix + '.*'
+            subprocess.call(clean_up, shell=True)
             if wg_flag == 'n':
                 run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                           + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
