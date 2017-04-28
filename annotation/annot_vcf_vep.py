@@ -65,21 +65,20 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             in_vcf = sample + '.somatic_indel.PASS.vcf'
         # run_vep = ''
         buffer_size = '2000'
-        try:
-            if wg_flag == 'n':
-                run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                          + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                          + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
-                          + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
-                          + loc
-            else:
-                run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                          + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                          + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
-                          ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
-            log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
-            check = subprocess.call(run_vep, shell=True)
-        except:
+        if wg_flag == 'n':
+            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
+                      + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
+                      + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
+                      + loc
+        else:
+            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
+                      + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
+                      ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
+        log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
+        check = subprocess.call(run_vep, shell=True)
+        if check != 0:
             log(loc, date_time() + 'VEP failed.  Trying smaller buffer size\n')
             buffer_size = str(int(buffer_size)/2)
             clean_up = 'rm ' + out_suffix + '.*'
@@ -97,10 +96,9 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
                           ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
             log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
             check = subprocess.call(run_vep, shell=True)
-
-        if check != 0:
-            log(loc, date_time() + 'VEP annotation for ' + sample + in_suffix + ' failed\n')
-            exit(1)
+            if check != 0:
+                log(loc, date_time() + 'VEP failed for sample ' + sample + '\n')
+                exit(1)
         else:
             log(loc, date_time() + 'VEP annotation ' + sample + in_suffix + ' successful!\n')
         if source == 'mutect':
