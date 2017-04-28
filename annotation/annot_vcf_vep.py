@@ -79,8 +79,8 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         check = subprocess.call(run_vep, shell=True)
         if check != 0:
-            log(loc, date_time() + 'VEP failed.  Trying smaller buffer size\n')
             buffer_size = str(int(buffer_size)/2)
+            log(loc, date_time() + 'VEP failed.  Trying smaller buffer size of ' + buffer_size + '\n')
             clean_up = 'rm ' + out_suffix + '.*'
             subprocess.call(clean_up, shell=True)
             if wg_flag == 'n':
