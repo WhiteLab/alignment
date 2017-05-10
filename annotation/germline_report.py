@@ -3,9 +3,10 @@
 import re
 from pysam import VariantFile
 import sys
+from create_ref import create_index
 
 
-def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_dict, out):
+def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_dict, out, ref_flag):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
@@ -14,7 +15,8 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
     # index annotations by impact rank
     rank_dict = {}
     outstring = ''
-
+    cand_top = []
+    cand_next = []
     for ann in ann_list:
         impact = ann[loc_dict['IMPACT']]
         if impact not in rank_dict:
@@ -48,17 +50,41 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                             ExAC_MAF = check.group(1)
                 cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, tx_id, effect, impact, biotype, codon,
                                             aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
-                if f == 0:
-                    top_gene = gene
-                    f = 1
-                    outstring += cur_var
-                if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
-                    outstring += cur_var
-                    f1 = 1
+                if ref_flag == 'n':
+                    if f == 0:
+                        top_gene = gene
+                        f = 1
+                        outstring += cur_var
+                    if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
+                        outstring += cur_var
+                        f1 = 1
+                else:
+                    if f < 1:
+                        if tx_id == ref_flag[gene]:
+                            top_gene = gene
+                            outstring += cur_var
+                            f = 1
+                        else:
+                            top_gene = gene
+                            f = 0.5
+                            cand_top.append(cur_var)
+
+                    if f > 0 and gene != top_gene and impact != 'MODIFIER' and f1 < 1:
+                        if tx_id == ref_flag[gene]:
+                            outstring += cur_var
+                            f1 = 1
+                        else:
+                            f1 = 0.5
+                            cand_next.append(cur_var)
+    if ref_flag != 'n':
+        if f == 0.5:
+            outstring += cand_top[0]
+        if f1 == 0.5:
+            outstring += cand_next[0]
     out.write(outstring)
 
 
-def gen_report(vcf, sample):
+def gen_report(vcf, sample, ref_flag):
     vcf_in = VariantFile(vcf)
     out = open(sample + '.germline_pass.xls', 'w')
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0,
@@ -79,12 +105,14 @@ def gen_report(vcf, sample):
     out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tTranscript_id\tEffect\t'
               'IMPACT\tBIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\tCLIN_SIG\tC'
               'ADD_PHRED\n')
+    if ref_flag != 'n':
+        ref_flag = create_index(ref_flag)
     for record in vcf_in.fetch():
         #pdb.set_trace()
         (chrom, pos, ref, alt, alt_ct, tot_ct) = (record.contig, str(record.pos), record.ref, record.alts[0],
                                                   str(record.info['TR']), str(record.info['TC']))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
-        output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, desired, out)
+        output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, desired, out, ref_flag)
     out.close()
     return 0
 
@@ -95,11 +123,13 @@ if __name__ == "__main__":
         description='parse VEP annotated output into a digestable report.')
     parser.add_argument('-i', '--infile', action='store', dest='infile',
                         help='VEP annotated variant file')
-    parser.add_argument('-s', '--sample', action='store', dest = 'sample', help='Sample name')
+    parser.add_argument('-s', '--sample', action='store', dest='sample', help='Sample name')
+    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-seprated reference table with gene '
+                    'symbols and refseq + ensebl ids to standardize what trnascript is used.  Use flag \'n\' to skip')
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (vcf, sample) = (inputs.infile, inputs.sample)
-    gen_report(vcf, sample)
+    (vcf, sample, ref) = (inputs.infile, inputs.sample, inputs.ref)
+    gen_report(vcf, sample, ref)
