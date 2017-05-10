@@ -60,7 +60,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                         f1 = 1
                 else:
                     if f < 1:
-                        if tx_id == ref_flag[gene]:
+                        if gene in ref_flag[gene] and tx_id == ref_flag[gene]:
                             top_gene = gene
                             outstring += cur_var
                             f = 1
@@ -70,7 +70,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                             cand_top.append(cur_var)
 
                     if f > 0 and gene != top_gene and impact != 'MODIFIER' and f1 < 1:
-                        if tx_id == ref_flag[gene]:
+                        if gene in ref_flag[gene] and tx_id == ref_flag[gene]:
                             outstring += cur_var
                             f1 = 1
                         else:
