@@ -8,6 +8,7 @@ from pysam import VariantFile
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
+from create_ref import create_index
 
 
 def create_ind(out):
@@ -65,15 +66,19 @@ def calc_pct(a, b):
     return ratio, fmt
 
 
-def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tflag, out):
+def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tflag, out, ref_flag):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
     # secondary hit flag to avoid excessive repeats
     f1 = 0
     # index annotations by impact rank
+    # index annotations by impact rank
     rank_dict = {}
     outstring = ''
+    cand_top = []
+    cand_next = []
+    r_flag = 99
     var_tup = '\t'.join((chrom, pos, ref, alt))
     (context,  norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct) = (mut_dict[var_tup]['context'],
     mut_dict[var_tup]['n_ref_count'], mut_dict[var_tup]['n_alt_count'], mut_dict[var_tup]['t_ref_count'],
@@ -97,6 +102,9 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
         rank_dict[impact].append(ann)
     for impact in rank:
         if impact in rank_dict:
+            cur_rank = rank.index(impact)
+            if cur_rank < r_flag:
+                r_flag = cur_rank
             for ann in rank_dict[impact]:
                 (gene, tx_id, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype) = (ann[loc_dict['SYMBOL']],
                 ann[loc_dict['Feature']], ann[loc_dict['Consequence']], ann[loc_dict['Protein_position']],
@@ -122,17 +130,41 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
                 cur_var = '\t'.join((chrom, pos, context, ref, alt, norm_ref_ct, norm_alt_ct, norm_alt_pct, tum_ref_ct,
                                      tum_alt_ct, tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene, tx_id, effect, impact,
                                      biotype, codon, aa, tflag)) + '\n'
-                if f == 0:
-                    top_gene = gene
-                    f = 1
-                    outstring += cur_var
-                if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
-                    outstring += cur_var
-                    f1 = 0
+                if ref_flag == 'n':
+                    if f == 0:
+                        top_gene = gene
+                        f = 1
+                        outstring += cur_var
+                    if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
+                        outstring += cur_var
+                        f1 = 0
+                else:
+                    if f < 1 and cur_rank == r_flag:
+                        if gene in ref_flag and tx_id == ref_flag[gene]:
+                            top_gene = gene
+                            outstring += cur_var
+                            f = 1
+                        else:
+                            top_gene = gene
+                            f = 0.5
+                            cand_top.append(cur_var)
+
+                    if f > 0 and gene != top_gene and impact != 'MODIFIER' and f1 < 1 and cur_rank == (r_flag + 1):
+                        if gene in ref_flag and tx_id == ref_flag[gene]:
+                            outstring += cur_var
+                            f1 = 1
+                        else:
+                            f1 = 0.5
+                            cand_next.append(cur_var)
+    if ref_flag != 'n':
+        if f == 0.5:
+            outstring += cand_top[0]
+        if f1 == 0.5:
+            outstring += cand_next[0]
     out.write(outstring)
 
 
-def gen_report(vcf, out, c):
+def gen_report(vcf, out, c, ref_flag):
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
@@ -164,13 +196,15 @@ def gen_report(vcf, out, c):
     out.write('chr\tpos\tcontext\tref\talt\tnormal_ref_count\tnormal_alt_count\t%_normal_alt\ttumor_ref_count\t'
               'tumor_alt_count\t%_tumor_alt\tT/N_%_alt_ratio\tsnp_ID\tExAC_MAF\tgene\ttx_id\teffect\timpact\tbiotype\t'
               'codon_change\tamino_acid_change\ton/off-target\n')
+    if ref_flag != 'n':
+        ref_flag = create_index(ref_flag)
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, record.alts[0]
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         tflag = 'NA'
         if c != 'n':
             tflag = mark_target(chrom, pos, on_dict)
-        output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag, out)
+        output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag, out, ref_flag)
 
     out.close()
     log(loc, date_time() + 'Creating prioritized report for ' + vcf + ' complete!\n')
@@ -186,13 +220,15 @@ def main():
                         help='MuTect output table - has counts for tumor/normal')
     parser.add_argument('-c', '--custom', action='store', dest='c',
                         help='bed file to mark whether hit was on or off-target. if not desired, enter \'n\' ')
+    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-seprated reference table with gene '
+                    'symbols and refseq + ensebl ids to standardize what trnascript is used.  Use flag \'n\' to skip')
 
     if len(sys.argv) == 1:
         parser.print_help()
         exit(1)
     args = parser.parse_args()
 
-    gen_report(args.vcf, args.out, args.c)
+    gen_report(args.vcf, args.out, args.c, args.ref)
 
 
 if __name__ == '__main__':
