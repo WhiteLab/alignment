@@ -17,6 +17,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
     outstring = ''
     cand_top = []
     cand_next = []
+    r_flag =99
     for ann in ann_list:
         impact = ann[loc_dict['IMPACT']]
         if impact not in rank_dict:
@@ -24,6 +25,9 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
         rank_dict[impact].append(ann)
     for impact in rank:
         if impact in rank_dict:
+            cur_rank = rank.index(impact)
+            if cur_rank < r_flag:
+                r_flag = cur_rank
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
                 (gene, tx_id, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype, sift, clin_sig,
@@ -59,7 +63,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                         outstring += cur_var
                         f1 = 1
                 else:
-                    if f < 1:
+                    if f < 1 and cur_rank == r_flag:
                         if gene in ref_flag and tx_id == ref_flag[gene]:
                             top_gene = gene
                             outstring += cur_var
