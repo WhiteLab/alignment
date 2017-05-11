@@ -17,7 +17,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
     outstring = ''
     cand_top = []
     cand_next = []
-    r_flag =99
+    r_flag = 99
     for ann in ann_list:
         impact = ann[loc_dict['IMPACT']]
         if impact not in rank_dict:
@@ -73,7 +73,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                             f = 0.5
                             cand_top.append(cur_var)
 
-                    if f > 0 and gene != top_gene and impact != 'MODIFIER' and f1 < 1:
+                    if f > 0 and gene != top_gene and impact != 'MODIFIER' and f1 < 1 and cur_rank == (r_flag + 1):
                         if gene in ref_flag and tx_id == ref_flag[gene]:
                             outstring += cur_var
                             f1 = 1
