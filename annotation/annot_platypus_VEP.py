@@ -12,7 +12,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],\
            config_data['params']['threads'], config_data['tools']['snpsift'], config_data['tools']['java'], \
-           config_data['refs']['cadd']
+           config_data['refs']['cadd'], config_data['refs']['tx_index']
 
 
 def pass_filter(sample):
@@ -32,7 +32,7 @@ def pass_filter(sample):
 
 
 def annot_platypus(config_file, samp_list, ref_mnt):
-    (vep_tool, vep_cache, fasta, threads, snpsift, java, cadd) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, threads, snpsift, java, cadd, tx_index) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     cadd = ref_mnt + '/' + cadd
     vep_cache = ref_mnt + '/' + vep_cache
@@ -66,7 +66,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
                                  + ' FAILED!\nCommand used:\n' + run_vep + '\n')
                 exit(1)
 
-            check = gen_report(out_vcf, sample)
+            check = gen_report(out_vcf, sample, tx_index)
             if check == 0:
                 sys.stderr.write(date_time() + 'Summary table of germline calls completed!\n')
                 samp_flag[samp_fh] = 1

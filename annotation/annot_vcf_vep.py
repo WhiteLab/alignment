@@ -15,7 +15,7 @@ def parse_config(config_file):
     return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
             config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
             config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'],
-            config_data['params']['wg_flag'])
+            config_data['params']['wg_flag'], config_data['refs']['tx_index'])
 
 
 def pass_filter(sample, in_suffix, dustmask_flag):
@@ -39,7 +39,7 @@ def pass_filter(sample, in_suffix, dustmask_flag):
 
 
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag) \
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index) \
         = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
@@ -104,12 +104,12 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         if source == 'mutect':
             if wg_flag == 'y':
                 intvl = 'n'
-            check = gen_snv_report(out_vcf, sample + in_mutect, intvl)
+            check = gen_snv_report(out_vcf, sample + in_mutect, intvl, tx_index)
             if check != 0:
                 log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
                 exit(1)
         else:
-            check = gen_indel_report(out_vcf)
+            check = gen_indel_report(out_vcf, tx_index)
             if check != 0:
                 log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
                 exit(1)

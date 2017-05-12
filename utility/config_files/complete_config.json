@@ -27,6 +27,7 @@
     "capture": "REFS/BED/capture_panel_3.0.bed",
     "intervals": "REFS/INTERVAL/capture_panel_3.0_interval.txt",
     "intervals_0base": "REFS/INTERVAL/capture_panel_3.0_interval_0base.txt",
+    "tx_index": "REFS/INTERVAL/capture_panel_v3_tx_standardization_reference.txt",
     "fa_ordered": "REFS/FASTA/hg19_karyo_ordered.fa",
     "fai": "REFS/FASTA/hg19_karyo_ordered.fa.fai",
     "dustmask": "REFS/BED/hg19_dustmasked_merged.bed",
