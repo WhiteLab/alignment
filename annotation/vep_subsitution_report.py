@@ -204,6 +204,9 @@ def gen_report(vcf, out, c, ref_flag):
         tflag = 'NA'
         if c != 'n':
             tflag = mark_target(chrom, pos, on_dict)
+            # only outputting ON TARGET hits
+            if tflag == 'OFF':
+                continue
         output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, desired, tflag, out, ref_flag)
 
     out.close()
