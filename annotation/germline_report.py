@@ -128,8 +128,8 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--infile', action='store', dest='infile',
                         help='VEP annotated variant file')
     parser.add_argument('-s', '--sample', action='store', dest='sample', help='Sample name')
-    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-seprated reference table with gene '
-                    'symbols and refseq + ensebl ids to standardize what trnascript is used.  Use flag \'n\' to skip')
+    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
+                    'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)

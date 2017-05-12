@@ -8,6 +8,7 @@ from pysam import VariantFile
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
+from create_ref import create_index
 
 
 def calc_pct(a, b):
@@ -17,7 +18,7 @@ def calc_pct(a, b):
     return ratio, fmt
 
 
-def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, loc_dict, out):
+def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, loc_dict, out, ref_flag):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
@@ -26,7 +27,9 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
     # index annotations by impact rank
     rank_dict = {}
     outstring = ''
-
+    cand_top = []
+    cand_next = []
+    r_flag = 99
     for ann in ann_list:
         impact = ann[loc_dict['IMPACT']]
         if impact not in rank_dict:
@@ -34,6 +37,9 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
         rank_dict[impact].append(ann)
     for impact in rank:
         if impact in rank_dict:
+            cur_rank = rank.index(impact)
+            if cur_rank < r_flag:
+                r_flag = cur_rank
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
                 (gene, tx_id, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype) = \
@@ -59,17 +65,41 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
                         aa = test[0] + str(aa_pos) + test[1]
                 cur_var = '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
                                      impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
-                if f == 0:
-                    top_gene = gene
-                    f = 1
-                    outstring += cur_var
-                if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
-                    outstring += cur_var
-                    f1 = 0
+                if ref_flag == 'n':
+                    if f == 0:
+                        top_gene = gene
+                        f = 1
+                        outstring += cur_var
+                    if f == 1 and gene != top_gene and impact != 'MODIFIER' and f1 != 0:
+                        outstring += cur_var
+                        f1 = 0
+                else:
+                    if f < 1 and cur_rank == r_flag:
+                        if gene in ref_flag and tx_id == ref_flag[gene]:
+                            top_gene = gene
+                            outstring += cur_var
+                            f = 1
+                        else:
+                            top_gene = gene
+                            f = 0.5
+                            cand_top.append(cur_var)
+
+                    if f > 0 and gene != top_gene and impact != 'MODIFIER' and f1 < 1 and cur_rank == (r_flag + 1):
+                        if gene in ref_flag and tx_id == ref_flag[gene]:
+                            outstring += cur_var
+                            f1 = 1
+                        else:
+                            f1 = 0.5
+                            cand_next.append(cur_var)
+    if ref_flag != 'n':
+        if f == 0.5:
+            outstring += cand_top[0]
+        if f1 == 0.5:
+            outstring += cand_next[0]
     out.write(outstring)
 
 
-def gen_report(vcf):
+def gen_report(vcf, ref_flag):
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
@@ -94,11 +124,14 @@ def gen_report(vcf):
             desired[desc_list[i]] = i
     out.write('chr\tpos\tref\talt\tsnp_ID\tExAC_MAF\tgene\ttranscript_id\tvariant_class_effect\teffect\timpact'
             '\tbiotype\tcodon_change\tamino_acid_change\talt_cov\tnon_alt_cov\tvaf\n')
+    if ref_flag != 'n':
+        ref_flag = create_index(ref_flag)
+
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
                                 str(record.info['MINCOV']), str(record.info['ALTCOV']), str(record.info['COVRATIO']))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
-        output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, desired, out)
+        output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, desired, out, ref_flag)
 
     out.close()
     log(loc, date_time() + 'Creating prioritized report for ' + vcf + ' complete!\n')
@@ -110,13 +143,15 @@ def main():
         description='parse VEP annotated output into a digestable report, prioritizing highest impact calls.')
     parser.add_argument('-v', '--vcf', action='store', dest='vcf',
                         help='VEP annotated variant file')
+    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
+                    'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
 
     if len(sys.argv) == 1:
         parser.print_help()
         exit(1)
     args = parser.parse_args()
 
-    gen_report(args.vcf)
+    gen_report(args.vcf, args.ref)
 
 
 if __name__ == '__main__':

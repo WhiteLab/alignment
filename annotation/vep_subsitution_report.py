@@ -223,8 +223,8 @@ def main():
                         help='MuTect output table - has counts for tumor/normal')
     parser.add_argument('-c', '--custom', action='store', dest='c',
                         help='bed file to mark whether hit was on or off-target. if not desired, enter \'n\' ')
-    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-seprated reference table with gene '
-                    'symbols and refseq + ensebl ids to standardize what trnascript is used.  Use flag \'n\' to skip')
+    parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
+                    'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
 
     if len(sys.argv) == 1:
         parser.print_help()
