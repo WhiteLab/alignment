@@ -44,6 +44,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
     fasta = ref_mnt + '/' + fasta
     vep_cache = ref_mnt + '/' + vep_cache
     intvl = ref_mnt + '/' + intvl
+    tx_index = ref_mnt + '/' + tx_index
     # scale back on the forking a bit
 
     if int(threads) > 2:

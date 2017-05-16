@@ -36,6 +36,7 @@ def annot_platypus(config_file, samp_list, ref_mnt):
     fasta = ref_mnt + '/' + fasta
     cadd = ref_mnt + '/' + cadd
     vep_cache = ref_mnt + '/' + vep_cache
+    tx_index = ref_mnt + '/' + tx_index
     # scale back on the forking a bit
     if int(threads) > 2:
         threads = str(int(threads)/2)
