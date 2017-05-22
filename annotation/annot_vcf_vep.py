@@ -90,7 +90,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             clean_up = 'rm ' + out_vcf + '.*'
             log(loc, date_time() + 'VEP failed. Status of run was ' + str(check_run) + ' Trying smaller buffer size of '
                 + buffer_size + '\n' + clean_up + '\n')
-            check.kill()
+
             subprocess.call(clean_up, shell=True)
             run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
             log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
