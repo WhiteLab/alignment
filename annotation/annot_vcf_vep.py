@@ -38,6 +38,22 @@ def pass_filter(sample, in_suffix, dustmask_flag):
     out.close()
 
 
+def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, sample):
+    if wg_flag == 'n':
+        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+                  + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
+                  + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
+                  + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
+                  + loc
+    else:
+        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+                  + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
+                  + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
+                  ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
+    log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
+    return run_vep
+
+
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index) \
         = parse_config(config_file)
@@ -66,37 +82,20 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             in_vcf = sample + '.somatic_indel.PASS.vcf'
         # run_vep = ''
         buffer_size = '2000'
-        if wg_flag == 'n':
-            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                      + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
-                      + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
-                      + loc
-        else:
-            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                      + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                      + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
-                      ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
-        log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
-        check = subprocess.call(run_vep, shell=True)
-        if check != 0:
+        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
+                          sample)
+        check = subprocess.Popen(run_cmd, shell=True)
+        check_run = check.wait()
+        if check_run != 0:
             buffer_size = str(int(buffer_size)/2)
-            log(loc, date_time() + 'VEP failed.  Trying smaller buffer size of ' + buffer_size + '\n')
-            clean_up = 'rm ' + sample + out_suffix + '.*'
+            clean_up = 'rm ' + out_vcf + '.*'
+            log(loc, date_time() + 'VEP failed.  Trying smaller buffer size of ' + buffer_size + '\n' + clean_up + '\n')
+            check.kill()
             subprocess.call(clean_up, shell=True)
-            if wg_flag == 'n':
-                run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                          + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                          + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
-                          + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
-                          + loc
-            else:
-                run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                          + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                          + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
-                          ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
+            run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
+                              sample)
             log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
-            check = subprocess.call(run_vep, shell=True)
+            check = subprocess.call(run_cmd, shell=True)
             if check != 0:
                 log(loc, date_time() + 'VEP failed for sample ' + sample + '\n')
                 exit(1)
