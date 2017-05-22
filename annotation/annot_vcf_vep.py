@@ -87,7 +87,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         check_run = check.wait()
         if check_run != 0:
             buffer_size = str(int(buffer_size)/2)
-            clean_up = 'rm ' + out_vcf + '.*'
+            clean_up = 'rm ' + out_vcf + '*'
             log(loc, date_time() + 'VEP failed. Status of run was ' + str(check_run) + ' Trying smaller buffer size of '
                 + buffer_size + '\n' + clean_up + '\n')
 
