@@ -38,19 +38,19 @@ def pass_filter(sample, in_suffix, dustmask_flag):
     out.close()
 
 
-def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, sample):
+def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc):
     if wg_flag == 'n':
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+        run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
                   + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
                   + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
                   + loc
     else:
-        run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+        run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
                   + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
                   ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
-    return run_vep
+    return run_cmd
 
 
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
@@ -81,8 +81,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             in_vcf = sample + '.somatic_indel.PASS.vcf'
         # run_vep = ''
         buffer_size = '2000'
-        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
-                          sample)
+        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
         log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         check = subprocess.Popen(run_cmd, shell=True)
         check_run = check.wait()
@@ -93,8 +92,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
                 + buffer_size + '\n' + clean_up + '\n')
             check.kill()
             subprocess.call(clean_up, shell=True)
-            run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
-                              sample)
+            run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
             log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
             check = subprocess.call(run_cmd, shell=True)
             if check != 0:
