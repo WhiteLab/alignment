@@ -50,7 +50,6 @@ def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
                   + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
                   ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
-    log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
     return run_vep
 
 
@@ -84,6 +83,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         buffer_size = '2000'
         run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
                           sample)
+        log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         check = subprocess.Popen(run_cmd, shell=True)
         check_run = check.wait()
         if check_run != 0:
