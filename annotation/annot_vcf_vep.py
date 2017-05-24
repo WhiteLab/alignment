@@ -101,8 +101,6 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
         # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
         check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-        parent = psutil.Process(check.pid)
-        children = parent.children(recursive=True)
         check_run = watch_mem(check, loc)
         if check_run != 0:
 
@@ -110,12 +108,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
             clean_up = 'rm ' + out_vcf + '*'
             log(loc, date_time() + 'VEP failed. Status of run was ' + str(check_run) + ' Trying smaller buffer size of '
                 + buffer_size + '\n' + clean_up + '\n')
-            for process in children:
-                try:
-                    process.send_signal(signal.SIGTERM)
-                    log(loc, date_time() + 'Child process successfully terminated\n')
-                except:
-                    log(loc, date_time() + 'Child process had already failed\n')
+            os.killpg(os.getpgid(check.pid), signal.SIGINT)
 
             subprocess.call(clean_up, shell=True)
             run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
