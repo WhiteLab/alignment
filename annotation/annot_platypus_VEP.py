@@ -62,9 +62,6 @@ def annot_platypus(config_file, samp_list, ref_mnt):
     cadd = ref_mnt + '/' + cadd
     vep_cache = ref_mnt + '/' + vep_cache
     tx_index = ref_mnt + '/' + tx_index
-    # scale back on the forking a bit
-    if int(threads) > 2:
-        threads = str(int(threads)/2)
     # parse sample file, use only last if pairs
     samp_fh = open(samp_list, 'r')
     # track to prevent repeat annotation if same sample used as comparison
