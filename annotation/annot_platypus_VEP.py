@@ -6,6 +6,9 @@ from germline_report import gen_report
 from utility.date_time import date_time
 import subprocess
 import json
+import psutil
+import os
+import signal
 
 
 def parse_config(config_file):
@@ -29,6 +32,28 @@ def pass_filter(sample):
                 out.write(line)
     infile.close()
     out.close()
+
+
+def run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size):
+    cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field ANN ' \
+        '--canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --buffer_size ' \
+          + buffer_size + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache \
+          + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
+    return cmd
+
+
+def watch_mem(proc_obj, sample):
+    from time import sleep
+    while proc_obj.poll() is None:
+        mem_pct = psutil.virtual_memory().percent
+        sys.stderr.write(date_time() + 'Current memory usage at ' + str(mem_pct) + '% processing sample ' + sample
+            + ' from platypus ' + '\n')
+        if mem_pct >= 99:
+            sys.stderr.write(date_time() + 'Memory exceeded while running VEP.')
+            return 1
+        sleep(30)
+
+    return proc_obj.poll()
 
 
 def annot_platypus(config_file, samp_list, ref_mnt):
@@ -55,17 +80,29 @@ def annot_platypus(config_file, samp_list, ref_mnt):
             subprocess.call(mk_log_dir, shell=True)
             in_vcf = sample + '.germline_pass.vcf'
             out_vcf = sample + '.germline_pass.vep.vcf'
-            run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
-                    ' ANN --canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --fork ' \
-                    + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> ' \
-                    'LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
-            check = subprocess.call(run_vep, shell=True)
-            if check == 0:
-                sys.stderr.write(date_time() + 'SNP annotation of germline calls completed!\n')
+            buffer_size = '2000'
+            run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size)
+            sys.stderr.write(date_time() + 'Annotating sample ' + in_vcf + '\n')
+            # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
+            check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+            check_run = watch_mem(check, sample)
+            if check_run != 0:
+
+                buffer_size = str(int(buffer_size) / 2)
+                clean_up = 'rm ' + out_vcf + '*'
+                sys.stderr.write(date_time() + 'VEP failed. Status of run was ' + str(check_run)
+                                 + ' Trying smaller buffer size of ' + buffer_size + '\n' + clean_up + '\n')
+                os.killpg(os.getpgid(check.pid), signal.SIGINT)
+
+                subprocess.call(clean_up, shell=True)
+                run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size)
+                sys.stderr.write(date_time() + 'Annotating sample ' + sample + in_vcf + '\n')
+                check = subprocess.call(run_cmd, shell=True)
+                if check != 0:
+                    sys.stderr.write(date_time() + 'VEP failed for sample ' + sample + '\n')
+                    exit(1)
             else:
-                sys.stderr.write(date_time() + 'SNP annotation of germline calls for ' + sample
-                                 + ' FAILED!\nCommand used:\n' + run_vep + '\n')
-                exit(1)
+                sys.stderr.write(date_time() + 'VEP annotation of ' + in_vcf + ' successful!\n')
 
             check = gen_report(out_vcf, sample, tx_index)
             if check == 0:

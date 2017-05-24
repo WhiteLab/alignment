@@ -119,7 +119,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
                 log(loc, date_time() + 'VEP failed for sample ' + sample + '\n')
                 exit(1)
         else:
-            log(loc, date_time() + 'VEP annotation ' + sample + in_suffix + ' successful!\n')
+            log(loc, date_time() + 'VEP annotation of ' + sample + in_suffix + ' successful!\n')
         if source == 'mutect':
             if wg_flag == 'y':
                 intvl = 'n'
