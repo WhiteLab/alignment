@@ -60,7 +60,7 @@ def watch_mem(proc_obj, loc):
     from time import sleep
     while proc_obj.poll() is None:
         mem_pct = psutil.virtual_memory().percent
-        log(loc, date_time() + 'Current memory usage at ' + mem_pct + '%')
+        log(loc, date_time() + 'Current memory usage at ' + str(mem_pct) + '%')
         if mem_pct >= 99:
             log(loc, date_time() + 'Memory exceeded while running VEP.')
             return 1
