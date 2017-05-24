@@ -56,6 +56,17 @@ def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep
     return run_cmd
 
 
+def watch_mem(proc_obj, loc):
+    from time import sleep
+    while proc_obj.poll() is None:
+        if psutil.virtual_memory().percent >= 99:
+            log(loc, date_time() + 'Memory exceeded while running VEP.')
+            return 1
+        sleep(30)
+
+    return proc_obj.poll()
+
+
 def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index) \
         = parse_config(config_file)
@@ -90,7 +101,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
         check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
         parent = psutil.Process(check.pid)
         children = parent.children(recursive=True)
-        check_run = check.wait()
+        check_run = watch_mem(check, loc)
         if check_run != 0:
 
             buffer_size = str(int(buffer_size)/2)
