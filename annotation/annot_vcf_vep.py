@@ -59,7 +59,9 @@ def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep
 def watch_mem(proc_obj, loc):
     from time import sleep
     while proc_obj.poll() is None:
-        if psutil.virtual_memory().percent >= 99:
+        mem_pct = psutil.virtual_memory().percent
+        log(loc, date_time() + 'Current memory usage at ' + mem_pct + '%')
+        if mem_pct >= 99:
             log(loc, date_time() + 'Memory exceeded while running VEP.')
             return 1
         sleep(30)
