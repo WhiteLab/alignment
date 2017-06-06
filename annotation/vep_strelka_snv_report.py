@@ -151,8 +151,8 @@ def gen_report(vcf, c, ref_flag):
     for record in vcf_in.fetch():
         # pdb.set_trace()
         (chrom, pos, ref, alt, norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct) = (record.contig, str(record.pos),
-        record.ref, record.alts[0], record.samples['NORMAL'][(record.ref + 'U')],
-        record.samples['NORMAL'][(record.alts[0] + 'U')][0], record.samples['TUMOR'][(record.ref + 'U')],
+        record.ref, record.alts[0], record.samples['NORMAL'][(record.ref + 'U')][0],
+        record.samples['NORMAL'][(record.alts[0] + 'U')][0], record.samples['TUMOR'][(record.ref + 'U')][0],
         record.samples['TUMOR'][(record.alts[0] + 'U')][0])
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         tflag = 'NA'
