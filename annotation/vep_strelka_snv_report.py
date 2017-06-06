@@ -9,6 +9,7 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
 from create_ref import create_index
+from vep_subsitution_report import mark_target
 from vep_subsitution_report import create_target
 
 
@@ -19,7 +20,8 @@ def calc_pct(a, b):
     return ratio, fmt
 
 
-def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, loc_dict, out, ref_flag):
+def output_highest_impact(chrom, pos, ref, alt, norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct, ann_list, loc_dict,
+                          tflag, out, ref_flag):
     rank = ('HIGH', 'MODERATE', 'LOW', 'MODIFIER')
     top_gene = ''
     f = 0
@@ -64,8 +66,20 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
                         aa += str(aa_pos)
                     else:
                         aa = test[0] + str(aa_pos) + test[1]
-                cur_var = '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
-                                     impact, biotype, codon, aa, alt_ct, non_alt_ct, vaf)) + '\n'
+                norm_alt_pct = '0'
+                norm_alt_rf = 0.0
+                tum_alt_pct = '0'
+                tum_alt_rf = 0.0
+                tn_ratio = tum_alt_ct
+                if int(norm_alt_ct) + int(norm_ref_ct) > 0:
+                    (norm_alt_rf, norm_alt_pct) = calc_pct(norm_ref_ct, norm_alt_ct)
+                if int(tum_alt_ct) + int(tum_ref_ct) > 0:
+                    (tum_alt_rf, tum_alt_pct) = calc_pct(tum_ref_ct, tum_alt_ct)
+                if norm_alt_rf > 0:
+                    tn_ratio = "{0:.2f}".format(tum_alt_rf / norm_alt_rf)
+                cur_var = '\t'.join((chrom, pos, ref, alt, str(norm_ref_ct), str(norm_alt_ct), norm_alt_pct, str(tum_ref_ct),
+                                     str(tum_alt_ct), tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
+                                     impact, biotype, codon, aa, tflag)) + '\n'
                 if ref_flag == 'n':
                     if f == 0:
                         top_gene = gene
@@ -100,13 +114,17 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_lis
     out.write(outstring)
 
 
-def gen_report(vcf, ref_flag):
+def gen_report(vcf, c, ref_flag):
     import pdb
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
     loc = 'LOGS/' + parts[0] + '.snv.strelka.vep_priority.report.log'
     log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
+    on_dict = {}
+    if c != 'n':
+        on_dict = create_target(c)
+        log(loc, date_time() + 'Target file given, creating index for on target info\n')
     vcf_in = VariantFile(vcf)
 
     out = open(parts[0] + '.snv.strelka.vep.prioritized_impact.report.xls', 'w')
@@ -124,17 +142,27 @@ def gen_report(vcf, ref_flag):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('chr\tpos\tref\talt\tsnp_ID\tExAC_MAF\tgene\ttranscript_id\tvariant_class_effect\teffect\timpact'
-            '\tbiotype\tcodon_change\tamino_acid_change\talt_cov\tnon_alt_cov\tvaf\n')
+    out.write('chr\tpos\tref\talt\tnormal_ref_count\tnormal_alt_count\t%_normal_alt\ttumor_ref_count\t'
+              'tumor_alt_count\t%_tumor_alt\tT/N_%_alt_ratio\tsnp_ID\tExAC_MAF\tgene\ttranscript_id\t'
+              'variant_class_effect\teffect\timpact\tbiotype\tcodon_change\tamino_acid_change\ton/off-target\n')
     if ref_flag != 'n':
         ref_flag = create_index(ref_flag)
 
     for record in vcf_in.fetch():
-        pdb.set_trace()
-        (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
-                                str(record.format), str(record.info['ALTCOV']), str(record.info['COVRATIO']))
+        # pdb.set_trace()
+        (chrom, pos, ref, alt, norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct) = (record.contig, str(record.pos),
+        record.ref, record.alts[0], record.samples['NORMAL'][(record.ref + 'U')],
+        record.samples['NORMAL'][(record.alts[0] + 'U')][0], record.samples['TUMOR'][(record.ref + 'U')],
+        record.samples['TUMOR'][(record.alts[0] + 'U')][0])
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
-        output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, desired, out, ref_flag)
+        tflag = 'NA'
+        if c != 'n':
+            tflag = mark_target(chrom, pos, on_dict)
+            # only outputting ON TARGET hits
+            if tflag == 'OFF':
+                continue
+        output_highest_impact(chrom, pos, ref, alt, norm_ref_ct, norm_alt_ct, tum_ref_ct, tum_alt_ct,
+                              ann_list, desired, tflag, out, ref_flag)
 
     out.close()
     log(loc, date_time() + 'Creating prioritized report for ' + vcf + ' complete!\n')
@@ -146,6 +174,8 @@ def main():
         description='parse VEP annotated output into a digestable report, prioritizing highest impact calls.')
     parser.add_argument('-v', '--vcf', action='store', dest='vcf',
                         help='VEP annotated variant file')
+    parser.add_argument('-c', '--custom', action='store', dest='c',
+                        help='bed file to mark whether hit was on or off-target. if not desired, enter \'n\' ')
     parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
                     'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
 
@@ -154,7 +184,7 @@ def main():
         exit(1)
     args = parser.parse_args()
 
-    gen_report(args.vcf, args.ref)
+    gen_report(args.vcf, args.c, args.ref)
 
 
 if __name__ == '__main__':
