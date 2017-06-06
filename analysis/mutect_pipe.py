@@ -73,7 +73,7 @@ def mutect_pipe(config_file, sample_pairs, ref_mnt):
                   + ' | grep -v REJECT > ' + out + '/' + vcf_file + '.keep '
             cmd_list.append(cur)
             i += 1
-        # fix encode flag won't work if alread phred 33, if a job fails try without
+        # fix encode flag won't work if already phred 33, if a job fails try without
         try:
             job_manager(cmd_list, max_t)
         except:

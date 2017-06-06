@@ -45,13 +45,13 @@ def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep
     if wg_flag == 'n':
         run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                  + ' --no_whole_genome --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
+                  + ' --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
                   + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
                   + loc
     else:
         run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                  + ' --no_whole_genome --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
+                  + ' --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
                   ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
     return run_cmd
 
