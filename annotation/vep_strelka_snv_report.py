@@ -11,6 +11,7 @@ from utility.log import log
 from create_ref import create_index
 from vep_subsitution_report import mark_target
 from vep_subsitution_report import create_target
+import pdb
 
 
 def calc_pct(a, b):
@@ -77,9 +78,12 @@ def output_highest_impact(chrom, pos, ref, alt, norm_ref_ct, norm_alt_ct, tum_re
                     (tum_alt_rf, tum_alt_pct) = calc_pct(tum_ref_ct, tum_alt_ct)
                 if norm_alt_rf > 0:
                     tn_ratio = "{0:.2f}".format(tum_alt_rf / norm_alt_rf)
-                cur_var = '\t'.join((chrom, pos, ref, alt, str(norm_ref_ct), str(norm_alt_ct), norm_alt_pct, str(tum_ref_ct),
-                                     str(tum_alt_ct), tum_alt_pct, tn_ratio, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
+                try:
+                    cur_var = '\t'.join((chrom, pos, ref, alt, str(norm_ref_ct), str(norm_alt_ct), norm_alt_pct, str(tum_ref_ct),
+                                     str(tum_alt_ct), tum_alt_pct, str(tn_ratio), snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
                                      impact, biotype, codon, aa, tflag)) + '\n'
+                except:
+                    pdb.set_trace()
                 if ref_flag == 'n':
                     if f == 0:
                         top_gene = gene
@@ -115,7 +119,6 @@ def output_highest_impact(chrom, pos, ref, alt, norm_ref_ct, norm_alt_ct, tum_re
 
 
 def gen_report(vcf, c, ref_flag):
-    import pdb
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
