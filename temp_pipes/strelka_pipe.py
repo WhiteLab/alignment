@@ -17,7 +17,7 @@ def run_strelka(strelka_tools, norm_bam, tum_bam, pair, threads, fasta):
                      + ' --config=' + cwd + '/config.ini --output-dir=' + cwd + '/' + pair
     sys.stderr.write(date_time() + strelka_config + '\n')
     check = subprocess.call(strelka_config, shell=True)
-    run_cmd = 'cd ' + pair + ' && make -j ' + threads
+    run_cmd = 'cd ' + cwd + '/' + pair + ' && make -j ' + threads
     sys.stderr.write(date_time() + run_cmd + '\n')
     check += subprocess.call(run_cmd)
     return check
