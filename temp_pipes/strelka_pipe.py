@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     strelka_tools = inputs.strelka
-    pairs = inputs.pair
+    pairs = inputs.pairs
     config = inputs.json
     ref_mnt = inputs.ref_mnt
 
