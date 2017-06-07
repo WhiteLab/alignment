@@ -8,14 +8,7 @@ from pysam import VariantFile
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
-from create_ref import create_index
-
-
-def calc_pct(a, b):
-    # return both formatted and unformatted
-    ratio = float(b) / (float(a) + float(b)) * 100
-    fmt = "{0:.2f}%".format(ratio)
-    return ratio, fmt
+from report_tools import *
 
 
 def output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, loc_dict, out, ref_flag):

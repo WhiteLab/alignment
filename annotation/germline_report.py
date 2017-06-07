@@ -3,7 +3,7 @@
 import re
 from pysam import VariantFile
 import sys
-from create_ref import create_index
+from report_tools import create_index
 
 
 def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_dict, out, ref_flag):
