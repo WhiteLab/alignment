@@ -9,14 +9,6 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
 from report_tools import *
-import pdb
-
-
-def calc_pct(a, b):
-    # return both formatted and unformatted
-    ratio = float(b) / (float(a) + float(b)) * 100
-    fmt = "{0:.2f}%".format(ratio)
-    return ratio, fmt
 
 
 def output_highest_impact(chrom, pos, ref, alt, not_shared, ann_list, loc_dict, tflag, out, ref_flag, call_type):
@@ -78,18 +70,14 @@ def output_highest_impact(chrom, pos, ref, alt, not_shared, ann_list, loc_dict, 
                         (tum_alt_rf, tum_alt_pct) = calc_pct(tum_ref_ct, tum_alt_ct)
                     if norm_alt_rf > 0:
                         tn_ratio = "{0:.2f}".format(tum_alt_rf / norm_alt_rf)
-                    try:
-                        cur_var = '\t'.join((chrom, pos, ref, alt, str(norm_ref_ct), str(norm_alt_ct), norm_alt_pct,
-                        str(tum_ref_ct), str(tum_alt_ct), tum_alt_pct, str(tn_ratio), snp_id, ExAC_MAF, gene, tx_id,
-                        variant_class, effect, impact, biotype, codon, aa, tflag)) + '\n'
-                    except:
-                        pdb.set_trace()
+
+                    cur_var = '\t'.join((chrom, pos, ref, alt, str(norm_ref_ct), str(norm_alt_ct), norm_alt_pct,
+                    str(tum_ref_ct), str(tum_alt_ct), tum_alt_pct, str(tn_ratio), snp_id, ExAC_MAF, gene, tx_id,
+                    variant_class, effect, impact, biotype, codon, aa, tflag)) + '\n'
+
                 else:
-                    try:
-                        cur_var = '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
-                                         impact, biotype, codon, aa, tflag)) + '\n'
-                    except:
-                        pdb.set_trace()
+                    cur_var = '\t'.join((chrom, pos, ref, alt, snp_id, ExAC_MAF, gene, tx_id, variant_class, effect,
+                                     impact, biotype, codon, aa, tflag)) + '\n'
 
                 if ref_flag == 'n':
                     if f == 0:
