@@ -11,6 +11,7 @@ def create_index(ref):
 
 
 def create_target(cfile):
+    import re
     cindex = {}
     fh = open(cfile, 'r')
     for line in fh:
