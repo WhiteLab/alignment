@@ -137,7 +137,7 @@ def gen_report(vcf, c, ref_flag):
         log(loc, date_time() + 'Target file given, creating index for on target info\n')
     vcf_in = VariantFile(vcf)
     call_type = 'snv'
-    if re.search('indel', parts[1]) is True:
+    if re.search('indel', fn) is True:
         out = open(parts[0] + '.indel.strelka.vep.prioritized_impact.report.xls', 'w')
         call_type = 'indel'
     else:
