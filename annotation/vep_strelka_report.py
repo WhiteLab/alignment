@@ -160,8 +160,8 @@ def gen_report(vcf, c, ref_flag):
         record.ref, record.alts[0])
         if call_type == 'snv':
             not_shared = {'norm_ref_ct': record.samples['NORMAL'][(record.ref + 'U')][0],
-                          'norm_alt_ct': record.samples['TUMOR'][(record.ref + 'U')][0],
-                           'tum_ref_ct': record.samples['NORMAL'][(record.alts[0] + 'U')][0],
+                          'norm_alt_ct': record.samples['NORMAL'][(record.alts[0] + 'U')][0],
+                           'tum_ref_ct': record.samples['TUMOR'][(record.ref + 'U')][0],
                            'tum_alt_ct': record.samples['TUMOR'][(record.alts[0] + 'U')][0]}
         else:
             not_shared = {}
