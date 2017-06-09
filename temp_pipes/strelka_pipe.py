@@ -24,7 +24,7 @@ def run_strelka(strelka_tools, norm_bam, tum_bam, pair, threads, fasta):
 
 
 def quick_check_vcf(vcf):
-    test = subprocess.check_output('grep -v "#" ' + vcf + ' | head -n 1')
+    test = subprocess.check_output('grep -v "#" ' + vcf + ' | head -n 1', shell=True)
     return len(test)
 
 
