@@ -23,6 +23,11 @@ def run_strelka(strelka_tools, norm_bam, tum_bam, pair, threads, fasta):
     return check
 
 
+def quick_check_vcf(vcf):
+    test = subprocess.check_output('grep -v "#" ' + vcf + ' | head -n 1')
+    return len(test)
+
+
 def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index) \
         = parse_config(config)
@@ -75,21 +80,30 @@ def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
 
         in_vcf = cwd + '/' + pair + '/results/passed.somatic.snvs.vcf'
         out_vcf = cwd + '/' + pair + '/results/' + pair + '.somatic.snv.strelka.vep.vcf'
-        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, vep_threads, fasta, vep_cache, vcache, loc)
-        check = subprocess.call(run_cmd, shell=True)
-        if check != 0:
-            sys.stderr.write(date_time() + 'vep failed for ' + in_vcf + ' for pair ' + pair + '\n')
-            exit(1)
-        gen_report(out_vcf, intvl, tx_index)
+        # need to ensure vcf has calls to run through VEP or it will fail
+        content_check = quick_check_vcf(in_vcf)
+        if content_check > 0:
+            run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, vep_threads, fasta, vep_cache, vcache, loc)
+            check = subprocess.call(run_cmd, shell=True)
+            if check != 0:
+                sys.stderr.write(date_time() + 'vep failed for ' + in_vcf + ' for pair ' + pair + '\n')
+                exit(1)
+            gen_report(out_vcf, intvl, tx_index)
+        else:
+            sys.stderr.write(date_time() + 'No calls actually made in ' + in_vcf + ' skipping VEP and report\n')
 
         in_vcf = cwd + '/' + pair + '/results/passed.somatic.indels.vcf'
         out_vcf = cwd + '/' + pair + '/results/' + pair + '.somatic.indel.strelka.vep.vcf'
-        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, vep_threads, fasta, vep_cache, vcache, loc)
-        check = subprocess.call(run_cmd, shell=True)
-        if check != 0:
-            sys.stderr.write(date_time() + 'vep failed for ' + in_vcf + ' for pair ' + pair + '\n')
-            exit(1)
-        gen_report(out_vcf, intvl, tx_index)
+        content_check = quick_check_vcf(in_vcf)
+        if content_check > 0:
+            run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, vep_threads, fasta, vep_cache, vcache, loc)
+            check = subprocess.call(run_cmd, shell=True)
+            if check != 0:
+                sys.stderr.write(date_time() + 'vep failed for ' + in_vcf + ' for pair ' + pair + '\n')
+                exit(1)
+            gen_report(out_vcf, intvl, tx_index)
+        else:
+            sys.stderr.write(date_time() + 'No calls actually made in ' + in_vcf + ' skipping VEP and report\n')
 
     sys.stderr.write(date_time() + 'FIN.\n')
 
