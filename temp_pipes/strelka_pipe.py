@@ -67,6 +67,7 @@ def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
                 sys.stderr.write(date_time() + 'Could not find tumor bam ' + bnids[0] + '! Aborting\n')
                 exit(1)
             sys.stderr.write(date_time() + dl_cmd + '\n')
+            subprocess.call(dl_cmd, shell=True)
 
         (dl_cmd, norm_bam, norm_bai) = get_bam_name(bnids[1], src_cmd, 'PANCAN', obj)
         if len(norm_bam) < 1:
@@ -84,6 +85,7 @@ def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
                 sys.stderr.write(date_time() + 'Could not find normal bam ' + bnids[1] + '! Aborting\n')
                 exit(1)
             sys.stderr.write(date_time() + dl_cmd + '\n')
+            subprocess.call(dl_cmd, shell=True)
 
         check = run_strelka(strelka_tools, norm_bam, tum_bam, pair, threads, fasta)
         if check != 0:

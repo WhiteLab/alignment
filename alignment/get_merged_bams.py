@@ -26,7 +26,7 @@ def list_bam(cont, obj, sample, threads):
     for fn in re.findall('(.*)\n', flist):
         if re.match('.*.merged.final.ba', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
-            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' ' + fn + ' --output '\
+            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' --output '\
                      + os.path.basename(fn)
             p.append(dl_cmd)
     if len(p) < 1:
