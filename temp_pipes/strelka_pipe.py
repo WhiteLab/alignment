@@ -78,10 +78,10 @@ def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
         subprocess.call(dl_cmd, shell=True)
         # check again to ensure bam has > 0 file size
         if os.stat(norm_bam).st_size == 0:
-            sys.stderr.write('bam for ' + bnids[0] + ' in PANCAN container had no content,  trying PDX\n')
-            (dl_cmd, norm_bam, norm_bai) = get_bam_name(bnids[0], src_cmd, 'PDX', obj)
+            sys.stderr.write('bam for ' + bnids[1] + ' in PANCAN container had no content,  trying PDX\n')
+            (dl_cmd, norm_bam, norm_bai) = get_bam_name(bnids[1], src_cmd, 'PDX', obj)
             if len(norm_bam) < 1:
-                sys.stderr.write(date_time() + 'Could not find normal bam ' + bnids[0] + '! Aborting\n')
+                sys.stderr.write(date_time() + 'Could not find normal bam ' + bnids[1] + '! Aborting\n')
                 exit(1)
             sys.stderr.write(date_time() + dl_cmd + '\n')
 
