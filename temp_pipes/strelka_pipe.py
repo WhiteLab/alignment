@@ -51,7 +51,7 @@ def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
         bnids = pair.split('_')
         # get bams
         (dl_cmd, tum_bam, tum_bai) = get_bam_name(bnids[0], src_cmd, 'PDX', obj)
-        if len(tum_bam) < 1 or os.stat(tum_bam).st_size == 0:
+        if len(tum_bam) < 1:
             sys.stderr.write('Did not find valid  bam for ' + bnids[0] + ' in PDX container trying PANCAN\n')
             (dl_cmd, tum_bam, tum_bai) = get_bam_name(bnids[0], src_cmd, 'PANCAN', obj)
             if len(tum_bam) < 1:
@@ -59,15 +59,31 @@ def annot_strelka_pipe(strelka_tools, pairs, config, ref_mnt):
                 exit(1)
         sys.stderr.write(date_time() + dl_cmd + '\n')
         subprocess.call(dl_cmd, shell=True)
+        # check again to ensure bam has > 0 file size
+        if os.stat(tum_bam).st_size == 0:
+            sys.stderr.write('bam for ' + bnids[0] + ' in PDX container had no contect,  trying PANCAN\n')
+            (dl_cmd, tum_bam, tum_bai) = get_bam_name(bnids[0], src_cmd, 'PANCAN', obj)
+            if len(tum_bam) < 1:
+                sys.stderr.write(date_time() + 'Could not find tumor bam ' + bnids[0] + '! Aborting\n')
+                exit(1)
+            sys.stderr.write(date_time() + dl_cmd + '\n')
 
         (dl_cmd, norm_bam, norm_bai) = get_bam_name(bnids[1], src_cmd, 'PANCAN', obj)
-        if len(norm_bam) < 1 or os.stat(norm_bam).st_size == 0:
+        if len(norm_bam) < 1:
             sys.stderr.write('Did not find valid bam for ' + bnids[1] + ' in PANCAN container trying PDX\n')
             (dl_cmd, norm_bam, norm_bai) = get_bam_name(bnids[1], src_cmd, 'PDX', obj)
             if len(norm_bam) < 1:
                 sys.stderr.write(date_time() + 'Could not find normal bam ' + bnids[1] + '! Aborting\n')
         sys.stderr.write(date_time() + dl_cmd + '\n')
         subprocess.call(dl_cmd, shell=True)
+        # check again to ensure bam has > 0 file size
+        if os.stat(norm_bam).st_size == 0:
+            sys.stderr.write('bam for ' + bnids[0] + ' in PANCAN container had no content,  trying PDX\n')
+            (dl_cmd, norm_bam, norm_bai) = get_bam_name(bnids[0], src_cmd, 'PDX', obj)
+            if len(norm_bam) < 1:
+                sys.stderr.write(date_time() + 'Could not find normal bam ' + bnids[0] + '! Aborting\n')
+                exit(1)
+            sys.stderr.write(date_time() + dl_cmd + '\n')
 
         check = run_strelka(strelka_tools, norm_bam, tum_bam, pair, threads, fasta)
         if check != 0:
