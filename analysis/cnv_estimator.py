@@ -23,7 +23,7 @@ def get_genes(bed):
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['tools']['samtools'], \
+    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['tools']['bedtools'], \
            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['refs']['capture']
 
 
@@ -47,17 +47,23 @@ def get_bam_name(bnid, src_cmd, cont, obj):
                 bai = fn
     return dl_cmd, bam, bai
 
+def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
+    for pair in pair_list:
+        (tum, norm) = pair.split('\t')
+
 
 def cnv_pipe(config_file, sample_pairs, ref_mnt):
     src_cmd = '. /home/ubuntu/.novarc;'
     job_list = []
-    (cont, obj, samtools, ana, ann, bed) = parse_config(config_file)
+    (cont, obj, bedtools, ana, ann, bed) = parse_config(config_file)
     bed = ref_mnt + '/' + bed
     bed_t1 = bed.replace('.bed', '_t1.bed')
     bed_t2 = bed.replace('.bed', '_t2.bed')
     pair_list = []
     t1_genes = get_genes(bed_t1)
     t2_genes = get_genes(bed_t2)
+    t1_suffix = '.t1.bedtools.coverage.txt'
+    t2_suffix = '.t2.bedtools.coverage.txt'
     # calc coverage for all gene capture regions
     for pairs in open(sample_pairs):
         pair_set = pairs.rstrip('\n').split('\t')
@@ -68,15 +74,19 @@ def cnv_pipe(config_file, sample_pairs, ref_mnt):
         job_list.append(norm_dl_cmd)
         job_manager(job_list, '8')
         job_list = []
-        job_list.append(samtools + ' bedcov ' + bed_t1 + ' ' + tum_bam + ' > ' + pair_set[1] + '.t1.sam.bedcov.txt;')
-        job_list.append(samtools + ' bedcov ' + bed_t2 + ' ' + tum_bam + ' > ' + pair_set[1] + '.t2.sam.bedcov.txt;')
-        job_list.append(samtools + ' bedcov ' + bed_t1 + ' ' + norm_bam + ' > ' + pair_set[2] + '.t1.sam.bedcov.txt;')
-        job_list.append(samtools + ' bedcov ' + bed_t2 + ' ' + norm_bam + ' > ' + pair_set[2] + '.t2.sam.bedcov.txt;')
+        job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + pair_set[1]
+                        + t1_suffix)
+        job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t2 + ' > ' + pair_set[1]
+                        + t2_suffix)
+        job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t1 + ' > ' + pair_set[2]
+                        + t1_suffix)
+        job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t2 + ' > ' + pair_set[2]
+                        + t2_suffix)
         job_manager(job_list, '8')
         cleanup = 'rm ' + tum_bam + ' ' + tum_bai + ' ' + norm_bam + ' ' + norm_bai + ';'
         subprocess.call(cleanup, shell=True)
     # process coverage files, assess cnv
-
+    calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix)
 
 if __name__ == "__main__":
     import argparse
