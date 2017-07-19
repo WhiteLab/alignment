@@ -99,7 +99,7 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
                 tn_ratio = float('-inf')
                 log2_ratio = float('-inf')
 
-            out.write('\t'.join((t1_genes[gene], gene, '2', str(tum_ct), str(norm_ct), str(tn_ratio), str(log2_ratio)))
+            out.write('\t'.join((t1_genes[gene], gene, '1', str(tum_ct), str(norm_ct), str(tn_ratio), str(log2_ratio)))
                       + '\n')
         sys.stderr.write(date_time() + 'Calculating tier 2 gene coverage ratios for ' + pair + '\n')
         for gene in t2_genes:
@@ -122,7 +122,7 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
                 tn_ratio = float('-inf')
                 log2_ratio = float('-inf')
 
-            out.write('\t'.join((t1_genes[gene], gene, '2', str(tum_ct), str(norm_ct), str(tn_ratio), str(log2_ratio)))
+            out.write('\t'.join((t2_genes[gene], gene, '2', str(tum_ct), str(norm_ct), str(tn_ratio), str(log2_ratio)))
                       + '\n')
         sys.stderr.write(date_time() + 'Completed estimating cnv for ' + pair + '\n')
         out.close()
