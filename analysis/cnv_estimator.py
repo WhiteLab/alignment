@@ -59,6 +59,7 @@ def get_gene_counts(ct_dict, tier, bnid, suffix):
 
 def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
     for pair in pair_list:
+        sys.stderr.write(date_time() + 'Collapsing reads for ' + pair + '\n')
         out = open(pair + '_cnv_estimate.txt', 'w')
         out.write('CHROM\tGENE\tTier\tTum Read ct\tNorm Read ct\tT/N ratio\tlog2 ratio\n')
         (tum, norm) = pair.split('\t')
@@ -75,6 +76,7 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
         get_gene_counts(cur, 't2', tum, t2_suffix)
         get_gene_counts(cur, 't1', norm, t1_suffix)
         get_gene_counts(cur, 't2', norm, t2_suffix)
+        sys.stderr.write(date_time() + 'Calculating tier 1 gene coverage ratios for ' + pair + '\n')
         for gene in t1_genes:
             (tum_ct, norm_ct, tum_total, norm_total) = (cur[tum]['t1'][gene], cur[norm]['t1'][gene],
                                                         cur[tum]['t1']['TOTAL'], cur[norm]['t1']['TOTAL'])
@@ -82,14 +84,32 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
             tn_ratio = tum_rf/norm_rf
             log2_ratio = log(tn_ratio, 2)
             out.write('\t'.join((t1_genes[gene], gene, '1', tum_ct, norm_ct, tn_ratio, log2_ratio)) + '\n')
+        sys.stderr.write(date_time() + 'Calculating tier 2 gene coverage ratios for ' + pair + '\n')
         for gene in t2_genes:
             (tum_ct, norm_ct, tum_total, norm_total) = (cur[tum]['t2'][gene], cur[norm]['t2'][gene],
                                                         cur[tum]['t2']['TOTAL'], cur[norm]['t2']['TOTAL'])
-            tum_rf, norm_rf = tum_ct/tum_total, norm_ct/norm_total
-            tn_ratio = tum_rf/norm_rf
-            log2_ratio = log(tn_ratio, 2)
-            out.write('\t'.join((t1_genes[gene], gene, '2', tum_ct, norm_ct, tn_ratio, log2_ratio)) + '\n')
+            tum_rf, norm_rf, tn_ratio, log2_ratio = 0, 0, 0, 0
+            if tum_total != 0:
+                tum_rf = tum_ct/tum_total
+            if norm_total != 0:
+                norm_rf = norm_ct / norm_total
+            if tum_rf > 0 and norm_rf > 0:
+                tn_ratio = tum_rf / norm_rf
+                log2_ratio = log(tn_ratio, 2)
+            elif tum_rf == norm_rf:
+                tn_ratio = 1
+            elif tum_rf > 0 and norm_rf == 0:
+                tn_ratio = float('inf')
+                log2_ratio = float('inf')
+            elif tum_rf == 0 and norm_rf > 0:
+                tn_ratio = float('-inf')
+                log2_ratio = float('-inf')
 
+            out.write('\t'.join((t1_genes[gene], gene, '2', str(tum_ct), str(norm_ct), str(tn_ratio), str(log2_ratio)))
+                      + '\n')
+        sys.stderr.write(date_time() + 'Completed estimating cnv for ' + pair + '\n')
+        out.close()
+    return 0
 
 
 def cnv_pipe(config_file, sample_pairs, ref_mnt):
@@ -106,12 +126,14 @@ def cnv_pipe(config_file, sample_pairs, ref_mnt):
     t2_suffix = '.t2.bedtools.coverage.txt'
     # calc coverage for all gene capture regions
     for pairs in open(sample_pairs):
+
         pair_set = pairs.rstrip('\n').split('\t')
         pair_list.append('\t'.join((pair_set[1], pair_set[2])))
         (tum_dl_cmd, tum_bam, tum_bai) = get_bam_name(pair_set[1], src_cmd, cont, obj)
         (norm_dl_cmd, norm_bam, norm_bai) = get_bam_name(pair_set[2], src_cmd, cont, obj)
         job_list.append(tum_dl_cmd)
         job_list.append(norm_dl_cmd)
+        sys.stderr.write(date_time() + tum_dl_cmd + norm_dl_cmd + '\n')
         job_manager(job_list, '8')
         job_list = []
         job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + pair_set[1]
@@ -122,11 +144,15 @@ def cnv_pipe(config_file, sample_pairs, ref_mnt):
                         + t1_suffix)
         job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t2 + ' > ' + pair_set[2]
                         + t2_suffix)
+        sys.stderr.write(date_time() + 'Calculating read depth for ' + pair_set[0] + '\n')
         job_manager(job_list, '8')
         cleanup = 'rm ' + tum_bam + ' ' + tum_bai + ' ' + norm_bam + ' ' + norm_bai + ';'
+        sys.stderr.write('Removing bams for ' + pair_set[0])
         subprocess.call(cleanup, shell=True)
     # process coverage files, assess cnv
+    sys.stderr.write(date_time() + 'Collapsing read counts in to tiers and gene\n')
     calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix)
+    sys.stderr.write(date_time() + 'Fin!\n')
 
 if __name__ == "__main__":
     import argparse
