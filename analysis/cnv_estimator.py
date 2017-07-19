@@ -7,7 +7,7 @@ import re
 import subprocess
 from utility.job_manager import job_manager
 import json
-import pdb
+from math import log
 
 
 def get_genes(bed):
@@ -76,7 +76,20 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
         get_gene_counts(cur, 't1', norm, t1_suffix)
         get_gene_counts(cur, 't2', norm, t2_suffix)
         for gene in t1_genes:
-            tum_rf = cur[tum]['t1'][gene]/cur[tum]['t1']['TOTAL']
+            (tum_ct, norm_ct, tum_total, norm_total) = (cur[tum]['t1'][gene], cur[norm]['t1'][gene],
+                                                        cur[tum]['t1']['TOTAL'], cur[norm]['t1']['TOTAL'])
+            tum_rf, norm_rf = tum_ct/tum_total, norm_ct/norm_total
+            tn_ratio = tum_rf/norm_rf
+            log2_ratio = log(tn_ratio, 2)
+            out.write('\t'.join((t1_genes[gene], gene, '1', tum_ct, norm_ct, tn_ratio, log2_ratio)) + '\n')
+        for gene in t2_genes:
+            (tum_ct, norm_ct, tum_total, norm_total) = (cur[tum]['t2'][gene], cur[norm]['t2'][gene],
+                                                        cur[tum]['t2']['TOTAL'], cur[norm]['t2']['TOTAL'])
+            tum_rf, norm_rf = tum_ct/tum_total, norm_ct/norm_total
+            tn_ratio = tum_rf/norm_rf
+            log2_ratio = log(tn_ratio, 2)
+            out.write('\t'.join((t1_genes[gene], gene, '2', tum_ct, norm_ct, tn_ratio, log2_ratio)) + '\n')
+
 
 
 def cnv_pipe(config_file, sample_pairs, ref_mnt):
