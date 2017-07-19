@@ -115,7 +115,6 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
 
 def cnv_pipe(config_file, sample_pairs, ref_mnt, cont2):
     src_cmd = '. /home/ubuntu/.novarc;'
-    job_list = []
     (cont, obj, bedtools, ana, ann, bed) = parse_config(config_file)
     bed = ref_mnt + '/' + bed
     bed_t1 = bed.replace('.bed', '_t1.bed')
@@ -127,7 +126,7 @@ def cnv_pipe(config_file, sample_pairs, ref_mnt, cont2):
     t2_suffix = '.t2.bedtools.coverage.txt'
     # calc coverage for all gene capture regions
     for pairs in open(sample_pairs):
-
+        job_list = []
         pair_set = pairs.rstrip('\n').split('\t')
         pair_list.append('\t'.join((pair_set[1], pair_set[2])))
         (tum_dl_cmd, tum_bam, tum_bai) = get_bam_name(pair_set[1], src_cmd, cont, obj)
