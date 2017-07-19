@@ -135,23 +135,24 @@ def cnv_pipe(config_file, sample_pairs, ref_mnt, cont2):
         subprocess.call(tum_dl_cmd, shell=True)
         # ensure bam is complete, otherwise try a different location
         if not (os.path.isfile(tum_bam) and os.path.getsize(tum_bam) > 0):
-            sys.stderr.write(date_time() + 'Download failed, trying backup container\n')
+            sys.stderr.write(date_time() + 'Download failed for ' + pair_set[1] + ', trying backup container\n')
             (tum_dl_cmd, tum_bam, tum_bai) = get_bam_name(pair_set[1], src_cmd, cont2, obj)
             sys.stderr.write(date_time() + tum_dl_cmd + '\n')
             subprocess.call(tum_dl_cmd, shell=True)
             if not (os.path.isfile(tum_bam) and os.path.getsize(tum_bam) > 0):
                 sys.stderr.write(date_time() + 'Suitable bam for ' + pair_set[1] + ' not found. Check parameters!\n')
-
+                exit(1)
         (norm_dl_cmd, norm_bam, norm_bai) = get_bam_name(pair_set[2], src_cmd, cont, obj)
         subprocess.call(norm_dl_cmd, shell=True)
         # ensure bam is complete, otherwise try a different location
         if not (os.path.isfile(norm_bam) and os.path.getsize(norm_bam) > 0):
-            sys.stderr.write(date_time() + 'Download failed, trying backup container\n')
+            sys.stderr.write(date_time() + 'Download failed for ' + pair_set[2] + ', trying backup container\n')
             (norm_dl_cmd, norm_bam, norm_bai) = get_bam_name(pair_set[2], src_cmd, cont2, obj)
             sys.stderr.write(date_time() + norm_dl_cmd + '\n')
-            subprocess.call(tum_dl_cmd, shell=True)
+            subprocess.call(norm_dl_cmd, shell=True)
             if not (os.path.isfile(norm_bam) and os.path.getsize(norm_bam) > 0):
                 sys.stderr.write(date_time() + 'Suitable bam for ' + pair_set[2] + ' not found. Check parameters!\n')
+                exit(1)
 
         job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + pair_set[1]
                         + t1_suffix)
