@@ -61,10 +61,11 @@ def get_gene_counts(ct_dict, tier, bnid, suffix):
 def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
     for pair in pair_list:
         sys.stderr.write(date_time() + 'Collapsing reads for ' + pair + '\n')
-        out = open(pair + '_cnv_estimate.txt', 'w')
-        out.write('CHROM\tGENE\tTier\tTum Read ct\tNorm Read ct\tT/N ratio\tlog2 ratio\n')
         (tum, norm) = pair.split('\t')
         pair = pair.replace('\t', '_')
+        out = open(pair + '_cnv_estimate.txt', 'w')
+        out.write('CHROM\tGENE\tTier\tTum Read ct\tNorm Read ct\tT/N ratio\tlog2 ratio\n')
+
         cur = {tum: {}, norm: {}}
         cur[tum]['t1'] = {key: 0 for key in t1_genes.keys()}
         cur[tum]['t1']['TOTAL'] = 0
