@@ -5,6 +5,7 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 import re
 import subprocess
+import os
 from utility.job_manager import job_manager
 import json
 from math import log
@@ -112,7 +113,7 @@ def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
     return 0
 
 
-def cnv_pipe(config_file, sample_pairs, ref_mnt):
+def cnv_pipe(config_file, sample_pairs, ref_mnt, cont2):
     src_cmd = '. /home/ubuntu/.novarc;'
     job_list = []
     (cont, obj, bedtools, ana, ann, bed) = parse_config(config_file)
@@ -130,12 +131,28 @@ def cnv_pipe(config_file, sample_pairs, ref_mnt):
         pair_set = pairs.rstrip('\n').split('\t')
         pair_list.append('\t'.join((pair_set[1], pair_set[2])))
         (tum_dl_cmd, tum_bam, tum_bai) = get_bam_name(pair_set[1], src_cmd, cont, obj)
+        sys.stderr.write(date_time() + tum_dl_cmd + '\n')
+        subprocess.call(tum_dl_cmd, shell=True)
+        # ensure bam is complete, otherwise try a different location
+        if not (os.path.isfile(tum_bam) and os.path.getsize(tum_bam) > 0):
+            sys.stderr.write(date_time() + 'Download failed, trying backup container\n')
+            (tum_dl_cmd, tum_bam, tum_bai) = get_bam_name(pair_set[1], src_cmd, cont2, obj)
+            sys.stderr.write(date_time() + tum_dl_cmd + '\n')
+            subprocess.call(tum_dl_cmd, shell=True)
+            if not (os.path.isfile(tum_bam) and os.path.getsize(tum_bam) > 0):
+                sys.stderr.write(date_time() + 'Suitable bam for ' + pair_set[1] + ' not found. Check parameters!\n')
+
         (norm_dl_cmd, norm_bam, norm_bai) = get_bam_name(pair_set[2], src_cmd, cont, obj)
-        job_list.append(tum_dl_cmd)
-        job_list.append(norm_dl_cmd)
-        sys.stderr.write(date_time() + tum_dl_cmd + norm_dl_cmd + '\n')
-        job_manager(job_list, '8')
-        job_list = []
+        subprocess.call(norm_dl_cmd, shell=True)
+        # ensure bam is complete, otherwise try a different location
+        if not (os.path.isfile(norm_bam) and os.path.getsize(norm_bam) > 0):
+            sys.stderr.write(date_time() + 'Download failed, trying backup container\n')
+            (norm_dl_cmd, norm_bam, norm_bai) = get_bam_name(pair_set[2], src_cmd, cont2, obj)
+            sys.stderr.write(date_time() + norm_dl_cmd + '\n')
+            subprocess.call(tum_dl_cmd, shell=True)
+            if not (os.path.isfile(norm_bam) and os.path.getsize(norm_bam) > 0):
+                sys.stderr.write(date_time() + 'Suitable bam for ' + pair_set[2] + ' not found. Check parameters!\n')
+
         job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + pair_set[1]
                         + t1_suffix)
         job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t2 + ' > ' + pair_set[1]
@@ -164,11 +181,14 @@ if __name__ == "__main__":
                         help='JSON config file with tool and ref locations')
     parser.add_argument('-r', '--reference', action='store', dest='ref_mnt',
                         help='Directory references are mounted, i.e. /mnt/cinder/REFS_XXX')
+    parser.add_argument('-c', '--cont2', action='store', dest='cont2',
+                        help='Backup container in case the first location does not work')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file, ref_mnt) = (inputs.sample_pairs, inputs.config_file, inputs.ref_mnt)
-    cnv_pipe(config_file, sample_pairs, ref_mnt)
+    (sample_pairs, config_file, ref_mnt, cont2) = (inputs.sample_pairs, inputs.config_file, inputs.ref_mnt,
+                                                   inputs.cont2)
+    cnv_pipe(config_file, sample_pairs, ref_mnt, cont2)
