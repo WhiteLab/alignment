@@ -7,18 +7,19 @@ import re
 import subprocess
 from utility.job_manager import job_manager
 import json
+import pdb
 
 
 def get_genes(bed):
     temp = {}
-    glist = []
+    gdict = {}
     for line in open(bed):
         info = line.rstrip('\n').split('\t')
         m = re.match('(\S+)_chr.*', info[-1])
         if m.group(1) not in temp:
             temp[m.group(1)] = 1
-            glist.append(m.group(1))
-    return glist
+            gdict[m.group(1)] = info[0]
+    return gdict
 
 
 def parse_config(config_file):
@@ -47,9 +48,35 @@ def get_bam_name(bnid, src_cmd, cont, obj):
                 bai = fn
     return dl_cmd, bam, bai
 
+
+def get_gene_counts(ct_dict, tier, bnid, suffix):
+    for entry in open(bnid + suffix):
+        data = entry.rstrip('\n').split('\t')
+        g = re.match(r'(\S+)_chr', data[3])
+        ct_dict[bnid][tier]['TOTAL'] += float(data[4])
+        ct_dict[bnid][tier][g.group(1)] += int(data[4])
+
+
 def calc_tn_cov_ratios(pair_list, t1_genes, t2_genes, t1_suffix, t2_suffix):
     for pair in pair_list:
+        out = open(pair + '_cnv_estimate.txt', 'w')
+        out.write('CHROM\tGENE\tTier\tTum Read ct\tNorm Read ct\tT/N ratio\tlog2 ratio\n')
         (tum, norm) = pair.split('\t')
+        cur = {tum: {}, norm: {}}
+        cur[tum]['t1'] = {key: 0 for key in t1_genes.keys()}
+        cur[tum]['t1']['TOTAL'] = 0
+        cur[tum]['t2'] = {key: 0 for key in t2_genes.keys()}
+        cur[tum]['t2']['TOTAL'] = 0
+        cur[norm]['t1'] = {key: 0 for key in t1_genes.keys()}
+        cur[norm]['t1']['TOTAL'] = 0
+        cur[norm]['t2'] = {key: 0 for key in t2_genes.keys()}
+        cur[norm]['t2']['TOTAL'] = 0
+        get_gene_counts(cur, 't1', tum, t1_suffix)
+        get_gene_counts(cur, 't2', tum, t2_suffix)
+        get_gene_counts(cur, 't1', norm, t1_suffix)
+        get_gene_counts(cur, 't2', norm, t2_suffix)
+        for gene in t1_genes:
+            tum_rf = cur[tum]['t1'][gene]/cur[tum]['t1']['TOTAL']
 
 
 def cnv_pipe(config_file, sample_pairs, ref_mnt):
