@@ -16,17 +16,34 @@ def get_bam_name(bnid, src_cmd, cont, obj):
     bam = ''
     bai = ''
     dl_cmd = ''
+    bam2 = []
+    bai2 = []
+    dl_cmd2 = []
+    # flag to see if merged found, if not, use rmdup singleton files
+    mflag = 0
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
-        # test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
         test = re.search(bnid + '.merged.final.ba[m|i]$', fn) or re.search(bnid + '.merged.final.bam.bai$', fn)
         if test:
             dl_cmd += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
+            mflag = 1
             if fn[-3:] == 'bam':
                 bam = fn
             else:
                 bai = fn
-    return dl_cmd, bam, bai
+        test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
+        if test:
+            dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
+            if fn[-3:] == 'bam':
+                bam = fn
+                bam2.append(bam)
+            else:
+                bai = fn
+                bai2.append(bai)
+    if mflag == 1:
+        return dl_cmd, bam, bai
+    else:
+        return dl_cmd2, bam2, bai2
 
 
 def calc_coverage(bedtools2_tool, sample, bedfile, cont, obj):
@@ -35,10 +52,18 @@ def calc_coverage(bedtools2_tool, sample, bedfile, cont, obj):
     for bnid in open(sample):
         bnid = bnid.rstrip('\n')
         (dl_cmd, bam, bai) = get_bam_name(bnid, src_cmd, cont, obj)
-        bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam + ' -b ' + bedfile + ' > ' + bnid + '.hist;'
-        cleanup = 'rm ' + bam + ' ' + bai + ';'
-        final = dl_cmd + bed_cmd + cleanup
-        job_list.append(final)
+        if isinstance(bam, basestring):
+            bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam + ' -b ' + bedfile + ' > ' + bnid + '.hist;'
+            cleanup = 'rm ' + bam + ' ' + bai + ';'
+            final = dl_cmd + bed_cmd + cleanup
+            job_list.append(final)
+        else:
+            for i in xrange(len(bam)):
+                bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam[i] + ' -b ' + bedfile + ' > ' + bnid \
+                          + str(i) + '.hist;'
+                cleanup = 'rm ' + bam[i] + ' ' + bai[i] + ';'
+                final = dl_cmd[i] + bed_cmd + cleanup
+                job_list.append(final)
     job_manager(job_list, '8')
 
 if __name__ == "__main__":
