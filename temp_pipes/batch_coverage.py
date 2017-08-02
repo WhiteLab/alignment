@@ -21,6 +21,8 @@ def get_bam_name(bnid, src_cmd, cont, obj):
     dl_cmd2 = []
     # flag to see if merged found, if not, use rmdup singleton files
     mflag = 0
+    dl_ind = 0
+    dl_ct = 0
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
         test = re.search(bnid + '.merged.final.ba[m|i]$', fn) or re.search(bnid + '.merged.final.bam.bai$', fn)
@@ -33,13 +35,23 @@ def get_bam_name(bnid, src_cmd, cont, obj):
                 bai = fn
         test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
         if test:
-            dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
             if fn[-3:] == 'bam':
                 bam = fn
                 bam2.append(bam)
+                if dl_ct % 2:
+                    dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
+                else:
+                    dl_cmd2[dl_ind] += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
+                    dl_ind += 1
             else:
                 bai = fn
                 bai2.append(bai)
+                if dl_ct % 2:
+                    dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
+                else:
+                    dl_cmd2[dl_ind] += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
+                    dl_ind += 1
+            dl_ct += 1
     if mflag == 1:
         return dl_cmd, bam, bai
     else:
@@ -60,7 +72,7 @@ def calc_coverage(bedtools2_tool, sample, bedfile, cont, obj):
         else:
             for i in xrange(len(bam)):
                 bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam[i] + ' -b ' + bedfile + ' > ' + bnid \
-                          + str(i) + '.hist;'
+                          + '_' + str(i) + '.hist;'
                 cleanup = 'rm ' + bam[i] + ' ' + bai[i] + ';'
                 final = dl_cmd[i] + bed_cmd + cleanup
                 job_list.append(final)
