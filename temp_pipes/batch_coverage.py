@@ -42,7 +42,7 @@ def get_bam_name(bnid, src_cmd, cont, obj):
             else:
                 bai = fn
                 bai2.append(bai)
-            if not dl_ct % 2:
+            if not (dl_ct % 2 == 0):
                 dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
             else:
                 dl_cmd2[dl_ind] += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
