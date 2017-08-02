@@ -22,7 +22,7 @@ def get_bam_name(bnid, src_cmd, cont, obj):
     # flag to see if merged found, if not, use rmdup singleton files
     mflag = 0
     dl_ind = 0
-    dl_ct = 0
+    dl_ct = 1
     for fn in re.findall('(.*)\n', flist):
         # depending on software used to index, .bai extension may follow bam
         test = re.search(bnid + '.merged.final.ba[m|i]$', fn) or re.search(bnid + '.merged.final.bam.bai$', fn)
@@ -38,19 +38,15 @@ def get_bam_name(bnid, src_cmd, cont, obj):
             if fn[-3:] == 'bam':
                 bam = fn
                 bam2.append(bam)
-                if dl_ct % 2:
-                    dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
-                else:
-                    dl_cmd2[dl_ind] += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
-                    dl_ind += 1
+
             else:
                 bai = fn
                 bai2.append(bai)
-                if dl_ct % 2:
-                    dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
-                else:
-                    dl_cmd2[dl_ind] += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
-                    dl_ind += 1
+            if not dl_ct % 2:
+                dl_cmd2.append(src_cmd + 'swift download ' + cont + ' ' + fn + ';')
+            else:
+                dl_cmd2[dl_ind] += src_cmd + 'swift download ' + cont + ' ' + fn + ';'
+                dl_ind += 1
             dl_ct += 1
     if mflag == 1:
         return dl_cmd, bam, bai
