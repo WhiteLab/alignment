@@ -9,7 +9,7 @@ import argparse
 import json
 from utility.date_time import date_time
 import subprocess
-from utility.download_from_swift import download_from_swift
+from utility.find_project_files import find_project_files
 from pipeline import Pipeline
 from utility.log import log
 
@@ -27,7 +27,6 @@ if len(sys.argv) == 1:
 
 inputs = parser.parse_args()
 fh = open(inputs.fn, 'r')
-src_cmd = '. ~/.novarc;'
 ref_mnt = inputs.ref_mnt
 
 
@@ -56,14 +55,14 @@ for line in fh:
     log(loc, date_time() + 'Initializing scratch directory for ' + bid + '\n')
     # All files for current bid to be stored in cwd
 
-    obj1 = 'RAW/' + bid + '/' + bid + '_'
+    sample_prefix = 'RAW/' + bid + '/' + bid + '_'
     cur_dir = cwd + '/RAW/' + bid
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
     lane_status = {}
     for lane in lane_csv.split(', '):
         lane_status[lane] = 'Initializing'
-        swift_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + obj1 + lane
+        swift_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + sample_prefix + lane
         log(loc, date_time() + 'Getting sequence files for sample ' + lane + '\n' + swift_cmd + '\n')
         try:
             contents = subprocess.check_output(swift_cmd, shell=True)
@@ -84,7 +83,7 @@ for line in fh:
 
         # attempt to download sequencing files
         try:
-            download_from_swift(cont, prefix)
+            find_project_files(cont, prefix)
         except:
             log(loc, date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
             lane_status[lane] = 'Download failed'
