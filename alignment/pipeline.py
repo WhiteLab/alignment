@@ -23,7 +23,7 @@ from parse_qc import parse_qc
 
 
 class Pipeline:
-    def __init__(self, end1, end2, seqtype, json_config, ref_mnt):
+    def __init__(self, end1, end2, seqtype, json_config):
         self.config_data = json.loads(open(json_config, 'r').read())
         self.end1 = end1
         self.end2 = end2
@@ -34,7 +34,6 @@ class Pipeline:
             s = re.match('(^\S+)_\D*\d\.f\w*q\.gz$', self.end1)
             self.sample = s.group(1)
         hgac_ID = self.sample.split("_")
-        self.ref_mnt = ref_mnt
         self.seqtype = seqtype
         self.cflag = 'y'
         if self.seqtype == 'capture':
@@ -45,13 +44,13 @@ class Pipeline:
         self.pdxflag = self.config_data['params']['pdxflag']
         if self.pdxflag == 'Y':
             self.mmu_filter = self.config_data['tools']['mouse_filter']
-            self.mmu_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_bwa']
-            self.hsa_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_bwa']
-            self.mmu_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_samtools']
-            self.hsa_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_samtools']
+            self.mmu_bwa_ref = self.config_data['refs']['mmu_bwa']
+            self.hsa_bwa_ref =  self.config_data['refs']['hsa_bwa']
+            self.mmu_samtools_ref = self.config_data['refs']['mmu_samtools']
+            self.hsa_samtools_ref = self.config_data['refs']['hsa_samtools']
         else:
-            self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
-            self.bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['bwa']
+            self.samtools_ref = self.config_data['refs']['samtools']
+            self.bwa_ref = self.config_data['refs']['bwa']
 
         # flag for whether to use novosort rmdup capabilities
         self.use_nova_flag = self.config_data['params']['novaflag']
@@ -60,7 +59,7 @@ class Pipeline:
         self.qc_stats = self.config_data['tools']['qc_stats']
         self.cont = self.config_data['refs']['cont']
         self.obj = self.config_data['refs']['obj']
-        self.bed_ref = self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
+        self.bed_ref = self.config_data['refs'][self.seqtype]
         self.bedtools2_tool = self.config_data['tools']['bedtools']
         self.picard_tmp = 'picard_tmp'
         self.novosort = self.config_data['tools']['novosort']
@@ -257,8 +256,6 @@ def main():
                         help='Type of sequencing peformed.  Likely choices are genome, exome, and capture')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file containing tool and reference locations')
-    parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
-                        help='Drive mount location.  Example would be /mnt/cinder/REFS_XXX')
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -269,8 +266,7 @@ def main():
     end2 = inputs.end2
     seqtype = inputs.seqtype
     config_file = inputs.config_file
-    ref_mnt = inputs.ref_mnt
-    Pipeline(end1, end2, seqtype, config_file, ref_mnt)
+    Pipeline(end1, end2, seqtype, config_file)
 
 
 if __name__ == "__main__":

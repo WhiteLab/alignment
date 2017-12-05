@@ -18,8 +18,6 @@ parser.add_argument('-f', '--file', action='store', dest='fn',
                     help='File with bionimbus ID, seqtype and sample lane list')
 parser.add_argument('-j', '--json', action='store', dest='config_file',
                     help='JSON config file with tools, references, and data storage locations')
-parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
-                    help='Reference drive mount location.  Example would be /mnt/cinder/REFS_XXX')
 
 if len(sys.argv) == 1:
     parser.print_help()
@@ -27,15 +25,14 @@ if len(sys.argv) == 1:
 
 inputs = parser.parse_args()
 fh = open(inputs.fn, 'r')
-ref_mnt = inputs.ref_mnt
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config']
+    return config_data['refs']['project'], config_data['refs']['align'], config_data['refs']['config']
 
 
-(cont, obj, pipe_cfg) = parse_config(inputs.config_file)
+(project, align_dir, pipe_cfg) = parse_config(inputs.config_file)
 
 for line in fh:
     line = line.rstrip('\n')
@@ -62,7 +59,7 @@ for line in fh:
     lane_status = {}
     for lane in lane_csv.split(', '):
         lane_status[lane] = 'Initializing'
-        swift_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + sample_prefix + lane
+        swift_cmd = src_cmd + 'swift list ' + project + ' --prefix ' + sample_prefix + lane
         log(loc, date_time() + 'Getting sequence files for sample ' + lane + '\n' + swift_cmd + '\n')
         try:
             contents = subprocess.check_output(swift_cmd, shell=True)
@@ -83,7 +80,7 @@ for line in fh:
 
         # attempt to download sequencing files
         try:
-            find_project_files(cont, prefix)
+            find_project_files(project, prefix)
         except:
             log(loc, date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
             lane_status[lane] = 'Download failed'
@@ -113,7 +110,7 @@ for line in fh:
             # if pipeline fails, abandon process as a larger error might come up
         log(loc, date_time() + 'Running pipeline process for lane ' + lane + '\n')
         # check class status flag
-        p = Pipeline(end1, end2, seqtype, pipe_cfg, ref_mnt)
+        p = Pipeline(end1, end2, seqtype, pipe_cfg)
         if p.status != 0:
             log(loc, date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(
                 p.status) + " \n")
