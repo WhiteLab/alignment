@@ -7,8 +7,8 @@ from subprocess import check_output
 from date_time import date_time
 
 
-def find_project_files(project, subdir):
-    find_cmd = "find " + project + "/" + subdir
+def find_project_files(file_dir, file_prefix):
+    find_cmd = "find " + file_dir + " -name " + file_prefix + '*'
     sys.stderr.write(date_time() + find_cmd + "\n")
     try:
         results = check_output(find_cmd, shell=True, stderr=subprocess.PIPE)
@@ -24,14 +24,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description='Simple download module to get files from swift.  Can use prefix or whole object name')
-    parser.add_argument('-p', '--project', action='store', dest='project', help='Project directory')
-    parser.add_argument('-s', '--sub-directory', action='store', dest='subdir',
-                        help='File subdirectory within project')
+    parser.add_argument('-d', '--file-dir', action='store', dest='file_dir', help='Directory with relevant files')
+    parser.add_argument('-p', '--file-prefix', action='store', dest='file_prefix',
+                        help='Prefix of relevant files')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (project, subdir) = (inputs.project, inputs.subdir)
-    find_project_files(project, subdir)
+    (file_dir, file_prefix) = (inputs.file_dir, inputs.file_prefix)
+    find_project_files(file_dir, file_prefix)

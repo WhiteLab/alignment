@@ -37,7 +37,7 @@ def parse_config(config_file):
 for line in fh:
     line = line.rstrip('\n')
     (bid, seqtype, lane_csv) = line.split('\t')
-    cwd = ref_mnt + '/SCRATCH'
+    cwd = '/cephfs/PROJECTS/' + project
     check_dir = os.path.isdir(cwd)
     if not check_dir:
         subprocess.check_output('mkdir ' + cwd, shell=True)
@@ -46,7 +46,7 @@ for line in fh:
     except:
         sys.stderr.write(
             date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this '
-                                                            'sample set\n')
+            'sample set\n')
         exit(1)
     loc = cwd[:-7] + bid + '.run.log'
     log(loc, date_time() + 'Initializing scratch directory for ' + bid + '\n')
@@ -59,38 +59,33 @@ for line in fh:
     lane_status = {}
     for lane in lane_csv.split(', '):
         lane_status[lane] = 'Initializing'
-        swift_cmd = src_cmd + 'swift list ' + project + ' --prefix ' + sample_prefix + lane
-        log(loc, date_time() + 'Getting sequence files for sample ' + lane + '\n' + swift_cmd + '\n')
+        seq_dir = 'RAW/' + bid
+        file_prefix = bid + '_' + lane
+        (contents, seqfile, sf1, sf2, end1, end2) = ('', [], '', '', '', '')
+        # attempt to find sequencing files
         try:
-            contents = subprocess.check_output(swift_cmd, shell=True)
-        except:
-            log(loc, date_time() + 'Can\'t find sequencing files for ' + lane + ' skipping!\n')
-            continue
-
-        lane_status[lane] = 'Running'
-        # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order -
-        # standard file naming should work with this
-        seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
-        sf1 = seqfile[0]
-        end1 = os.path.basename(sf1)
-        sf2 = seqfile[1]
-        end2 = os.path.basename(sf2)
-        lane_status[lane] = 'Downloading'
-        prefix = 'RAW/' + bid + '/' + bid + '_' + lane
-
-        # attempt to download sequencing files
-        try:
-            find_project_files(project, prefix)
+            contents = find_project_files(seq_dir, file_prefix)
+            lane_status[lane] = 'Running'
+            # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order -
+            # standard file naming should work with this
+            seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
+            sf1 = seqfile[0]
+            end1 = os.path.basename(sf1)
+            sf2 = seqfile[1]
+            end2 = os.path.basename(sf2)
         except:
             log(loc, date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
-            lane_status[lane] = 'Download failed'
+            lane_status[lane] = 'File search failed'
             continue
-            # pipeline needs to be run in same directory as sequencing files
+
+        lane_status[lane] = 'Searching'
+
+        # pipeline needs to be run in same directory as sequencing files
 
         if os.path.isfile(cur_dir + '/' + end1) and os.path.isfile(cur_dir + '/' + end2):
-            lane_status[lane] = 'Sequencing file download successful'
+            lane_status[lane] = 'Sequencing file found successfully'
         else:
-            lane_status[lane] = 'Sequencing file download failed'
+            lane_status[lane] = 'Sequencing file not found'
             log(loc, lane + '\t' + lane_status[lane] + '\n')
             exit(3)
 
