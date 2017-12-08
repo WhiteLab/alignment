@@ -2,7 +2,7 @@
 
 import glob
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 from subprocess import call
 from date_time import date_time

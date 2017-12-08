@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 import re
 from utility.date_time import date_time
-from cutadapter import cutadapter
-from bwa_mem_pe import bwa_mem_pe
-from novosort_sort_pe import novosort_sort_pe
-from filter_wrap import filter_wrap
-from picard_rmdup import picard_rmdup
-from picard_insert_size import picard_insert_size
-from flagstats import flagstats
-import coverage
+from alignment.cutadapter import cutadapter
+from alignment.bwa_mem_pe import bwa_mem_pe
+from alignment.novosort_sort_pe import novosort_sort_pe
+from alignment.filter_wrap import filter_wrap
+from alignment.picard_rmdup import picard_rmdup
+from alignment.picard_insert_size import picard_insert_size
+from alignment.flagstats import flagstats
+from alignment.coverage import *
 from subprocess import call
 import subprocess
 import json
 from utility.log import log
-from parse_qc import parse_qc
+from alignment.parse_qc import parse_qc
 
 
 class Pipeline:
@@ -209,10 +209,12 @@ class Pipeline:
 
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
-        method = getattr(coverage, (self.seqtype + '_coverage'))
         # run last since this step slowest of the last
         wait_flag = 1
-        method(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
+        if self.seqtype != 'genome':
+            exome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
+        else:
+            genome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
         log(self.loc, date_time() + 'Checking outputs and uploading results\n')
         # check to see if last expected files have been generated suffix
         self.check_outputs()

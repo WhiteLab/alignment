@@ -5,7 +5,7 @@ import os
 import signal
 from vep_subsitution_report import gen_report as gen_snv_report
 from vep_indel_report import gen_report as gen_indel_report
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 import subprocess

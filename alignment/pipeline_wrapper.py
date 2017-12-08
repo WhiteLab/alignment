@@ -2,7 +2,7 @@
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 import re
 import argparse

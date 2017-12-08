@@ -4,7 +4,7 @@ import sys
 import os
 import subprocess
 import re
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.job_manager import job_manager
 from utility.date_time import date_time
 
