@@ -10,7 +10,6 @@ from utility.log import log
 from alignment.fastqc import fastqc
 import time
 
-
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     (cutadapt_tool, fastqc_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim, threads) = (

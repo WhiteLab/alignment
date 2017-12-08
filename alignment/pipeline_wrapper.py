@@ -2,7 +2,7 @@
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/')
 import os
 import re
 import argparse
@@ -10,8 +10,7 @@ import json
 from utility.date_time import date_time
 import subprocess
 from utility.find_project_files import find_project_files
-from pipeline import Pipeline
-from utility.log import log
+from subprocess import call
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f', '--file', action='store', dest='fn',
@@ -29,18 +28,17 @@ fh = open(inputs.fn, 'r')
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['project'], config_data['refs']['align'], config_data['refs']['config']
+    return config_data['refs']['project'], config_data['refs']['align'], config_data['refs']['config'], \
+           config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['align_pipe']
 
 
-(project, align_dir, pipe_cfg) = parse_config(inputs.config_file)
-
+(project, align_dir, pipe_cfg, cores, mem, align_pipe) = parse_config(inputs.config_file)
+cwd = '/cephfs/PROJECTS/' + project
+check_dir = os.path.isdir(cwd)
 for line in fh:
     line = line.rstrip('\n')
     (bid, seqtype, lane_csv) = line.split('\t')
-    cwd = '/cephfs/PROJECTS/' + project
-    check_dir = os.path.isdir(cwd)
-    if not check_dir:
-        subprocess.check_output('mkdir ' + cwd, shell=True)
+
     try:
         os.chdir(cwd)
     except:
@@ -48,8 +46,6 @@ for line in fh:
             date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this '
             'sample set\n')
         exit(1)
-    loc = cwd[:-7] + bid + '.run.log'
-    log(loc, date_time() + 'Initializing scratch directory for ' + bid + '\n')
     # All files for current bid to be stored in cwd
 
     sample_prefix = 'RAW/' + bid + '/' + bid + '_'
@@ -61,63 +57,31 @@ for line in fh:
         lane_status[lane] = 'Initializing'
         seq_dir = 'RAW/' + bid
         file_prefix = bid + '_' + lane
-        (contents, seqfile, sf1, sf2, end1, end2) = ('', [], '', '', '', '')
+        (contents, seqfile, sf1, sf2) = ('', [], '', '')
         # attempt to find sequencing files
         try:
+            sys.stderr.write(date_time() + 'Searching for sequencing files related to ' + lane + '\n')
             contents = find_project_files(seq_dir, file_prefix)
-            lane_status[lane] = 'Running'
-            # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order -
+            # sequencing files found in pairs using simple iterator, as find gives files in alphanumeric order -
             # standard file naming should work with this
             seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
             sf1 = seqfile[0]
-            end1 = os.path.basename(sf1)
             sf2 = seqfile[1]
-            end2 = os.path.basename(sf2)
         except:
-            log(loc, date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
-            lane_status[lane] = 'File search failed'
+            sys.stderr.write(date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
             continue
 
-        lane_status[lane] = 'Searching'
-
-        # pipeline needs to be run in same directory as sequencing files
-
-        if os.path.isfile(cur_dir + '/' + end1) and os.path.isfile(cur_dir + '/' + end2):
-            lane_status[lane] = 'Sequencing file found successfully'
-        else:
-            lane_status[lane] = 'Sequencing file not found'
-            log(loc, lane + '\t' + lane_status[lane] + '\n')
-            exit(3)
-
+        # Create sbatch script and submit
+        #p = Pipeline(end1, end2, seqtype, pipe_cfg)
+        # batch params $cores $mem $pipeline $f1 $f2 $t $j
+        job_log = lane + '.log'
+        batch = 'sbatch --export=cores="' + cores + '",mem=' + mem + '",log="' + job_log + '",pipeline="' \
+                + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype + '",j="' + pipe_cfg + '"'
+        sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:
-            os.chdir(cur_dir)
-            l_dir = cur_dir + '/LOGS'
-            l_check = os.path.isdir(l_dir)
-            if not l_check:
-                subprocess.call('mkdir ' + l_dir, shell=True)
+            call(batch, shell=True)
         except:
-            log(loc,
-                date_time() + 'Could not change to new directory ' + cur_dir + ' Skipping and removing sequencing files\n')
-            rm_sf = 'rm ' + cur_dir + '/' + end1 + ' ' + cur_dir + '/' + end2
-            subprocess.call(rm_sf, shell=True)
-            os.chdir(cwd)
-            exit(3)
-            # if pipeline fails, abandon process as a larger error might come up
-        log(loc, date_time() + 'Running pipeline process for lane ' + lane + '\n')
-        # check class status flag
-        p = Pipeline(end1, end2, seqtype, pipe_cfg)
-        if p.status != 0:
-            log(loc, date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(
-                p.status) + " \n")
-            lane_status[lane] = 'Pipeline return status failed'
-            log(loc, lane + '\t' + lane_status[lane] + '\n')
-            exit(3)
+            sys.stderr.write(date_time() + 'Batch submission for ' + lane + ' failed! Check logs!\n')
         # change back to parent directory so that new sequencing files can be downloaded in same place
-        os.chdir(cwd)
-        # clean out files for next run
-        cleanup = 'rm -rf ' + cur_dir + '/BAM ' + cur_dir + '/QC'
-        subprocess.call(cleanup, shell=True)
-        lane_status[lane] = 'Pipeline run and data uploaded'
-        log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')
-    os.chdir(cur_dir)
-sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")
+
+sys.stderr.write(date_time() + "Job submissions.  Check logs for any errors\n")
