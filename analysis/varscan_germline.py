@@ -22,7 +22,8 @@ def varscan_germline(config_file, sample, ref_mnt):
     for line in rf:
         chrom = line.split('\t')
         cmd = samtools + ' mpileup -r ' + chrom[0] + ' -B -f ' + fasta + ' ' + sample + \
-              '.merged.final.bam | java -Xmx4000m -jar ' + varscan + ' mpileup2cns --output-vcf 1 --min-var-freq 0.35 --variants 1 > ' + \
+              '.merged.final.bam | java -Xmx4000m -jar ' + varscan + ' mpileup2cns --output-vcf 1 --min-var-freq 0.35' \
+                                                                     ' --variants 1 > ' + \
               chrom[0] + '.vcf'
         cmd_list.append(cmd)
     rf.close()

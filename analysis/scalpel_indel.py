@@ -8,7 +8,7 @@ from utility.date_time import date_time
 from subprocess import call
 from utility.log import log
 from alignment.get_merged_bams import get_merged_bams
-from dustmask_filter import filter_indel
+from analysis.dustmask_filter import filter_indel
 
 
 def parse_config(config_file):

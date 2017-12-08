@@ -8,7 +8,7 @@ from pysam import VariantFile
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from utility.log import log
-from report_tools import *
+from annotation.report_tools import *
 
 
 def output_highest_impact(chrom, pos, ref, alt, not_shared, ann_list, loc_dict, tflag, out, ref_flag, call_type):
@@ -140,7 +140,7 @@ def gen_report(vcf, c, ref_flag):
     f_pos_list = []
     desc_list = desc_string.split('|')
     ann_size = len(desc_list)
-    for i in xrange(0, ann_size, 1):
+    for i in range(0, ann_size, 1):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i

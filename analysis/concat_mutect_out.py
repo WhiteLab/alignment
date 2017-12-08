@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 
 if sys.argv[1] is None:
-    print "Usage: base_filename (i.e. 2011-123_2012-345)"
+    sys.stderr.write("Usage: base_filename (i.e. 2011-123_2012-345)")
     exit()
 
 base_filename = sys.argv[1]
@@ -18,9 +18,9 @@ for chrom in chrs:
     for line in dot_out:
         line = line.strip()
         if line.startswith('#') and header_flag == 0:
-            print line
+            print(line)
         if line.startswith('contig') and header_flag == 0:
-            print line
+            print(line)
             header_flag = 1
         elif not line.startswith('#'):
-            print line
+            print(line)

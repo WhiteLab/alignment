@@ -38,7 +38,7 @@ def print_header_cc(tbl, ccvsn, ranges):
 
 def parseFastQC(FQC):
     fh = open(FQC)
-    for i in xrange(8):
+    for i in range(8):
         next(fh)
     seq_len = next(fh)
     vals = seq_len.rstrip('\n').split()
@@ -61,7 +61,7 @@ def parseFS(FS):
 
 def parseINS(INS):
     fh = open(INS, 'r')
-    for i in xrange(0, 7, 1):
+    for i in range(0, 7, 1):
         skip = next(fh)
     line = next(fh)
     line = line.rstrip('\n')
@@ -102,7 +102,7 @@ def parseCoverage(CF, ranges):
     fh.close()
     avg_cov = aln_bp / run_total
     avg_ratio = 0.0
-    for i in xrange(0, len(temp), 1):
+    for i in range(0, len(temp), 1):
         avg_ratio += float(temp[i][4])
         # pdb.set_trace()
         if int(temp[i][1]) >= avg_cov:

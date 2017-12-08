@@ -19,7 +19,7 @@ def parse_config(config_file):
 
 def list_unsorted_bam(bam_list, cont, threads):
     p = []
-    for i in xrange(0, len(bam_list), 1):
+    for i in range(0, len(bam_list), 1):
         bam_list[i] = bam_list[i].replace('.rmdup.srt.bam', '.bam')
         dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' ' + bam_list[i]
         p.append(dl_cmd)

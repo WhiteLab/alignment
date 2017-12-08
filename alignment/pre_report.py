@@ -77,7 +77,7 @@ def parse_pileup(out, tbl, sample, mode, cov, index):
         # fields 1-3 are chrom, pos, ref then triplets of ct, base, quality.
         (chrom, pos, ref) = (pile[0], int(pile[1]), pile[2])
         k = 0  # tracks sample list position
-        for i in xrange(4, len(pile), 3):
+        for i in range(4, len(pile), 3):
             if samp_list[k] not in cov:
                 cov[samp_list[k]] = {}
             if chrom not in cov[samp_list[k]]:

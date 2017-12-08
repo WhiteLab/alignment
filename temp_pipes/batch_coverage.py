@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
@@ -60,19 +60,20 @@ def calc_coverage(bedtools2_tool, sample, bedfile, cont, obj):
     for bnid in open(sample):
         bnid = bnid.rstrip('\n')
         (dl_cmd, bam, bai) = get_bam_name(bnid, src_cmd, cont, obj)
-        if isinstance(bam, basestring):
+        if isinstance(bam, str):
             bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam + ' -b ' + bedfile + ' > ' + bnid + '.hist;'
             cleanup = 'rm ' + bam + ' ' + bai + ';'
             final = dl_cmd + bed_cmd + cleanup
             job_list.append(final)
         else:
-            for i in xrange(len(bam)):
+            for i in range(len(bam)):
                 bed_cmd = bedtools2_tool + ' coverage -hist -abam ' + bam[i] + ' -b ' + bedfile + ' > ' + bnid \
                           + '_' + str(i) + '.hist;'
                 cleanup = 'rm ' + bam[i] + ' ' + bai[i] + ';'
                 final = dl_cmd[i] + bed_cmd + cleanup
                 job_list.append(final)
     job_manager(job_list, '8')
+
 
 if __name__ == "__main__":
     import argparse

@@ -1,3 +1,6 @@
+import sys
+
+
 def create_index(ref):
     # helper script common to report generators
     fh = open(ref)

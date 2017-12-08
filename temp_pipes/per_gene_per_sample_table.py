@@ -42,12 +42,12 @@ def calc_coverage(sample_list, suffix, bed):
 
     sys.stderr.write(date_time() + 'Outputting results\n')
     sys.stdout.write('Gene/Sample\t')
-    print '\t'.join(slist)
+    print('\t'.join(slist))
     for gene in gene_list:
         sys.stdout.write(gene)
         for sample in slist:
             sys.stdout.write('\t' + str(master_dict[gene][sample]))
-        print
+        print()
     sys.stderr.write(date_time() + 'Fin!\n')
 
 if __name__ == "__main__":

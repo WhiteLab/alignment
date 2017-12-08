@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
 
 
@@ -17,7 +17,7 @@ def job_manager(cmd_list, max_t):
     n = int(max_t)
     if n > x:
         n = x
-    for i in xrange(0, n, 1):
+    for i in range(0, n, 1):
         p[i] = {}
         p[i]['job'] = subprocess.Popen(cmd_list[i], shell=True)
         p[i]['cmd'] = cmd_list[i]
@@ -32,12 +32,12 @@ def job_manager(cmd_list, max_t):
             sys.stderr.write(
                 date_time() + 'Checking job statuses. ' + str(comp) + ' of ' + str(x) + ' completed. ' + str(
                     s) + ' seconds have passed\n')
-            for i in xrange(0, n, 1):
+            for i in range(0, n, 1):
                 check = p[i]['job'].poll()
                 if str(check) == '1':
                     sys.stderr.write(
                         date_time() + 'Job returned an error while running ' + p[i]['cmd'] + '  aborting!\n')
-                    for k in xrange(0, n, 1):
+                    for k in range(0, n, 1):
                         p[k]['job'].kill()
                         sys.stderr.write('Killing job ' + str(k) + '\n')
                     exit(1)

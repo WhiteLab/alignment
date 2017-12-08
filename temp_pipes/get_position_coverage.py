@@ -31,7 +31,7 @@ def build_jobs(samtools, bed, sample):
 
 def compile_results(slist):
     cov_dict = {}
-    for i in xrange(0, len(slist), 1):
+    for i in range(0, len(slist), 1):
         for line in open(slist[i] + '_covered.txt'):
             info = line.rstrip('\n').split('\t')
             if info[0] not in cov_dict:
@@ -47,7 +47,7 @@ def calc_pos_cov(table, samtools, out):
     head = next(fh)
     bnids = []
     head = head.rstrip('\n').split('\t')
-    for i in xrange(1, len(head), 1):
+    for i in range(1, len(head), 1):
         bnid = head[i].split('_')
         bnids.append(bnid[0])
     # create bed file to get coverage
@@ -63,7 +63,7 @@ def calc_pos_cov(table, samtools, out):
     job_list = []
     src_cmd = '. ~/.novarc;'
     # get bams, then build jobs
-    for i in xrange(0, len(bnids), 1):
+    for i in range(0, len(bnids), 1):
         sys.stderr.write(date_time() + 'Getting bam for ' + bnids[i] + '\n')
         bam = 'ALIGN/' + bnids[i] + '/BAM/' + bnids[i] + '.merged.final.bam'
         dl_cmd = src_cmd + 'swift download PDX --prefix ALIGN/' + bnids[i] + '/BAM/' + bnids[i] + '.merged.final.ba;'
@@ -91,7 +91,7 @@ def calc_pos_cov(table, samtools, out):
     out_fh.write('\t'.join(head) + '\n')
     for var in vlist:
         out_fh.write(var)
-        for i in xrange(0, len(bnids), 1):
+        for i in range(0, len(bnids), 1):
             m = re.search('\S+-(chr\w+)_(\d+)_\w+->\w+', var)
             (chrom, pos) = (m.group(1), m.group(2))
             if bnids[i] in cov_dict[chrom][pos]:

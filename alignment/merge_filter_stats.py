@@ -8,13 +8,13 @@ import subprocess
 
 
 def skip_lines(fh, stop):
-    for i in xrange(0, stop, 1):
+    for i in range(0, stop, 1):
         skip = next(fh)
     return 0
 
 def process_line(fh, stop):
     list_list = []
-    for i in xrange(0,stop,1):
+    for i in range(0,stop,1):
         cur = next(fh)
         cur = cur.rstrip('\n').split()
         list_list.append(cur)
@@ -25,8 +25,8 @@ def download_from_swift(cont, obj, lane_list):
     lanes = open(lane_list, 'r')
     head = ''
     data = []
-    print 'BID\tread group\ttotal alignment pairs(ap)\t% unambiguous ap\t% ambiguous ap\t% total ap filtered' \
-          '\t%total ap kept'
+    print ('BID\tread group\ttotal alignment pairs(ap)\t% unambiguous ap\t% ambiguous ap\t% total ap filtered' \
+          '\t%total ap kept')
     for line in lanes:
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
@@ -50,7 +50,7 @@ def download_from_swift(cont, obj, lane_list):
             kept = str(float(unamb_pairs_pct) + float(amb_pairs_pct))
             temp.extend((group[0][6], unamb_pairs_pct, amb_pairs_pct, filt, kept))
 
-            print bid + '\t' + lane + '\t' + '\t'.join(temp)
+            print (bid + '\t' + lane + '\t' + '\t'.join(temp))
             stat.close()
 
 

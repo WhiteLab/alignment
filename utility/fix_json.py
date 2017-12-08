@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os
 import subprocess
@@ -14,7 +14,7 @@ for obj in fh:
     head = next(jfile)
     temp.write(head)
     garbage = next(jfile)
-    for i in xrange(0, 7, 1):
+    for i in range(0, 7, 1):
         cur = next(jfile)
         cur = cur.replace('\t\t', '\t')
         temp.write(cur)
@@ -25,7 +25,7 @@ for obj in fh:
     temp.write(cur)
     garbage = next(jfile)
     garbage = next(jfile)
-    for i in xrange(0, 12, 1):
+    for i in range(0, 12, 1):
         cur = next(jfile)
         cur = cur.replace('\t\t', '\t')
         temp.write(cur)
@@ -35,7 +35,7 @@ for obj in fh:
     temp.write(cur)
     garbage = next(jfile)
     garbage = next(jfile)
-    for i in xrange(0, 9, 1):
+    for i in range(0, 9, 1):
         cur = next(jfile)
         cur = cur.replace('\t\t', '\t')
         temp.write(cur)

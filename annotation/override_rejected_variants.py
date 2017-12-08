@@ -58,7 +58,7 @@ def recreate_analysis(out, vcf, vdict, pair):
     head = next(out_fh)
     new_out_fh.write(head)
     temp_out_fh.write(head)
-    for i in xrange(3):
+    for i in range(3):
         head = next(vcf_fh)
         new_vcf_fh.write(head)
         temp_vcf_fh.write(head)

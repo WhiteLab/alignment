@@ -9,12 +9,12 @@ from subprocess import call
 from alignment.novosort_merge_pe import novosort_merge_pe
 from alignment.picard_ksort import ksort
 from alignment.get_merged_bams import get_merged_bams
-from mutect_pipe import mutect_pipe
-from mutect_merge_sort import mutect_merge_sort
+from analysis.mutect_pipe import mutect_pipe
+from analysis.mutect_merge_sort import mutect_merge_sort
 from utility.upload_variants_to_swift import upload_variants_to_swift
 from annotation.annot_platypus_VEP import annot_platypus
-from platypus_germline import platypus_germline
-from scalpel_indel import scalpel_indel
+from analysis.platypus_germline import platypus_germline
+from analysis.scalpel_indel import scalpel_indel
 
 
 def parse_config(config_file):

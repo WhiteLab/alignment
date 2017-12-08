@@ -8,7 +8,6 @@ import re
 import argparse
 import json
 from utility.date_time import date_time
-import subprocess
 from utility.find_project_files import find_project_files
 from subprocess import call
 

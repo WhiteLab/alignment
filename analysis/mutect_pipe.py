@@ -77,7 +77,7 @@ def mutect_pipe(config_file, sample_pairs, ref_mnt):
         try:
             job_manager(cmd_list, max_t)
         except:
-            for i in xrange(0, len(cmd_list), 1):
+            for i in range(0, len(cmd_list), 1):
                 cmd_list[i] = cmd_list[i].replace('-fixMisencodedQuals ', '')
             job_manager(cmd_list, max_t)
     sys.stderr.write(date_time() + 'Variant calling completed!\n')

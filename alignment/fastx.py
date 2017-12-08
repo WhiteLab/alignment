@@ -45,7 +45,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='FASTX quality stats module.  Provides quality stats for fastq file and is independent of alignment.')
+        description='FASTX quality stats module.  Provides quality stats for fastq file and is independent of'
+                    ' alignment.')
     parser.add_argument('-f', '--fastx', action='store', dest='fastx_tool',
                         help='Location of fastx_quality_stats tool.  Version 0.0.13.2 preferred.')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample/location name prefix')

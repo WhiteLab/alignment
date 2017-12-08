@@ -41,7 +41,7 @@ for line in vcf_list:
     header_flag = 1
     vcf.close()
 vcf_list.close()
-print '\n'.join(header)
+print('\n'.join(header))
 for chrom in order:
     sys.stdout.write('\n'.join(vcf_entries[chrom]))
 

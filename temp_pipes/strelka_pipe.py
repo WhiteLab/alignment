@@ -7,7 +7,7 @@ from utility.date_time import date_time
 import subprocess
 from annotation.annot_vcf_vep import parse_config
 from annotation.annot_vcf_vep import run_vep
-from batch_coverage import get_bam_name
+from temp_pipes.batch_coverage import get_bam_name
 from annotation.vep_strelka_report import gen_report
 
 
