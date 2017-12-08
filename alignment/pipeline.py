@@ -6,7 +6,6 @@ import os
 import re
 from utility.date_time import date_time
 from cutadapter import cutadapter
-# from fastx import fastx deprecated
 from bwa_mem_pe import bwa_mem_pe
 from novosort_sort_pe import novosort_sort_pe
 from filter_wrap import filter_wrap
@@ -18,21 +17,20 @@ from subprocess import call
 import subprocess
 import json
 from utility.log import log
-from utility.upload_to_swift import upload_to_swift
 from parse_qc import parse_qc
 
 
 class Pipeline:
     def __init__(self, end1, end2, seqtype, json_config):
         self.config_data = json.loads(open(json_config, 'r').read())
-        self.end1 = end1
-        self.end2 = end2
+        self.sf1 = end1
+        self.sf2 = end2
+        self.end1 = os.path.basename(self.sf1)
+        self.end2 = os.path.basename(self.sf2)
         s = re.match('^(\S+)_1_sequence\.txt\.gz$', self.end1)
-        if s:
-            self.sample = s.group(1)
-        else:
+        if not s:
             s = re.match('(^\S+)_\D*\d\.f\w*q\.gz$', self.end1)
-            self.sample = s.group(1)
+        self.sample = s.group(1)
         hgac_ID = self.sample.split("_")
         self.seqtype = seqtype
         self.cflag = 'y'
@@ -57,8 +55,8 @@ class Pipeline:
         self.ram = self.config_data['params']['ram']
         self.threads = self.config_data['params']['threads']
         self.qc_stats = self.config_data['tools']['qc_stats']
-        self.cont = self.config_data['refs']['cont']
-        self.obj = self.config_data['refs']['obj']
+        self.project = self.config_data['refs']['project']
+        self.align = self.config_data['refs']['align']
         self.bed_ref = self.config_data['refs'][self.seqtype]
         self.bedtools2_tool = self.config_data['tools']['bedtools']
         self.picard_tmp = 'picard_tmp'
@@ -69,13 +67,11 @@ class Pipeline:
         self.jram = '6'
         self.samtools_tool = self.config_data['tools']['samtools']
         self.bwa_tool = self.config_data['tools']['bwa']
-        # self.fastx_tool = self.config_data['tools']['fastx'] fastx deprecated, replaced by fastqc
         self.cutadapter = self.config_data['tools']['cutadapt']
         self.bid = hgac_ID[0]
-        self.sample = s.group(1)
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
-
+        self.cwd = '/cephfs/' + self.project + '/' + self.align + '/' + self.sample
         self.status = 0
         self.pipeline()
 
@@ -87,9 +83,6 @@ class Pipeline:
             suffix = self.seqtype + '.hist'
         hist = self.sample + '.' + suffix
         ins = self.sample + '.insert_metrics.hist'
-        # waiting for .qs now deprecated as we've now switched to fastqc
-        # f1 = self.sample + '_1.qs'
-        # f2 = self.sample + '_2.qs'
         fstat1 = self.sample + '.srt.bam.flagstats'
         if self.use_nova_flag == 'Y':
             fstat1 = self.sample + '.bam.flagstats'
@@ -127,11 +120,22 @@ class Pipeline:
         exit(1)
 
     def pipeline(self):
+        # create working directory
+        if not os.path.isdir(self.cwd):
+            mk_cwd = 'mkdir -p ' + self.cwd
+            sys.stderr.write(date_time() + 'Creating working directory ' + mk_cwd + '\n')
+            call(mk_cwd, shell=True)
+        os.chdir(self.cwd)
+
         log_dir = 'LOGS/'
         if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
             call(mk_log_dir, shell=True)
             log(self.loc, date_time() + 'Made log directory ' + log_dir + "\n")
+        # create symlink for fastq files to work on
+        mk_links = 'ln -s' + self.sf1 + ' ./' + self.end1 + '; ln -s ' + self.sf2 + ' ./' + self.end2
+        log(self.loc, date_time() + 'Making symlinks for fastq files ' + mk_links + '\n')
+        call(mk_links, shell=True)
         # create BAM and QC directories if they don't exist already
         bam_dir = 'BAM/'
         qc_dir = 'QC/'
@@ -145,12 +149,7 @@ class Pipeline:
             log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
         log(self.loc,
             date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
-        # inputs
 
-        SAMPLES = {}
-        SAMPLES[self.sample] = {}
-        SAMPLES[self.sample]['f1'] = self.end1
-        SAMPLES[self.sample]['f2'] = self.end2
         RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
 
         # initialize fail return values
@@ -196,8 +195,6 @@ class Pipeline:
         else:
             log(self.loc, date_time() + 'Sorted bam file already exists, skipping\n')
         # skip next steps in insert size already calculated
-        # log(self.loc, date_time() + 'Getting fastq quality score stats\n')
-        # fastx(self.fastx_tool, self.sample, self.end1, self.end2)  # will run independently of rest of output
         if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
             log(self.loc, date_time() + 'Removing PCR duplicates\n')
             picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
@@ -208,7 +205,7 @@ class Pipeline:
         log(self.loc, date_time() + 'Gathering SAM flag stats\n')
         flagstats(self.samtools_tool, self.sample)
         log(self.loc, date_time() + 'Calculating insert sizes\n')
-        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram)  # get insert size metrics.
+        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram) # get insert size metrics.
 
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
@@ -234,17 +231,15 @@ class Pipeline:
         subprocess.call(mv_rest, shell=True)
         mv_config = ' cp ' + self.json_config + ' QC/'
         subprocess.call(mv_config, shell=True)
-        obj = self.obj + "/" + self.bid + "/"
+        # after completion simply move all one level up, delete created work folder
+        mv_all = 'mv * ../;'
+        call(mv_all, shell=True)
+        os.chdir('../')
+        rm_wd = 'rmdir ' + self.cwd
+        call(rm_wd, shell=True)
 
-        check = upload_to_swift(self.cont, obj)
-        if check == 0:
-            # log(self.loc, date_time() + 'Couchdb successfully updated\n')
-            self.status = 0
-            log(self.loc,
-                date_time() + "Pipeline complete, files successfully uploaded.  Files may be safely removed\n")
-        else:
-            log(self.loc, date_time() + "All but file upload succeeded\n")
-            self.status = 1
+        self.status = 0
+        sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
 
 
 def main():
