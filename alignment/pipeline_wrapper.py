@@ -37,23 +37,18 @@ check_dir = os.path.isdir(cwd)
 for line in fh:
     line = line.rstrip('\n')
     (bid, seqtype, lane_csv) = line.split('\t')
-
     try:
         os.chdir(cwd)
     except:
         sys.stderr.write(
-            date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this '
-            'sample set\n')
+            date_time() + 'Could not find working directory ' + cwd + '. Ensure correct project was set in config\n')
         exit(1)
     # All files for current bid to be stored in cwd
 
-    sample_prefix = 'RAW/' + bid + '/' + bid + '_'
     cur_dir = cwd + '/RAW/' + bid
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
-    lane_status = {}
     for lane in lane_csv.split(', '):
-        lane_status[lane] = 'Initializing'
         seq_dir = 'RAW/' + bid
         file_prefix = bid + '_' + lane
         (contents, seqfile, sf1, sf2) = ('', [], '', '')
@@ -74,13 +69,13 @@ for line in fh:
         #p = Pipeline(end1, end2, seqtype, pipe_cfg)
         # batch params $cores $mem $pipeline $f1 $f2 $t $j
         job_log = lane + '.log'
-        batch = 'sbatch --export=cores="' + cores + '",mem=' + mem + '",log="' + job_log + '",pipeline="' \
+        batch = 'sbatch --export=cores="' + cores + '",mem="' + mem + '",log="' + job_log + '",pipeline="' \
                 + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype + '",j="' + pipe_cfg + '"'
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:
             call(batch, shell=True)
         except:
             sys.stderr.write(date_time() + 'Batch submission for ' + lane + ' failed! Check logs!\n')
-        # change back to parent directory so that new sequencing files can be downloaded in same place
+        # change back to parent directory so that new sequencing files can be searched
 
-sys.stderr.write(date_time() + "Job submissions.  Check logs for any errors\n")
+sys.stderr.write(date_time() + "Jobs submitted.  Check logs for any errors\n")
