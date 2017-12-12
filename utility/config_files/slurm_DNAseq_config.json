@@ -2,7 +2,7 @@
   "tools": {
     "align_pipe": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/pipeline.py",
     "slurm_wrap": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/pipeline.sl",
-    "cutadapt": "/cephfs/users/mbrown/PIPELINES/TOOLS/cutadapt-1.15/cutadapt",
+    "cutadapt": "/cephfs/users/mbrown/PIPELINES/TOOLS/cutadapt-1.15//bin/cutadapt",
     "fastqc": "/cephfs/users/mbrown/PIPELINES/TOOLS/FastQC/fastqc",
     "bwa": "/cephfs/users/mbrown/PIPELINES/TOOLS/bwa-0.7.8/bwa",
     "samtools": "/cephfs/software/samtools-1.6/samtools",
