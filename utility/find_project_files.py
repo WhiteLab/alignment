@@ -3,7 +3,7 @@
 import subprocess
 import sys
 from subprocess import check_output
-
+import pdb
 from utility.date_time import date_time
 
 
@@ -12,6 +12,7 @@ def find_project_files(file_dir, file_prefix):
     sys.stderr.write(date_time() + find_cmd + "\n")
     try:
         results = check_output(find_cmd, shell=True, stderr=subprocess.PIPE)
+        pdb.set_trace()
         return results
     except:
         sys.stderr.write(date_time() + "Search of " + file_prefix + " from " + file_dir + " failed\n")
