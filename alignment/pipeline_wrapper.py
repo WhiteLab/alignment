@@ -53,11 +53,13 @@ for line in fh:
         (contents, seqfile, sf1, sf2) = ('', [], '', '')
         # attempt to find sequencing files
         try:
-            sys.stderr.write(date_time() + 'Searching for sequencing files related to ' + lane + '\n')
+            sys.stderr.write(date_time() + 'Searching for sequencing files related to bnid ' + bid + ' in lane '
+                             + lane + '\n')
             contents = find_project_files(cur_dir, file_prefix)
-            # sequencing files found in pairs using simple iterator, as find gives files in alphanumeric order -
             # standard file naming should work with this
             seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
+            # need to sort since output may not be alphanumerically sorted
+            seqfile.sort()
             sf1 = seqfile[0]
             sf2 = seqfile[1]
         except:
