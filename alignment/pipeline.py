@@ -72,6 +72,8 @@ class Pipeline:
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
         self.cwd = '/cephfs/PROJECTS/' + self.project + '/' + self.align + '/' + self.bid + '/' + self.sample
+        self.user = self.config_data['params']['user']
+        self.group = self.config_data['params']['group']
         self.status = 0
         self.pipeline()
 
@@ -239,7 +241,10 @@ class Pipeline:
         # os.chdir('../')
         # rm_wd = 'rmdir ' + self.cwd
         # call(rm_wd, shell=True)
-
+        # # change ownership to be project-specific
+        # set_acl = 'chown -R ./ ' + self.user + ':' + self.group
+        # log(self.loc, date_time() + 'Setting acls for current directory ' + set_acl + '\n')
+        # call(set_acl, shell=True)
         self.status = 0
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
 

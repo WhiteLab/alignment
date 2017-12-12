@@ -40,6 +40,8 @@
     "config": "/cephfs/users/mbrown/JOB_SUBMISSIONS/2017-Dec-12_slurm_align_test/2017-Dec-12_config.json"
   },
   "params": {
+    "user": "mbrown",
+    "group": "CPCI",
     "threads": "8",
     "ram": "30",
     "qual": "33",
