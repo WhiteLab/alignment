@@ -36,6 +36,11 @@ def cutadapter(sample, end1, end2, config_file):
                    + ' -' + aflag + ' ' + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' \
                    + r2trim + ' -n ' + ntrim + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' \
                    + loc + ' 2>> ' + loc
+    # cutadapt 1.15 can now quality trim without having to fake an adapter
+    if r1_adapt[0] == 'Z':
+        cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
+                       + ' -u ' + r1trim + ' -U ' + r2trim + ' -n ' + ntrim + ' -o ' + temp1 + ' -p ' + temp2 + ' ' \
+                       + end1 + ' ' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + '\n')
     f = Popen(cutadapt_cmd, shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
     time.sleep(20)
