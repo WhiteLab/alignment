@@ -34,29 +34,27 @@ def parse_config(config_file):
 
 (project, align_dir, pipe_cfg, cores, mem, align_pipe, slurm_wrap) = parse_config(inputs.config_file)
 cwd = '/cephfs/PROJECTS/' + project
-check_dir = os.path.isdir(cwd)
+if not os.path.isdir(cwd):
+    sys.stderr.write(date_time() + 'Could not find working directory ' + cwd
+                     + '. Ensure correct project was set in config\n')
+    exit(1)
+# check_dir = os.path.isdir(cwd)
 for line in fh:
     line = line.rstrip('\n')
     (bid, seqtype, lane_csv) = line.split('\t')
-    try:
-        os.chdir(cwd)
-    except:
-        sys.stderr.write(
-            date_time() + 'Could not find working directory ' + cwd + '. Ensure correct project was set in config\n')
-        exit(1)
+
     # All files for current bid to be stored in cwd
 
     cur_dir = cwd + '/RAW/' + bid
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
     for lane in lane_csv.split(', '):
-        seq_dir = 'RAW/' + bid
         file_prefix = bid + '_' + lane
         (contents, seqfile, sf1, sf2) = ('', [], '', '')
         # attempt to find sequencing files
         try:
             sys.stderr.write(date_time() + 'Searching for sequencing files related to ' + lane + '\n')
-            contents = find_project_files(seq_dir, file_prefix)
+            contents = find_project_files(cur_dir, file_prefix)
             # sequencing files found in pairs using simple iterator, as find gives files in alphanumeric order -
             # standard file naming should work with this
             seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
