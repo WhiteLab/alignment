@@ -133,7 +133,7 @@ class Pipeline:
             call(mk_log_dir, shell=True)
             log(self.loc, date_time() + 'Made log directory ' + log_dir + "\n")
         # create symlink for fastq files to work on
-        mk_links = 'ln -s' + self.sf1 + ' ./' + self.end1 + '; ln -s ' + self.sf2 + ' ./' + self.end2
+        mk_links = 'ln -s ' + self.sf1 + ' ./' + self.end1 + '; ln -s ' + self.sf2 + ' ./' + self.end2
         log(self.loc, date_time() + 'Making symlinks for fastq files ' + mk_links + '\n')
         call(mk_links, shell=True)
         # create BAM and QC directories if they don't exist already
@@ -154,86 +154,86 @@ class Pipeline:
 
         # initialize fail return values
         check = 1
-        # if self.run_cut_flag == 'Y':
-        #     check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
-        #     if check != 0:
-        #         log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
-        #         exit(1)
-        # if self.pdxflag == 'Y':
-        #     log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
-        #     check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.mmu_bwa_ref, self.end1, self.end2,
-        #                     self.samtools_tool, self.mmu_samtools_ref, self.sample, log_dir, self.threads)
-        #     if check != 0:
-        #         log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
-        #         exit(1)
-        #     if not os.path.isfile(self.sample + '.bam'):
-        #         check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
-        #                        self.hsa_samtools_ref, self.sample, log_dir, self.threads)
-        # else:
-        #     log(self.loc, date_time() + 'Starting BWA align\n')
-        #     # check certain key processes
-        #     # skip aligning if bam already exists
-        #     if not os.path.isfile(self.sample + '.bam'):
-        #         check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
-        #                            self.samtools_ref, self.sample, log_dir, self.threads)
-        #         # rest won't run until completed
-        #
-        #     else:
-        #         log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
-        #
-        # if check != 0:
-        #     log(self.loc, date_time() + 'BWA failure for ' + self.sample + '\n')
-        #     exit(1)
-        # # skip sort if sorted file exists already
-        # log(self.loc, date_time() + 'Sorting BAM file\n')
-        # if not os.path.isfile(self.sample + '.srt.bam'):
-        #     check = novosort_sort_pe(self.novosort, self.sample, log_dir, self.threads,
-        #                              self.ram, self.use_nova_flag)  # rest won't run until completed
-        #     if check != 0:
-        #         log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
-        #         exit(1)
-        # else:
-        #     log(self.loc, date_time() + 'Sorted bam file already exists, skipping\n')
-        # # skip next steps in insert size already calculated
-        # if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
-        #     log(self.loc, date_time() + 'Removing PCR duplicates\n')
-        #     picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
-        #                  self.jram)  # rest won't run until completed
-        # if self.use_nova_flag == 'Y':
-        #     log(self.loc, date_time() + 'Duplicates removed using novosort.\n')
-        #
-        # log(self.loc, date_time() + 'Gathering SAM flag stats\n')
-        # flagstats(self.samtools_tool, self.sample)
-        # log(self.loc, date_time() + 'Calculating insert sizes\n')
-        # picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram) # get insert size metrics.
-        #
-        # # figure out which coverage method to call using seqtype
-        # log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
-        # # run last since this step slowest of the last
-        # wait_flag = 1
-        # if self.seqtype != 'genome':
-        #     exome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
-        # else:
-        #     genome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
-        # log(self.loc, date_time() + 'Checking outputs and uploading results\n')
-        # # check to see if last expected files have been generated suffix
-        # self.check_outputs()
-        #
-        # if self.use_nova_flag != 'Y':
-        #     p_tmp_rm = "rm -rf picard_tmp"
-        #     call(p_tmp_rm, shell=True)
-        # # move files into appropriate place and run qc_stats
-        # log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
-        # mv_bam = 'mv *.bam *.bai BAM/'
-        # subprocess.call(mv_bam, shell=True)
-        # rm_sf = 'rm ' + self.end1 + ' ' + self.end2
-        # subprocess.call(rm_sf, shell=True)
-        # parse_qc(self.json_config, self.sample, self.cflag)
-        # mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
-        # subprocess.call(mv_rest, shell=True)
-        # mv_config = ' cp ' + self.json_config + ' QC/'
-        # subprocess.call(mv_config, shell=True)
-        # # after completion simply move all one level up, delete created work folder
+        if self.run_cut_flag == 'Y':
+            check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
+            if check != 0:
+                log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
+                exit(1)
+        if self.pdxflag == 'Y':
+            log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
+            check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.mmu_bwa_ref, self.end1, self.end2,
+                            self.samtools_tool, self.mmu_samtools_ref, self.sample, log_dir, self.threads)
+            if check != 0:
+                log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
+                exit(1)
+            if not os.path.isfile(self.sample + '.bam'):
+                check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
+                               self.hsa_samtools_ref, self.sample, log_dir, self.threads)
+        else:
+            log(self.loc, date_time() + 'Starting BWA align\n')
+            # check certain key processes
+            # skip aligning if bam already exists
+            if not os.path.isfile(self.sample + '.bam'):
+                check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
+                                   self.samtools_ref, self.sample, log_dir, self.threads)
+                # rest won't run until completed
+
+            else:
+                log(self.loc, date_time() + 'bam file already exists, skipping alignment as well as fastx!\n')
+
+        if check != 0:
+            log(self.loc, date_time() + 'BWA failure for ' + self.sample + '\n')
+            exit(1)
+        # skip sort if sorted file exists already
+        log(self.loc, date_time() + 'Sorting BAM file\n')
+        if not os.path.isfile(self.sample + '.srt.bam'):
+            check = novosort_sort_pe(self.novosort, self.sample, log_dir, self.threads,
+                                     self.ram, self.use_nova_flag)  # rest won't run until completed
+            if check != 0:
+                log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
+                exit(1)
+        else:
+            log(self.loc, date_time() + 'Sorted bam file already exists, skipping\n')
+        # skip next steps in insert size already calculated
+        if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
+            log(self.loc, date_time() + 'Removing PCR duplicates\n')
+            picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
+                         self.jram)  # rest won't run until completed
+        if self.use_nova_flag == 'Y':
+            log(self.loc, date_time() + 'Duplicates removed using novosort.\n')
+
+        log(self.loc, date_time() + 'Gathering SAM flag stats\n')
+        flagstats(self.samtools_tool, self.sample)
+        log(self.loc, date_time() + 'Calculating insert sizes\n')
+        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram) # get insert size metrics.
+
+        # figure out which coverage method to call using seqtype
+        log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
+        # run last since this step slowest of the last
+        wait_flag = 1
+        if self.seqtype != 'genome':
+            exome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
+        else:
+            genome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
+        log(self.loc, date_time() + 'Checking outputs and uploading results\n')
+        # check to see if last expected files have been generated suffix
+        self.check_outputs()
+
+        if self.use_nova_flag != 'Y':
+            p_tmp_rm = "rm -rf picard_tmp"
+            call(p_tmp_rm, shell=True)
+        # move files into appropriate place and run qc_stats
+        log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
+        mv_bam = 'mv *.bam *.bai BAM/'
+        subprocess.call(mv_bam, shell=True)
+        rm_sf = 'rm ' + self.end1 + ' ' + self.end2
+        subprocess.call(rm_sf, shell=True)
+        parse_qc(self.json_config, self.sample, self.cflag)
+        mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
+        subprocess.call(mv_rest, shell=True)
+        mv_config = ' cp ' + self.json_config + ' QC/'
+        subprocess.call(mv_config, shell=True)
+        # after completion simply move all one level up, delete created work folder
         # mv_all = 'mv * ../;'
         # call(mv_all, shell=True)
         # os.chdir('../')
