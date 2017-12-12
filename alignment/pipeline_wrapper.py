@@ -28,10 +28,11 @@ fh = open(inputs.fn, 'r')
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['refs']['project'], config_data['refs']['align'], config_data['refs']['config'], \
-           config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['align_pipe']
+           config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['align_pipe'], \
+           config_data['tools']['slurm_wrap']
 
 
-(project, align_dir, pipe_cfg, cores, mem, align_pipe) = parse_config(inputs.config_file)
+(project, align_dir, pipe_cfg, cores, mem, align_pipe, slurm_wrap) = parse_config(inputs.config_file)
 cwd = '/cephfs/PROJECTS/' + project
 check_dir = os.path.isdir(cwd)
 for line in fh:
@@ -69,8 +70,9 @@ for line in fh:
         #p = Pipeline(end1, end2, seqtype, pipe_cfg)
         # batch params $cores $mem $pipeline $f1 $f2 $t $j
         job_log = lane + '.log'
-        batch = 'sbatch --export=cores="' + cores + '",mem="' + mem + '",log="' + job_log + '",pipeline="' \
-                + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype + '",j="' + pipe_cfg + '"'
+        batch = 'sbatch ' + slurm_wrap + ' --export=cores="' + cores + '",mem="' + mem + '",log="' + job_log \
+                + '",pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
+                + '",j="' + pipe_cfg + '"'
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:
             call(batch, shell=True)
