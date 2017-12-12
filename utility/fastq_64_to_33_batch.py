@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Usage: ./fastq_64_to_33_batch.py <list> <th>
 

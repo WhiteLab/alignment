@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Uses GARVAN sample names with a project ID and a lookup table with bids to create HGAC/pipeline-friendly names and
 uploads to ceph.

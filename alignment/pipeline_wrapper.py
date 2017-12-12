@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
