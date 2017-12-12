@@ -127,7 +127,7 @@ def parse_qc(config_file, sample, cflag):
     tbl = open(sample + '.qc_stats.txt', 'w')
     json_out = open(sample + '.qc_stats.json', 'w')
     # get read length using line count of quality stats file
-    # fq_rd_len = subprocess.check_output('wc -l ' + qs, shell=True).encode() deprecated, using fastqc output
+    # fq_rd_len = subprocess.check_output('wc -l ' + qs, shell=True).decode() deprecated, using fastqc output
     # wc_res = fq_rd_len.split()
     fqc_file = 'QC/' + sample + '_1_sequence_fastqc/fastqc_data.txt'
     rd_len = int(parseFastQC(fqc_file))

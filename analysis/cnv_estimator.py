@@ -32,7 +32,7 @@ def parse_config(config_file):
 def get_bam_name(bnid, src_cmd, cont, obj):
     list_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + obj + '/' + bnid + '/BAM/'
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = subprocess.check_output(list_cmd, shell=True).encode()
+    flist = subprocess.check_output(list_cmd, shell=True).decode()
     # Use to check on download status
     bam = ''
     bai = ''

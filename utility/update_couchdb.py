@@ -28,7 +28,7 @@ def update_couchdb(fn, config_file):
         obj = obj.rstrip('\n')
         get_uuid = 'curl -X GET ' + server + '/_uuids -k;'
         sys.stderr.write(date_time() + get_uuid + '\n')
-        uuid_out = check_output(get_uuid, shell=True).encode()
+        uuid_out = check_output(get_uuid, shell=True).decode()
         m = re.findall('\"(\w+)\"', uuid_out)
         uuid = m[1]
         # typical response: {"uuids":["24ec4b43cfe304ff4709e76f7400074d"]}
@@ -37,7 +37,7 @@ def update_couchdb(fn, config_file):
         couch_cmd = curl
         # get response
         sys.stderr.write(date_time() + couch_cmd + '\n')
-        result = check_output(couch_cmd, shell=True).encode()
+        result = check_output(couch_cmd, shell=True).decode()
         result = result.rstrip('\n')
         sys.stderr.write(obj + '\t' + result + '\n')
         if result == 1:

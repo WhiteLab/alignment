@@ -20,7 +20,7 @@ def download_from_swift(cont, obj, lane_list):
             swift_cmd = src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur
             sys.stderr.write(date_time() + swift_cmd + "\n")
             try:
-                check = check_output(swift_cmd, shell=True, stderr=subprocess.PIPE).encode()
+                check = check_output(swift_cmd, shell=True, stderr=subprocess.PIPE).decode()
             except:
                 sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
                 exit(1)

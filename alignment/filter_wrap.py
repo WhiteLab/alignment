@@ -17,7 +17,7 @@ def filter_wrap(mmu_filter, bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, 
 
     log(loc, date_time() + bwa_cmd + "\n")
     try:
-        subprocess.check_output(bwa_cmd, shell=True).encode()
+        subprocess.check_output(bwa_cmd, shell=True).decode()
         log(loc, date_time() + 'Filtering completed, replacing fastq file\n')
         rn_fq = 'mv ' + sample + '_1.filtered.fq.gz ' + end1 + '; mv ' + sample + '_2.filtered.fq.gz ' + end2
         subprocess.call(rn_fq, shell=True)

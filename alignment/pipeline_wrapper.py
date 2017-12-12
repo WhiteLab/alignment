@@ -63,7 +63,7 @@ for line in fh:
             sf1 = seqfile[0]
             sf2 = seqfile[1]
         except:
-            sys.stderr.write(date_time() + 'Getting sequencing files for ' + bid + ' lane  ' + lane
+            sys.stderr.write(date_time() + 'Getting sequencing files for ' + bid + ' lane ' + lane
                              + ' failed.  Moving on\n')
             continue
 

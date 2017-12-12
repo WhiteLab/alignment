@@ -13,7 +13,7 @@ def picard_sort_pe(java_tool, picard_tool, picard_tmp, sample, log_dir):
                         "coordinate VALIDATION_STRINGENCY=LENIENT > " + log_dir + sample + ".picard.sort.pe.log 2>&1"
     log(log_dir + sample + ".picard.sort.pe.log", date_time() + picard_sort_pe_cmd + "\n")
     try:
-        subprocess.check_output(picard_sort_pe_cmd, shell=True).encode()
+        subprocess.check_output(picard_sort_pe_cmd, shell=True).decode()
     except:
         log(log_dir + sample + ".picard.sort.pe.log",
             'Picard sort failed for sample ' + sample + '.  Check for borg!\n')
