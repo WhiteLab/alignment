@@ -71,7 +71,7 @@ class Pipeline:
         self.bid = hgac_ID[0]
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
-        self.cwd = '/cephfs/' + self.project + '/' + self.align + '/' + self.sample
+        self.cwd = '/cephfs/PROJECTS/' + self.project + '/' + self.align + '/' + self.bid + '/' + self.sample
         self.status = 0
         self.pipeline()
 
