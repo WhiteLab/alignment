@@ -14,7 +14,7 @@ def bwa_mem_pe(bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref,
     loc = log_dir + sample + ".bwa.pe.log"
     log(loc, date_time() + bwa_cmd + "\n")
     try:
-        subprocess.check_output(bwa_cmd, shell=True)
+        subprocess.check_output(bwa_cmd, shell=True).encode()
     except:
         exit(1)
     return 0

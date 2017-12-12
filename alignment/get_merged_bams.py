@@ -19,7 +19,7 @@ def parse_config(config_file):
 def list_bam(cont, obj, sample, threads):
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/'
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = subprocess.check_output(list_cmd, shell=True)
+    flist = subprocess.check_output(list_cmd, shell=True).encode()
     # Use to check on download status
     p = []
 

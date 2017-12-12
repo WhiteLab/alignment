@@ -38,7 +38,7 @@ def list_bam(cont, obj, sample, threads, rmdup):
     # added trailing slash since we're dealing with bids - otherwise will end up pulling more samples than intended
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/BAM/'
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = subprocess.check_output(list_cmd, shell=True)
+    flist = subprocess.check_output(list_cmd, shell=True).encode()
     # Use to check on download status
     p = []
 
@@ -89,7 +89,7 @@ def novosort_merge_pe(config_file, sample_list):
                                      + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
                 log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
-                    subprocess.check_output(novosort_merge_cmd, shell=True)
+                    subprocess.check_output(novosort_merge_cmd, shell=True).encode()
                     # delete old bams to free up space
                     rm_bam = 'rm ' + bam_string
                     log(loc, date_time() + 'Removing bams that were already merged\n')
@@ -106,7 +106,7 @@ def novosort_merge_pe(config_file, sample_list):
                                      + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
                     log(loc, date_time() + novosort_merge_cmd + "\n")
                     try:
-                        subprocess.check_output(novosort_merge_cmd, shell=True)
+                        subprocess.check_output(novosort_merge_cmd, shell=True).encode()
                         rm_bam = 'rm ' + bam_string
                         log(loc, date_time() + 'Removing bams that were already merged\n')
                         subprocess.call(rm_bam, shell=True)
@@ -120,7 +120,7 @@ def novosort_merge_pe(config_file, sample_list):
                                         + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
                 log(loc, date_time() + novosort_merge_cmd + "\n")
                 try:
-                    subprocess.check_output(novosort_merge_cmd, shell=True)
+                    subprocess.check_output(novosort_merge_cmd, shell=True).encode()
                     # delete old bams to free up space
                     rm_bam = 'rm ' + bam_string
                     log(loc, date_time() + 'Removing bams that were already merged\n')
@@ -159,7 +159,7 @@ def novosort_merge_pe(config_file, sample_list):
                     # get name of rmdup bai file
                     root = bam_list[0].replace('.bam', '')
                     get_name = '. /home/ubuntu/.novarc; swift list ' + cont + ' --prefix ' + root + ' | grep bai$'
-                    bai = subprocess.check_output(get_name, shell=True)
+                    bai = subprocess.check_output(get_name, shell=True).encode()
                     bai = bai.rstrip('\n')
                     dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai
                     check = subprocess.call(dl_cmd, shell=True)
