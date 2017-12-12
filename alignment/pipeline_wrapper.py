@@ -68,10 +68,10 @@ for line in fh:
 
         # Create sbatch script and submit
         #p = Pipeline(end1, end2, seqtype, pipe_cfg)
-        # batch params $cores $mem $pipeline $f1 $f2 $t $j
+        # batch params $pipeline $f1 $f2 $t $j
         job_log = lane + '.log'
-        batch = 'sbatch ' + slurm_wrap + ' --export=cores="' + cores + '",mem="' + mem + '",log="' + job_log \
-                + '",pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
+        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' --log ' + job_log + ' ' + slurm_wrap \
+                + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
                 + '",j="' + pipe_cfg + '"'
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:

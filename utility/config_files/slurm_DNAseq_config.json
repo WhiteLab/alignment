@@ -37,7 +37,7 @@
     "align": "ALIGN",
     "analysis": "ANALYSIS",
     "annotation": "ANNOTATION",
-    "config": "/mnt/WG_PIPE/NS_VC/2016-Jul-01_cpci_plus_germline.json"
+    "config": "/cephfs/users/mbrown/JOB_SUBMISSIONS/2017-Dec-12_slurm_align_test/2017-Dec-12_config.json"
   },
   "params": {
     "threads": "8",
