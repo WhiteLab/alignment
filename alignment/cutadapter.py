@@ -31,7 +31,8 @@ def cutadapter(sample, end1, end2, config_file):
     (cutadapt_tool, fastqc_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim, threads) = \
         parse_config(config_file)
     aflag2 = aflag.upper()
-    cutadapt_cmd = cutadapt_tool + ' -j ' + threads + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
+    cut_th = str(int(threads) - 2)
+    cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -' + aflag + ' ' + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' \
                    + r2trim + ' -n ' + ntrim + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' \
                    + loc + ' 2>> ' + loc
@@ -45,7 +46,7 @@ def cutadapter(sample, end1, end2, config_file):
     else:
         log(loc, date_time() + 'cutadapt running ok.  Starting FastQC\n')
     # will run fastqc while cutadapt is running - assuming a vm of at least 4 cores
-    check = fastqc(fastqc_tool, sample, end1, end2, threads)
+    check = fastqc(fastqc_tool, sample, end1, end2, '2')
     if check != 0:
         log(loc, date_time() + 'FastQC failed for sample! ' + sample + '\n')
         exit(1)
