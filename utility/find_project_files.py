@@ -4,7 +4,7 @@ import subprocess
 import sys
 from subprocess import check_output
 
-from date_time import date_time
+from utility.date_time import date_time
 
 
 def find_project_files(file_dir, file_prefix):
@@ -14,7 +14,7 @@ def find_project_files(file_dir, file_prefix):
         results = check_output(find_cmd, shell=True, stderr=subprocess.PIPE)
         return results
     except:
-        sys.stderr.write(date_time() + "Search of " + subdir + " from " + project + " failed\n")
+        sys.stderr.write(date_time() + "Search of " + file_prefix + " from " + file_dir + " failed\n")
         exit(1)
     return 0
 
