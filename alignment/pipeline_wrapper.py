@@ -70,7 +70,7 @@ for line in fh:
         #p = Pipeline(end1, end2, seqtype, pipe_cfg)
         # batch params $pipeline $f1 $f2 $t $j
         job_log = lane + '.log'
-        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -0 ' + job_log + ' ' + slurm_wrap \
+        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + job_log + ' ' + slurm_wrap \
                 + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
                 + '",j="' + pipe_cfg + '"'
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
