@@ -10,7 +10,6 @@ import json
 from utility.date_time import date_time
 from utility.find_project_files import find_project_files
 from subprocess import call
-import pdb
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f', '--file', action='store', dest='fn',
@@ -56,7 +55,6 @@ for line in fh:
         try:
             sys.stderr.write(date_time() + 'Searching for sequencing files related to ' + lane + '\n')
             contents = find_project_files(cur_dir, file_prefix)
-            pdb.set_trace()
             # sequencing files found in pairs using simple iterator, as find gives files in alphanumeric order -
             # standard file naming should work with this
             seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
@@ -68,9 +66,9 @@ for line in fh:
             continue
 
         # Create sbatch script and submit
-        #p = Pipeline(end1, end2, seqtype, pipe_cfg)
+        # p = Pipeline(end1, end2, seqtype, pipe_cfg)
         # batch params $pipeline $f1 $f2 $t $j
-        job_log = lane + '.log'
+        job_log = bid + '_' + lane + '.log'
         batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + job_log + ' ' + slurm_wrap \
                 + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
                 + '",j="' + pipe_cfg + '"'
