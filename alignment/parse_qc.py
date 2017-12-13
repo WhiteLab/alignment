@@ -8,6 +8,7 @@ import time
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
+import pdb
 
 
 def parse_config(config_file):
@@ -94,6 +95,7 @@ def parseCoverage(CF, ranges):
     run_ratio = 1 - float(zero_attr[4])
     run_total = 0
     aln_bp = 0
+    pdb.set_trace()
     for ratio in ranges:
         cvg[ratio] = {}
         cvg[ratio]['xcov'] = 0
@@ -114,7 +116,7 @@ def parseCoverage(CF, ranges):
     avg_ratio = 0.0
     for i in range(0, len(temp), 1):
         avg_ratio += float(temp[i][4])
-        # pdb.set_trace()
+        pdb.set_trace()
         if int(temp[i][1]) >= avg_cov:
             avg_ratio = 1 - avg_ratio
             break
@@ -166,10 +168,8 @@ def parse_qc(config_file, sample, cflag):
         tbl.write('\t'.join(RG) + '\t' + str(rd_len))
         # cov is a dictionary with the per -ratio stats
         log(loc, date_time() + 'Parsing bedtools coverage file ' + bed_hist1 + '\n')
-        (
-            t1_ts, t1_aln_bp_ot, t1_num_bp, t1_cov, t1_zero_cov, t1_pct_zero_cov, t1_avg_cov,
-            t1_avg_ratio) = parseCoverage(
-            bed_hist1, ranges)
+        (t1_ts, t1_aln_bp_ot, t1_num_bp, t1_cov, t1_zero_cov, t1_pct_zero_cov, t1_avg_cov, t1_avg_ratio) \
+            = parseCoverage(bed_hist1, ranges)
         target_size += t1_ts
         aligned_bp_ot += t1_aln_bp_ot
         num_bp += t1_num_bp
