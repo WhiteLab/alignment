@@ -31,7 +31,8 @@ def cutadapter(sample, end1, end2, config_file):
     (cutadapt_tool, fastqc_tool, qual, mqual, r1_adapt, r2_adapt, minlen, r1trim, r2trim, aflag, ntrim, threads) = \
         parse_config(config_file)
     aflag2 = aflag.upper()
-    cut_th = str(int(threads) - 2)
+    # cut_th = str(int(threads) - 2)
+    cut_th = "3"
     cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -' + aflag + ' ' + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' \
                    + r2trim + ' -n ' + ntrim + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' \
