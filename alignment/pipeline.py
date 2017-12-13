@@ -207,17 +207,20 @@ class Pipeline:
         log(self.loc, date_time() + 'Gathering SAM flag stats\n')
         flagstats(self.samtools_tool, self.sample)
         log(self.loc, date_time() + 'Calculating insert sizes\n')
-        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram) # get insert size metrics.
+        # get insert size metrics
+        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram)
 
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
         # run last since this step slowest of the last
         wait_flag = 1
-        if self.seqtype != 'genome':
+        if self.seqtype == 'capture':
+            capture_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
+        elif self.seqtype == 'exome':
             exome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
         else:
             genome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
-        log(self.loc, date_time() + 'Checking outputs and uploading results\n')
+        log(self.loc, date_time() + 'Checking outputs and organizing results\n')
         # check to see if last expected files have been generated suffix
         self.check_outputs()
 
@@ -227,24 +230,24 @@ class Pipeline:
         # move files into appropriate place and run qc_stats
         log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
         mv_bam = 'mv *.bam *.bai BAM/'
-        subprocess.call(mv_bam, shell=True)
+        call(mv_bam, shell=True)
         rm_sf = 'rm ' + self.end1 + ' ' + self.end2
-        subprocess.call(rm_sf, shell=True)
+        call(rm_sf, shell=True)
         parse_qc(self.json_config, self.sample, self.cflag)
         mv_rest = 'find . -maxdepth 1 -type f -exec mv {} QC \;'
-        subprocess.call(mv_rest, shell=True)
+        call(mv_rest, shell=True)
         mv_config = ' cp ' + self.json_config + ' QC/'
-        subprocess.call(mv_config, shell=True)
+        call(mv_config, shell=True)
         # after completion simply move all one level up, delete created work folder
-        # mv_all = 'mv * ../;'
-        # call(mv_all, shell=True)
-        # os.chdir('../')
-        # rm_wd = 'rmdir ' + self.cwd
-        # call(rm_wd, shell=True)
-        # # change ownership to be project-specific
-        # set_acl = 'chown -R ./ ' + self.user + ':' + self.group
-        # log(self.loc, date_time() + 'Setting acls for current directory ' + set_acl + '\n')
-        # call(set_acl, shell=True)
+        mv_all = 'mv * ../;'
+        call(mv_all, shell=True)
+        os.chdir('../')
+        rm_wd = 'rmdir ' + self.cwd
+        call(rm_wd, shell=True)
+        # change ownership to be project-specific
+        set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
+        log(self.loc, date_time() + 'Setting acls for current directory ' + set_acl + '\n')
+        call(set_acl, shell=True)
         self.status = 0
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
 
