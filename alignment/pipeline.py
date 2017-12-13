@@ -122,6 +122,10 @@ class Pipeline:
         exit(1)
 
     def pipeline(self):
+        # temp line to source environment variables until compute is restarted
+        src_env = 'source /etc/environment'
+        call(src_env, shell=True)
+
         # create working directory
         if not os.path.isdir(self.cwd):
             mk_cwd = 'mkdir -p ' + self.cwd
