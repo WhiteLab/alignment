@@ -146,7 +146,7 @@ def parse_qc(config_file, sample, cflag):
     date_aligned = time.strftime("%c")
     (ccvsn, genome_size, range_list) = parse_config(config_file)
     ranges = range_list.split(',')
-    ranges = map(float, ranges)
+    ranges = list(map(float, ranges))
     # list containing read group info
     RG = sample.split('_')
     log(loc, date_time() + 'Parsing flagstats file ' + rawFlag + '\n')
