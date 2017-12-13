@@ -8,7 +8,6 @@ import time
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
-import pdb
 
 
 def parse_config(config_file):
@@ -95,7 +94,6 @@ def parseCoverage(CF, ranges):
     run_ratio = 1 - float(zero_attr[4])
     run_total = 0
     aln_bp = 0
-    pdb.set_trace()
     for ratio in ranges:
         cvg[ratio] = {}
         cvg[ratio]['xcov'] = 0
@@ -116,7 +114,6 @@ def parseCoverage(CF, ranges):
     avg_ratio = 0.0
     for i in range(0, len(temp), 1):
         avg_ratio += float(temp[i][4])
-        pdb.set_trace()
         if int(temp[i][1]) >= avg_cov:
             avg_ratio = 1 - avg_ratio
             break
