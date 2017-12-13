@@ -47,16 +47,26 @@ def parseFastQC(FQC):
 
 
 def parseFS(FS):
+    (tot_rds, post_aligned_reads, frac_aligned) = ('', '', '')
+    p_flag = 0
     fh = open(FS, 'r')
-    line = next(fh)
-    line = line.rstrip('\n')
-    rd_ct = re.search('^(\d+)\s', line)
-    next(fh)
-    line = next(fh)
-    line = line.rstrip('\n')
-    mapped = re.search('^(\d+).*\((\d+\.\d+)', line)
+    for line in fh:
+        if p_flag == 2:
+            break
+        if re.search('total', line) is not None:
+            rd_ct = re.search('^(\d+)\s', line)
+            tot_rds = rd_ct.group(1)
+            p_flag += 1
+        elif re.search('^\d+.*mapped\s\(\d+\.\d+', line) is not None:
+            mapped = re.search('^(\d+).*mapped\s\((\d+\.\d+)', line)
+            (post_aligned_reads, frac_aligned) = (mapped.group(1), mapped.group(2))
+            p_flag += 1
     fh.close()
-    return rd_ct.group(1), mapped.group(1), mapped.group(2)
+    if p_flag != 2:
+        sys.stderr.write('Unable to properly parse flagstats file ' + FS + '\n')
+        exit(1)
+
+    return tot_rds, post_aligned_reads, frac_aligned
 
 
 def parseINS(INS):
