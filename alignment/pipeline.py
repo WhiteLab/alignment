@@ -123,7 +123,7 @@ class Pipeline:
 
     def pipeline(self):
         # temp line to source environment variables until compute is restarted
-        src_env = 'source /etc/environment'
+        src_env = '. /etc/environment'
         call(src_env, shell=True)
 
         # create working directory
