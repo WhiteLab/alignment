@@ -142,7 +142,7 @@ class Pipeline:
                           + self.log_dir + '; mv ' + self.qc_dir + '/* ../' + self.qc_dir
             log(self.loc, date_time() + 'Relocating files ' + reloc_files + '\n')
             call(reloc_files, shell=True)
-            rm_old = 'rmdir ' + self.bam_dir + '; rmdir ' + self.log_dir + '; rmdir ' + self.qc_dir
+            rm_old = 'rmdir ' + ' '.join((self.bam_dir , self.log_dir, self.qc_dir))
             log(self.loc, date_time() + 'Clearing out working dirs ' + rm_old + '\n')
             call(rm_old, shell=True)
             return 0
