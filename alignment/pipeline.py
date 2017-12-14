@@ -14,7 +14,6 @@ from alignment.picard_insert_size import picard_insert_size
 from alignment.flagstats import flagstats
 from alignment.coverage import *
 from subprocess import call
-import subprocess
 import json
 from utility.log import log
 from alignment.parse_qc import parse_qc
@@ -74,6 +73,9 @@ class Pipeline:
         self.cwd = '/cephfs/PROJECTS/' + self.project + '/' + self.align + '/' + self.bid + '/' + self.sample
         self.user = self.config_data['params']['user']
         self.group = self.config_data['params']['group']
+        self.bam_dir = 'BAM/'
+        self.qc_dir = 'QC/'
+        self.log_dir = 'LOGS/'
         self.status = 0
         self.pipeline()
 
@@ -121,6 +123,32 @@ class Pipeline:
         sys.stderr.write('Outputs ' + ', '.join(failed) + ' failed to complete!\n')
         exit(1)
 
+    def organize_dirs(self):
+        # check for existing BAM, QC and LOG dirs one level up
+        try:
+            if not os.path.isdir('../' + self.bam_dir):
+                mk_bam_dir = 'mkdir ../' + self.bam_dir
+                log(self.loc, date_time() + 'Making BAM directory ' + mk_bam_dir + '\n')
+                call(mk_bam_dir, shell=True)
+            if not os.path.isdir('../' + self.qc_dir):
+                mk_qc_dir = 'mkdir ../' + self.qc_dir
+                log(self.loc, date_time() + 'Making QC directory ' + mk_qc_dir + '\n')
+                call(mk_qc_dir, shell=True)
+            if not os.path.isdir('../' + self.log_dir):
+                mk_log_dir = 'mkdir ../' + self.log_dir
+                log(self.loc, date_time() + 'Making LOGS directory ' + mk_log_dir + '\n')
+                call(mk_log_dir, shell=True)
+            reloc_files = 'mv ' + self.bam_dir + '/* ../' + self.bam_dir + '; mv ' + self.log_dir + '/* ../' \
+                          + self.log_dir + '; mv ' + self.qc_dir + '/* ../' + self.qc_dir
+            log(self.loc, date_time() + 'Relocating files ' + reloc_files + '\n')
+            call(reloc_files, shell=True)
+            rm_old = 'rmdir ' + self.bam_dir + '; rmdir ' + self.log_dir + '; rmdir ' + self.qc_dir
+            log(self.loc, date_time() + 'Clearing out working dirs ' + rm_old + '\n')
+            call(rm_old, shell=True)
+            return 0
+        except:
+            return 1
+
     def pipeline(self):
         # temp line to source environment variables until compute is restarted
         src_env = '. /etc/environment'
@@ -133,26 +161,24 @@ class Pipeline:
             call(mk_cwd, shell=True)
         os.chdir(self.cwd)
 
-        log_dir = 'LOGS/'
-        if not os.path.isdir(log_dir):
-            mk_log_dir = 'mkdir ' + log_dir
+        if not os.path.isdir(self.log_dir):
+            mk_log_dir = 'mkdir ' + self.log_dir
             call(mk_log_dir, shell=True)
-            log(self.loc, date_time() + 'Made log directory ' + log_dir + "\n")
+            log(self.loc, date_time() + 'Made log directory ' + self.log_dir + "\n")
         # create symlink for fastq files to work on
         mk_links = 'ln -s ' + self.sf1 + ' ./' + self.end1 + '; ln -s ' + self.sf2 + ' ./' + self.end2
         log(self.loc, date_time() + 'Making symlinks for fastq files ' + mk_links + '\n')
         call(mk_links, shell=True)
         # create BAM and QC directories if they don't exist already
-        bam_dir = 'BAM/'
-        qc_dir = 'QC/'
-        if not os.path.isdir(bam_dir):
-            mk_bam_dir = 'mkdir ' + bam_dir
+
+        if not os.path.isdir(self.bam_dir):
+            mk_bam_dir = 'mkdir ' + self.bam_dir
             call(mk_bam_dir, shell=True)
-            log(self.loc, date_time() + 'Made bam directory ' + bam_dir + "\n")
-        if not os.path.isdir(qc_dir):
-            mk_qc_dir = 'mkdir ' + qc_dir
+            log(self.loc, date_time() + 'Made bam directory ' + self.bam_dir + "\n")
+        if not os.path.isdir(self.qc_dir):
+            mk_qc_dir = 'mkdir ' + self.qc_dir
             call(mk_qc_dir, shell=True)
-            log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
+            log(self.loc, date_time() + 'Made qc directory ' + self.qc_dir + "\n")
         log(self.loc,
             date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
 
@@ -168,20 +194,20 @@ class Pipeline:
         if self.pdxflag == 'Y':
             log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
             check = filter_wrap(self.mmu_filter, self.bwa_tool, RGRP, self.mmu_bwa_ref, self.end1, self.end2,
-                            self.samtools_tool, self.mmu_samtools_ref, self.sample, log_dir, self.threads)
+                            self.samtools_tool, self.mmu_samtools_ref, self.sample, self.log_dir, self.threads)
             if check != 0:
                 log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
                 exit(1)
             if not os.path.isfile(self.sample + '.bam'):
                 check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
-                               self.hsa_samtools_ref, self.sample, log_dir, self.threads)
+                               self.hsa_samtools_ref, self.sample, self.log_dir, self.threads)
         else:
             log(self.loc, date_time() + 'Starting BWA align\n')
             # check certain key processes
             # skip aligning if bam already exists
             if not os.path.isfile(self.sample + '.bam'):
                 check = bwa_mem_pe(self.bwa_tool, RGRP, self.bwa_ref, self.end1, self.end2, self.samtools_tool,
-                                   self.samtools_ref, self.sample, log_dir, self.threads)
+                                   self.samtools_ref, self.sample, self.log_dir, self.threads)
                 # rest won't run until completed
 
             else:
@@ -193,7 +219,7 @@ class Pipeline:
         # skip sort if sorted file exists already
         log(self.loc, date_time() + 'Sorting BAM file\n')
         if not os.path.isfile(self.sample + '.srt.bam'):
-            check = novosort_sort_pe(self.novosort, self.sample, log_dir, self.threads,
+            check = novosort_sort_pe(self.novosort, self.sample, self.log_dir, self.threads,
                                      self.ram, self.use_nova_flag)  # rest won't run until completed
             if check != 0:
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
@@ -203,7 +229,7 @@ class Pipeline:
         # skip next steps in insert size already calculated
         if not os.path.isfile(self.sample + '.insert_metrics.hist') and self.use_nova_flag != 'Y':
             log(self.loc, date_time() + 'Removing PCR duplicates\n')
-            picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, log_dir,
+            picard_rmdup(self.java_tool, self.picard_tool, self.picard_tmp, self.sample, self.log_dir,
                          self.jram)  # rest won't run until completed
         if self.use_nova_flag == 'Y':
             log(self.loc, date_time() + 'Duplicates removed using novosort.\n')
@@ -212,7 +238,7 @@ class Pipeline:
         flagstats(self.samtools_tool, self.sample)
         log(self.loc, date_time() + 'Calculating insert sizes\n')
         # get insert size metrics
-        picard_insert_size(self.java_tool, self.picard_tool, self.sample, log_dir, self.jram)
+        picard_insert_size(self.java_tool, self.picard_tool, self.sample, self.log_dir, self.jram)
 
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')
@@ -224,7 +250,7 @@ class Pipeline:
             exome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
         else:
             genome_coverage(self.bedtools2_tool, self.sample, self.bed_ref, wait_flag)
-        log(self.loc, date_time() + 'Checking outputs and organizing results\n')
+        log(self.loc, date_time() + 'Checking outputs.s\n')
         # check to see if last expected files have been generated suffix
         self.check_outputs()
 
@@ -232,7 +258,7 @@ class Pipeline:
             p_tmp_rm = "rm -rf picard_tmp"
             call(p_tmp_rm, shell=True)
         # move files into appropriate place and run qc_stats
-        log(self.loc, date_time() + 'Calculating qc stats and prepping files for upload\n')
+        log(self.loc, date_time() + 'Calculating qc stats and organizing results\n')
         mv_bam = 'mv *.bam *.bai BAM/'
         call(mv_bam, shell=True)
         rm_sf = 'rm ' + self.end1 + ' ' + self.end2
@@ -242,9 +268,11 @@ class Pipeline:
         call(mv_rest, shell=True)
         mv_config = ' cp ' + self.json_config + ' QC/'
         call(mv_config, shell=True)
-        # after completion simply move all one level up, delete created work folder
-        mv_all = 'mv * ../;'
-        call(mv_all, shell=True)
+        # check to see if dirs exists one level up, if not create then mv in
+        check = self.organize_dirs()
+        if check != 0:
+            sys.stderr.write(date_time() + 'Organizing directories failed, check logs\n')
+            exit(1)
         os.chdir('../')
         rm_wd = 'rmdir ' + self.cwd
         call(rm_wd, shell=True)
