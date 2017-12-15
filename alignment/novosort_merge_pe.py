@@ -3,6 +3,7 @@
 import json
 import re
 import sys
+import os
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
@@ -13,8 +14,9 @@ from utility.job_manager import job_manager
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'], \
-           config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['threads'], \
-           config_data['params']['ram'], config_data['params']['novaflag']
+           config_data['refs']['project'], config_data['refs']['align'], config_data['params']['threads'], \
+           config_data['params']['ram'], config_data['params']['novaflag'], \
+           config_data['tools']['novo_merge_rmdup_slurm']
 
 
 def list_unsorted_bam(bam_list, cont, threads):
@@ -33,87 +35,57 @@ def list_unsorted_bam(bam_list, cont, threads):
         exit(1)
 
 
-def list_bam(cont, obj, sample, threads, rmdup):
-    ct = 0
-    # added trailing slash since we're dealing with bids - otherwise will end up pulling more samples than intended
-    list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample + '/BAM/'
-    sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = subprocess.check_output(list_cmd, shell=True).decode()
-    # Use to check on download status
-    p = []
+def list_bam(project, align, sample,rmdup):
+    bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
+    find_bam_cmd = 'find ' + bam_dir + '*.bam'
+    sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
+    bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode()
 
-    bam_list = []
-    bai_list = []
-    for fn in re.findall('(.*)\n', flist):
-        # depending on software used to index, .bai extension may follow bam
-        test = re.match('^\S+_\w*\d+\.rmdup.srt.ba[m|i]$', fn) or re.match('^\S+_\w*\d+\.rmdup.srt.bam.bai$', fn)
-
-        if test:
-            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
-            p.append(dl_cmd)
-            if fn[-3:] == 'bam':
-                bam_list.append(fn)
-                ct += 1
-            else:
-                bai_list.append(fn)
-    f = 0
-    if len(p) > 1:
-        f = job_manager(p, threads)
-
-        sys.stderr.write(date_time() + 'BAM download complete\n')
+    bam_list = bam_find.split('\n')
+    find_bai_cmd = 'find ' + bam_dir + '*.bai'
+    sys.stderr.write(date_time() + find_bai_cmd + '\nGetting bai list\n')
+    bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode()
+    bai_list = bai_find.split('\n')
+    ct = len(bam_list)
+    if ct >= 1:
+        sys.stderr.write(date_time() + 'BAM files\n')
         if rmdup == 'Y':
             return bam_list, ct
         else:
             return bam_list, bai_list, ct
     else:
-        sys.stderr.write(date_time() + 'BAM download failed\n')
+        sys.stderr.write(date_time() + 'No bams found for ' + sample + '\n')
         exit(1)
 
 
 def novosort_merge_pe(config_file, sample_list):
     fh = open(sample_list, 'r')
-    (novosort, java_tool, picard_tool, cont, obj, threads, ram, rmdup) = parse_config(config_file)
-    tmp_dir = 'mkdir TMP'
-    subprocess.call(tmp_dir, shell=True)
+    (novosort, java_tool, picard_tool, project, align, threads, ram, rmdup, novo_merge_rmdup_slurm) \
+        = parse_config(config_file)
+
     for sample in fh:
         sample = sample.rstrip('\n')
         loc = 'LOGS/' + sample + '.novosort_merge.log'
         if rmdup == 'Y':
-            (bam_list, n) = list_bam(cont, obj, sample, threads, rmdup)
+            (bam_list, n) = list_bam(project, align, sample, rmdup)
         else:
-            (bam_list, bai_list, n) = list_bam(cont, obj, sample, threads, rmdup)
+            (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
         bam_string = " ".join(bam_list)
+        cur_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
+        os.chdir(cur_dir)
+        tmp_dir = 'mkdir TMP'
+        job_log = sample + '.novosort_merge.log'
+        subprocess.call(tmp_dir, shell=True)
         if n > 1:
             if rmdup == 'Y':
-                novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd -o " + sample \
-                                     + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
-                log(loc, date_time() + novosort_merge_cmd + "\n")
-                try:
-                    subprocess.check_output(novosort_merge_cmd, shell=True).decode()
-                    # delete old bams to free up space
-                    rm_bam = 'rm ' + bam_string
-                    log(loc, date_time() + 'Removing bams that were already merged\n')
-                    subprocess.call(rm_bam, shell=True)
-                except:
-                    log(loc, date_time() + 'novosort sort and merge failed for sample ' + sample + ', trying unsorted'
-                                                                                                   ' bams\n')
-                    rm_bam = 'rm ' + bam_string
-                    log(loc, date_time() + 'Removing bams that failed merge\n')
-                    subprocess.call(rm_bam, shell=True)
-                    bam_list = list_unsorted_bam(bam_list, cont, threads)
-                    bam_string = " ".join(bam_list)
-                    novosort_merge_cmd = novosort + " -c " + threads + " -m " + ram + "G --rd -o " + sample \
-                                     + '.merged.final.bam --index --tmpdir ./TMP ' + bam_string + ' 2>> ' + loc
-                    log(loc, date_time() + novosort_merge_cmd + "\n")
-                    try:
-                        subprocess.check_output(novosort_merge_cmd, shell=True).decode()
-                        rm_bam = 'rm ' + bam_string
-                        log(loc, date_time() + 'Removing bams that were already merged\n')
-                        subprocess.call(rm_bam, shell=True)
-                    except:
-                        log(loc, date_time() + 'novosort sort and merge failed for sample ' + sample + '\n')
-                        exit(1)
+                # $novosort -c $threads -m $ram --rd -o $sample .merged.final.bam --index --tmpdir ./TMP $bam_string
+                # 2>> $loc
+                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log \
+                + ' --export=novosort="' + novosort + '",threads="' + threads + '",ram="' + ram + 'G",$bam_string="' \
+                        + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
+                log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")
 
+                subprocess.call(batch, shell=True)
 
             else:
                 novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted -o "\
@@ -147,7 +119,7 @@ def novosort_merge_pe(config_file, sample_list):
             try:
                 # first need to get bai file before renaming
                 if rmdup == 'N':
-                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai_list[0]
+                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + project + ' --skip-identical ' + bai_list[0]
                     check = subprocess.call(dl_cmd, shell=True)
                     if check != 0:
                         log(loc, 'Could not find bai file for ' + bam_list[0])
@@ -158,10 +130,10 @@ def novosort_merge_pe(config_file, sample_list):
                 else:
                     # get name of rmdup bai file
                     root = bam_list[0].replace('.bam', '')
-                    get_name = '. /home/ubuntu/.novarc; swift list ' + cont + ' --prefix ' + root + ' | grep bai$'
+                    get_name = '. /home/ubuntu/.novarc; swift list ' + project + ' --prefix ' + root + ' | grep bai$'
                     bai = subprocess.check_output(get_name, shell=True).decode()
                     bai = bai.rstrip('\n')
-                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + bai
+                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + project + ' --skip-identical ' + bai
                     check = subprocess.call(dl_cmd, shell=True)
                     if check != 0:
                         log(loc, 'Could not find bai file for ' + bai)

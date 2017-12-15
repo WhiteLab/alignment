@@ -9,6 +9,7 @@
     "java": "java",
     "picard": "/cephfs/users/mbrown/PIPELINES/TOOLS/picard-2.16.0/picard.jar",
     "novosort": "/cephfs/software/novosort/novosort",
+    "novo_merge_rmdup_slurm": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/novosort_merge_rmdup",
     "bedtools": "/cephfs/users/mbrown/PIPELINES/TOOLS/bedtools2/bin/bedtools",
     "qc_stats": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/parse_qc.py",
     "mutect": "/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
