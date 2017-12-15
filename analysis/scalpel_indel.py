@@ -7,7 +7,7 @@ import os
 from utility.date_time import date_time
 from subprocess import call
 from utility.log import log
-from alignment.get_merged_bams import get_merged_bams
+from alignment.check_for_merged_bams import check_for_merged_bams
 from analysis.dustmask_filter import filter_indel
 
 
@@ -63,7 +63,7 @@ def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
         create_sample_list(pairs)
         sys.stderr.write(date_time() + 'Sample pairs list not created - creating one since this is being run likely '
                                        'outside of pipeline')
-        get_merged_bams(config_file, sample_list)
+        check_for_merged_bams(config_file, sample_list)
     fh = open(pairs, 'r')
     for line in fh:
         cur = line.rstrip('\n').split('\t')

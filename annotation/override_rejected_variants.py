@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
-from analysis.variant_annot_pipe import *
+from analysis.variant_annot_pipeline_wrapper import *
 import subprocess
 import os
 

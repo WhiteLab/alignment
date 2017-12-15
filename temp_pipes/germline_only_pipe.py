@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
-from analysis.variant_annot_pipe import *
+from analysis.variant_annot_pipeline_wrapper import *
 
 
 def cleanup_bams():
@@ -31,7 +31,7 @@ def temp_germline_pipe(config_file, samples, ref_mnt):
             f = 1
             temp.close()
             x = 0
-            check = get_merged_bams(config_file, temp_name)
+            check = check_for_merged_bams(config_file, temp_name)
             if len(check) != 0:
                 sys.stderr.write('Can\'t find merged bams around ' + sample)
             check = platypus_germline(config_file, temp_name, 'LOGS/', 'n', ref_mnt)
@@ -48,7 +48,7 @@ def temp_germline_pipe(config_file, samples, ref_mnt):
     temp.close()
     if f == 0:
         # do remaining is total number of pairs left is less than m
-        get_merged_bams(config_file, temp_name)
+        check_for_merged_bams(config_file, temp_name)
         check = platypus_germline(config_file, temp_name, 'LOGS/', 'n', ref_mnt)
         if check != 0:
             sys.stderr.write(date_time() + 'platypus failed a the end of list\n')
