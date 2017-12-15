@@ -142,6 +142,8 @@ class Pipeline:
                           + self.log_dir + '; mv ' + self.qc_dir + '/* ../' + self.qc_dir
             log(self.loc, date_time() + 'Relocating files ' + reloc_files + '\n')
             call(reloc_files, shell=True)
+            # need to reassign log file location since it's being moved!
+            self.loc = '../' + self.loc
             rm_old = 'rmdir ' + ' '.join((self.bam_dir , self.log_dir, self.qc_dir))
             log(self.loc, date_time() + 'Clearing out working dirs ' + rm_old + '\n')
             call(rm_old, shell=True)
@@ -278,7 +280,7 @@ class Pipeline:
         call(rm_wd, shell=True)
         # change ownership to be project-specific
         set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
-        log(self.loc, date_time() + 'Setting acls for current directory ' + set_acl + '\n')
+        sys.stderr.write(date_time() + 'Setting acls for current directory ' + set_acl + '\n')
         call(set_acl, shell=True)
         self.status = 0
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
