@@ -222,7 +222,8 @@ class Pipeline:
         log(self.loc, date_time() + 'Sorting BAM file\n')
         if not os.path.isfile(self.sample + '.srt.bam'):
             check = novosort_sort_pe(self.novosort, self.sample, self.log_dir, self.threads,
-                                     self.ram, self.use_nova_flag)  # rest won't run until completed
+                                     self.ram, self.use_nova_flag)
+            # rest won't run until completed
             if check != 0:
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
                 exit(1)
