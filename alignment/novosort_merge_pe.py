@@ -16,7 +16,7 @@ def parse_config(config_file):
     return config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'], \
            config_data['refs']['project'], config_data['refs']['align'], config_data['params']['threads'], \
            config_data['params']['ram'], config_data['params']['novaflag'], \
-           config_data['tools']['novo_merge_rmdup_slurm']
+           config_data['tools']['novo_merge_rmdup_slurm'], config_data['tools']['novo_merge_picard_rmdup_slurm']
 
 
 def list_unsorted_bam(bam_list, cont, threads):
@@ -60,8 +60,8 @@ def list_bam(project, align, sample,rmdup):
 
 def novosort_merge_pe(config_file, sample_list):
     fh = open(sample_list, 'r')
-    (novosort, java_tool, picard_tool, project, align, threads, ram, rmdup, novo_merge_rmdup_slurm) \
-        = parse_config(config_file)
+    (novosort, java_tool, picard_tool, project, align, threads, ram, rmdup, novo_merge_rmdup_slurm,
+     novo_picard_merge_rmdup_slurm) = parse_config(config_file)
 
     for sample in fh:
         sample = sample.rstrip('\n')
@@ -88,33 +88,26 @@ def novosort_merge_pe(config_file, sample_list):
                 subprocess.call(batch, shell=True)
 
             else:
-                novosort_merge_cmd = novosort + " --threads " + threads + " --ram " + ram + "G --assumesorted -o "\
-                                        + sample + '.merged.bam --index --tmpdir ./TMP ' + bam_string
-                log(loc, date_time() + novosort_merge_cmd + "\n")
-                try:
-                    subprocess.check_output(novosort_merge_cmd, shell=True).decode()
-                    # delete old bams to free up space
-                    rm_bam = 'rm ' + bam_string
-                    log(loc, date_time() + 'Removing bams that were already merged\n')
-                    subprocess.call(rm_bam, shell=True)
-                    # rm dups
-                    picard_tmp = 'picard_tmp'
-                    # setting max records in ram to half of ram
-                    recs = (int(ram) / 2) * (1000000000 / 200)
-                    picard_rmdup_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " MarkDuplicates " \
-                                       "CREATE_INDEX=true TMP_DIR=" + picard_tmp + " REMOVE_DUPLICATES=true" \
-                                       " ASSUME_SORTED=true MAX_RECORDS_IN_RAM=" + str(recs) + \
-                                       " MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=500 INPUT=" + sample + ".merged.bam OUTPUT="\
-                                       + sample + ".merged.final.bam METRICS_FILE=" + sample +\
-                                       ".rmdup.srt.metrics VALIDATION_STRINGENCY=LENIENT"
-                    sys.stderr.write(date_time() + 'Removing dups\n' + picard_rmdup_cmd + '\n')
-                    subprocess.call(picard_rmdup_cmd, shell=True)
-                    # delete merged bam after removing dups
-                    rm_merged_bam = 'rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
-                    subprocess.call(rm_merged_bam, shell=True)
-                except:
-                    sys.stderr.write(date_time() + 'novosort and picard merge failed for sample ' + sample + '\n')
-                    exit(1)
+
+                # rm dups
+                picard_tmp = 'picard_tmp'
+                # setting max records in ram to half of ram
+                recs = (int(ram) / 2) * (1000000000 / 200)
+                in_bam = sample + '.merged.bam'
+                out_bam = sample + '.merged.final.bam'
+                mets = sample + '.rmdup.srt.metrics'
+                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log + ' --export=novosort="' \
+                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",inbam="' + in_bam \
+                        + '",$bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' + java_tool \
+                        + '",picard_tool="' + picard_tool + '",tmp="' + picard_tmp + '",recs="' + str(recs) \
+                        + '",out_bam="' + out_bam + '",mets="' + mets + '" ' + novo_picard_merge_rmdup_slurm
+                sys.stderr.write(date_time() + 'Merging with novosort and rmdup with picard for legacy reasons!\n'
+                                 + batch + '\n')
+                subprocess.call(batch, shell=True)
+                # delete merged bam after removing dups
+                rm_merged_bam = 'rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
+                subprocess.call(rm_merged_bam, shell=True)
+
         else:
             try:
                 # first need to get bai file before renaming

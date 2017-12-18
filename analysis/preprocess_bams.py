@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
 
-import json
 import sys
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
-import os
 from utility.date_time import date_time
-from subprocess import call
 from alignment.novosort_merge_pe import novosort_merge_pe
 from alignment.check_for_merged_bams import check_for_merged_bams
 
 
-def parse_config(config_file):
-    config_data = json.loads(open(config_file, 'r').read())
-    return config_data['tools']['novosort'], config_data['refs']['project'], config_data['refs']['align']
-
-
-def run_novosort(config_file, sample_list, obj):
+def run_novosort(config_file, sample_list):
         check = novosort_merge_pe(config_file, sample_list)
         if check == 0:
             sys.stderr.write(date_time() + 'File merge complete!\n')
@@ -26,7 +18,6 @@ def run_novosort(config_file, sample_list, obj):
 
 
 def preprocess_bams(config_file, sample_pairs):
-    (novosort, project, align) = parse_config(config_file)
     # create sample list
     sample_list = 'sample_list.txt'
     fh = open(sample_pairs, 'r')
@@ -50,7 +41,7 @@ def preprocess_bams(config_file, sample_pairs):
         temp_fh = open(temp_fn, 'w')
         temp_fh.write('\n'.join(miss_list))
         temp_fh.close()
-        run_novosort(config_file, temp_fn, align)
+        run_novosort(config_file, temp_fn)
     else:
         sys.stderr.write(date_time() + 'All bams found.  Moving on\n')
 
