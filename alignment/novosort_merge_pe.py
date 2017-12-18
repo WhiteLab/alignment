@@ -32,10 +32,7 @@ def list_bam(project, align, sample, rmdup):
         pdb.set_trace()
         ct = len(bam_list)
 
-        if rmdup == 'Y':
-            return bam_list, ct
-        else:
-            return bam_list, bai_list, ct
+        return bam_list, bai_list, ct
     except:
         sys.stderr.write(date_time() + 'No bams found for ' + sample + '\n')
         exit(1)
@@ -50,11 +47,7 @@ def novosort_merge_pe(config_file, sample_list):
     for sample in fh:
         sample = sample.rstrip('\n')
         loc = 'LOGS/' + sample + '.novosort_merge.log'
-        (bam_list, bai_list, n) = ([], [], 0)
-        if rmdup == 'Y':
-            (bam_list, n) = list_bam(project, align, sample, rmdup)
-        else:
-            (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
+        (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
         bam_string = " ".join(bam_list)
         pdb.set_trace()
         cur_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
