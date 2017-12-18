@@ -38,7 +38,6 @@ def list_bam(project, align, sample, rmdup):
         exit(1)
 
 
-
 def novosort_merge_pe(config_file, sample_list):
     fh = open(sample_list, 'r')
     (novosort, java_tool, picard_tool, project, align, threads, ram, rmdup, novo_merge_rmdup_slurm,
@@ -46,7 +45,7 @@ def novosort_merge_pe(config_file, sample_list):
 
     for sample in fh:
         sample = sample.rstrip('\n')
-        loc = 'LOGS/' + sample + '.novosort_merge.log'
+        loc = '../LOGS/' + sample + '.novosort_merge.log'
         (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
         bam_string = " ".join(bam_list)
         pdb.set_trace()
@@ -68,20 +67,19 @@ def novosort_merge_pe(config_file, sample_list):
                 # setting max records in ram to half of ram
                 recs = (int(ram) / 2) * (1000000000 / 200)
                 in_bam = sample + '.merged.bam'
+                in_bai = sample + '.merged.bai'
                 out_bam = sample + '.merged.final.bam'
                 mets = sample + '.rmdup.srt.metrics'
                 batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log + ' --export=novosort="' \
                         + novosort + '",threads="' + threads + '",ram="' + ram + 'G",inbam="' + in_bam \
                         + '",$bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' + java_tool \
                         + '",picard_tool="' + picard_tool + '",tmp="' + picard_tmp + '",recs="' + str(recs) \
-                        + '",out_bam="' + out_bam + '",mets="' + mets + '" ' + novo_picard_merge_rmdup_slurm
+                        + '",out_bam="' + out_bam + '",mets="' + mets + '",in_bai="' + in_bai + '" ' \
+                        + novo_picard_merge_rmdup_slurm
                 sys.stderr.write(date_time() + 'Merging with novosort and rmdup with picard for legacy reasons!\n'
                                  + batch + '\n')
                 pdb.set_trace()
                 subprocess.call(batch, shell=True)
-                # delete merged bam after removing dups
-                rm_merged_bam = 'rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
-                subprocess.call(rm_merged_bam, shell=True)
 
         else:
 
