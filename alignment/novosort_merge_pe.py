@@ -20,25 +20,26 @@ def parse_config(config_file):
 
 def list_bam(project, align, sample, rmdup):
     bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
-    find_bam_cmd = 'find ' + bam_dir + '.*.rmdup.srt.bam'
+    find_bam_cmd = 'find ' + bam_dir + '*.rmdup.srt.bam'
     sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
-    bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode()
-    bam_list = bam_find.split('\n')
-    find_bai_cmd = 'find ' + bam_dir + '.*.rmdup.srt.*.bai'
-    sys.stderr.write(date_time() + find_bai_cmd + '\nGetting bai list\n')
-    bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode()
-    bai_list = bai_find.split('\n')
-    pdb.set_trace()
-    ct = len(bam_list)
-    if ct >= 1:
-        sys.stderr.write(date_time() + 'BAM files\n')
+    try:
+        bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode()
+        bam_list = bam_find.split('\n')
+        find_bai_cmd = 'find ' + bam_dir + '*.rmdup.srt.*.bai'
+        sys.stderr.write(date_time() + find_bai_cmd + '\nGetting bai list\n')
+        bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode()
+        bai_list = bai_find.split('\n')
+        pdb.set_trace()
+        ct = len(bam_list)
+
         if rmdup == 'Y':
             return bam_list, ct
         else:
             return bam_list, bai_list, ct
-    else:
+    except:
         sys.stderr.write(date_time() + 'No bams found for ' + sample + '\n')
         exit(1)
+
 
 
 def novosort_merge_pe(config_file, sample_list):
