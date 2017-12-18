@@ -23,11 +23,11 @@ def list_bam(project, align, sample, rmdup):
     find_bam_cmd = 'find ' + bam_dir + '*.rmdup.srt.bam'
     sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
     try:
-        bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode()
+        bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode().rstrip('\n')
         bam_list = bam_find.split('\n')
         find_bai_cmd = 'find ' + bam_dir + '*.rmdup.srt.*.bai'
         sys.stderr.write(date_time() + find_bai_cmd + '\nGetting bai list\n')
-        bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode()
+        bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode().rstrip('\n')
         bai_list = bai_find.split('\n')
         pdb.set_trace()
         ct = len(bam_list)
