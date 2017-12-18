@@ -50,6 +50,7 @@ def novosort_merge_pe(config_file, sample_list):
     for sample in fh:
         sample = sample.rstrip('\n')
         loc = 'LOGS/' + sample + '.novosort_merge.log'
+        (bam_list, bai_list, n) = ([], [], 0)
         if rmdup == 'Y':
             (bam_list, n) = list_bam(project, align, sample, rmdup)
         else:
@@ -91,8 +92,8 @@ def novosort_merge_pe(config_file, sample_list):
 
         else:
 
-                link_bam = 'ln -s ' + bam_list[0] + ' ' + sample + '.merged.final.bam; ln -s ' + bai + ' ' + sample \
-                         + '.merged.final.bam.bai'
+                link_bam = 'ln -s ' + bam_list[0] + ' ' + sample + '.merged.final.bam; ln -s ' + bai_list[0] + ' ' \
+                           + sample + '.merged.final.bam.bai'
                 log(loc, date_time() + 'Creating symlink for merged final bam since ony one exists\n'
                     + link_bam + '\n')
                 subprocess.call(link_bam, shell=True)
