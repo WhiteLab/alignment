@@ -51,12 +51,12 @@ def novosort_merge_pe(config_file, sample_list):
         pdb.set_trace()
         cur_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
         os.chdir(cur_dir)
-        job_log = sample + '.novosort_merge.log'
+        out_bam = sample + '.merged.final.bam'
         if n > 1:
             if rmdup == 'Y':
-                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log + ' --export=novosort="' \
-                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",$bam_string="' \
-                        + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
+                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + loc + ' --export=novosort="' \
+                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",out_bam="' + out_bam \
+                        + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
                 log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")
                 pdb.set_trace()
                 subprocess.call(batch, shell=True)
@@ -68,11 +68,11 @@ def novosort_merge_pe(config_file, sample_list):
                 recs = (int(ram) / 2) * (1000000000 / 200)
                 in_bam = sample + '.merged.bam'
                 in_bai = sample + '.merged.bai'
-                out_bam = sample + '.merged.final.bam'
+
                 mets = sample + '.rmdup.srt.metrics'
-                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log + ' --export=novosort="' \
+                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + loc + ' --export=novosort="' \
                         + novosort + '",threads="' + threads + '",ram="' + ram + 'G",inbam="' + in_bam \
-                        + '",$bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' + java_tool \
+                        + '",bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' + java_tool \
                         + '",picard_tool="' + picard_tool + '",tmp="' + picard_tmp + '",recs="' + str(recs) \
                         + '",out_bam="' + out_bam + '",mets="' + mets + '",in_bai="' + in_bai + '" ' \
                         + novo_picard_merge_rmdup_slurm
