@@ -14,7 +14,7 @@ def parse_config(config_file):
 
 def list_bam(project, align_dir, sample):
     project_dir = '/cephfs/PROJECTS/' + project
-    bam = project_dir + '/' + align_dir + '/' + sample + '/' + sample + '.merged.final.bam'
+    bam = project_dir + '/' + align_dir + '/' + sample + '/BAM/' + sample + '.merged.final.bam'
     check_file = os.path.isfile(bam)
     if not check_file:
         sys.stderr.write(date_time() + 'Merged bam ' + bam + ' not found.\n')

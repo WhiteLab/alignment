@@ -85,7 +85,7 @@ def novosort_merge_pe(config_file, sample_list):
 
                 link_bam = 'ln -s ' + bam_list[0] + ' ' + sample + '.merged.final.bam; ln -s ' + bai_list[0] + ' ' \
                            + sample + '.merged.final.bam.bai'
-                log(loc, date_time() + 'Creating symlink for merged final bam since ony one exists\n'
+                log(loc, date_time() + 'Creating symlink for merged final bam since only one exists\n'
                     + link_bam + '\n')
                 subprocess.call(link_bam, shell=True)
 
