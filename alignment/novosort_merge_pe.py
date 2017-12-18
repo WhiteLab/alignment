@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import json
-import re
 import sys
 import os
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 import subprocess
-from utility.job_manager import job_manager
+import pdb
 
 
 def parse_config(config_file):
@@ -19,33 +18,17 @@ def parse_config(config_file):
            config_data['tools']['novo_merge_rmdup_slurm'], config_data['tools']['novo_merge_picard_rmdup_slurm']
 
 
-def list_unsorted_bam(bam_list, cont, threads):
-    p = []
-    for i in range(0, len(bam_list), 1):
-        bam_list[i] = bam_list[i].replace('.rmdup.srt.bam', '.bam')
-        dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' ' + bam_list[i]
-        p.append(dl_cmd)
-    f = job_manager(p, threads)
-    if f == 0:
-        sys.stderr.write(date_time() + 'BAM download complete\n')
-        return bam_list
-
-    else:
-        sys.stderr.write(date_time() + 'BAM download failed\n')
-        exit(1)
-
-
-def list_bam(project, align, sample,rmdup):
+def list_bam(project, align, sample, rmdup):
     bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
     find_bam_cmd = 'find ' + bam_dir + '*.bam'
     sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
     bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode()
-
     bam_list = bam_find.split('\n')
     find_bai_cmd = 'find ' + bam_dir + '*.bai'
     sys.stderr.write(date_time() + find_bai_cmd + '\nGetting bai list\n')
     bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode()
     bai_list = bai_find.split('\n')
+    pdb.set_trace()
     ct = len(bam_list)
     if ct >= 1:
         sys.stderr.write(date_time() + 'BAM files\n')
@@ -71,25 +54,21 @@ def novosort_merge_pe(config_file, sample_list):
         else:
             (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
         bam_string = " ".join(bam_list)
+        pdb.set_trace()
         cur_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
         os.chdir(cur_dir)
-        tmp_dir = 'mkdir TMP'
         job_log = sample + '.novosort_merge.log'
-        subprocess.call(tmp_dir, shell=True)
         if n > 1:
             if rmdup == 'Y':
-                # $novosort -c $threads -m $ram --rd -o $sample .merged.final.bam --index --tmpdir ./TMP $bam_string
-                # 2>> $loc
-                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log \
-                + ' --export=novosort="' + novosort + '",threads="' + threads + '",ram="' + ram + 'G",$bam_string="' \
+                batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_log + ' --export=novosort="' \
+                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",$bam_string="' \
                         + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
                 log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")
-
+                pdb.set_trace()
                 subprocess.call(batch, shell=True)
 
             else:
-
-                # rm dups
+                # run legacy pipe for removing dups using picard
                 picard_tmp = 'picard_tmp'
                 # setting max records in ram to half of ram
                 recs = (int(ram) / 2) * (1000000000 / 200)
@@ -103,44 +82,21 @@ def novosort_merge_pe(config_file, sample_list):
                         + '",out_bam="' + out_bam + '",mets="' + mets + '" ' + novo_picard_merge_rmdup_slurm
                 sys.stderr.write(date_time() + 'Merging with novosort and rmdup with picard for legacy reasons!\n'
                                  + batch + '\n')
+                pdb.set_trace()
                 subprocess.call(batch, shell=True)
                 # delete merged bam after removing dups
                 rm_merged_bam = 'rm ' + sample + '.merged.bam ' + sample + '.merged.bai'
                 subprocess.call(rm_merged_bam, shell=True)
 
         else:
-            try:
-                # first need to get bai file before renaming
-                if rmdup == 'N':
-                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + project + ' --skip-identical ' + bai_list[0]
-                    check = subprocess.call(dl_cmd, shell=True)
-                    if check != 0:
-                        log(loc, 'Could not find bai file for ' + bam_list[0])
-                        exit(1)
-                    mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai_list[0]\
-                            + ' ' + sample + '.merged.final.bam.bai'
-                    subprocess.call(mv_bam, shell=True)
-                else:
-                    # get name of rmdup bai file
-                    root = bam_list[0].replace('.bam', '')
-                    get_name = '. /home/ubuntu/.novarc; swift list ' + project + ' --prefix ' + root + ' | grep bai$'
-                    bai = subprocess.check_output(get_name, shell=True).decode()
-                    bai = bai.rstrip('\n')
-                    dl_cmd = '. /home/ubuntu/.novarc;swift download ' + project + ' --skip-identical ' + bai
-                    check = subprocess.call(dl_cmd, shell=True)
-                    if check != 0:
-                        log(loc, 'Could not find bai file for ' + bai)
-                        exit(1)
-                    mv_bam = 'mv ' + bam_list[0] + ' ' + sample + '.merged.final.bam; mv ' + bai + ' ' + sample \
-                             + '.merged.final.bam.bai'
-                    log(loc, date_time() + mv_bam + '\n')
-                    subprocess.call(mv_bam, shell=True)
-            except:
-                log(loc, 'Rename for single file failed.  Command was ' + mv_bam + '\n')
-                exit(1)
-            sys.stderr.write(date_time() + mv_bam + ' Only one associated bam file, renaming\n')
-            subprocess.call(mv_bam, shell=True)
-    sys.stderr.write(date_time() + 'Merge process complete\n')
+
+                link_bam = 'ln -s ' + bam_list[0] + ' ' + sample + '.merged.final.bam; ln -s ' + bai + ' ' + sample \
+                         + '.merged.final.bam.bai'
+                log(loc, date_time() + 'Creating symlink for merged final bam since ony one exists\n'
+                    + link_bam + '\n')
+                subprocess.call(link_bam, shell=True)
+
+    sys.stderr.write(date_time() + 'Merged file request submitted and processed, check logs.\n')
     return 0
 
 
