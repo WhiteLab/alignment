@@ -5,7 +5,6 @@ sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from alignment.novosort_merge_pe import novosort_merge_pe
 from alignment.check_for_merged_bams import check_for_merged_bams
-import pdb
 
 
 def run_novosort(config_file, sample_list):
@@ -35,7 +34,6 @@ def preprocess_bams(config_file, sample_pairs):
     sl.close()
     fh .close()
     miss_list = check_for_merged_bams(config_file, sample_list)
-    pdb.set_trace()
     if len(miss_list) > 0:
         sys.stderr.write(date_time() + 'Missing files detected, merging lane files\n')
         temp_fn = 'temp_samp_list.txt'

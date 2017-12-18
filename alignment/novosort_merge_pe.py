@@ -7,7 +7,6 @@ sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 import subprocess
-import pdb
 
 
 def parse_config(config_file):
@@ -29,7 +28,6 @@ def list_bam(project, align, sample, rmdup):
         sys.stderr.write(date_time() + find_bai_cmd + '\nGetting bai list\n')
         bai_find = subprocess.check_output(find_bai_cmd, shell=True).decode().rstrip('\n')
         bai_list = bai_find.split('\n')
-        pdb.set_trace()
         ct = len(bam_list)
 
         return bam_list, bai_list, ct
@@ -49,7 +47,6 @@ def novosort_merge_pe(config_file, sample_list):
         job_loc = sample + '.novosort_merge.log'
         (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
         bam_string = " ".join(bam_list)
-        pdb.set_trace()
         cur_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
         os.chdir(cur_dir)
         out_bam = sample + '.merged.final.bam'
@@ -59,7 +56,6 @@ def novosort_merge_pe(config_file, sample_list):
                         + novosort + '",threads="' + threads + '",ram="' + ram + 'G",out_bam="' + out_bam \
                         + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
                 log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")
-                pdb.set_trace()
                 subprocess.call(batch, shell=True)
 
             else:
@@ -79,7 +75,6 @@ def novosort_merge_pe(config_file, sample_list):
                         + novo_picard_merge_rmdup_slurm
                 sys.stderr.write(date_time() + 'Merging with novosort and rmdup with picard for legacy reasons!\n'
                                  + batch + '\n')
-                pdb.set_trace()
                 subprocess.call(batch, shell=True)
 
         else:
