@@ -2,6 +2,8 @@
   "tools": {
     "align_pipe": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/pipeline.py",
     "slurm_wrap": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/slurm_squad/pipeline.sl",
+    "variant_pipe": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/variant_annot_pipe.py",
+    "variant_slurm_wrap": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/slurm_squad/variant_annot.sl",
     "cutadapt": "cutadapt",
     "fastqc": "/cephfs/users/mbrown/PIPELINES/TOOLS/FastQC/fastqc",
     "bwa": "/cephfs/users/mbrown/PIPELINES/TOOLS/bwa-0.7.8/bwa",
@@ -35,6 +37,7 @@
     "vepCache": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/2015DECREFS/VEP",
     "cadd": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/2015DECREFS/CADD/capture_panel_v3_SNVs.tsv.gz",
     "dbsnp": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/GENCODE24GRCH37/GATK/dbSNP_r142.vcf.gz",
+    "project_dir": "/cephfs/projects/",
     "project": "PANCAN",
     "align": "ALIGN",
     "analysis": "ANALYSIS",

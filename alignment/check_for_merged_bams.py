@@ -9,12 +9,12 @@ from utility.date_time import date_time
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['project'], config_data['refs']['align']
+    return config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align']
 
 
-def list_bam(project, align_dir, sample):
-    project_dir = '/cephfs/PROJECTS/' + project
-    bam = project_dir + '/' + align_dir + '/' + sample + '/BAM/' + sample + '.merged.final.bam'
+def list_bam(project, project_dir, align_dir, sample):
+    project_dir + project
+    bam = project_dir + project + '/' + align_dir + '/' + sample + '/BAM/' + sample + '.merged.final.bam'
     check_file = os.path.isfile(bam)
     if not check_file:
         sys.stderr.write(date_time() + 'Merged bam ' + bam + ' not found.\n')
@@ -23,11 +23,11 @@ def list_bam(project, align_dir, sample):
 
 def check_for_merged_bams(config_file, sample_list):
     fh = open(sample_list, 'r')
-    (project, align_dir) = parse_config(config_file)
+    (project, project_dir, align_dir) = parse_config(config_file)
     missing = []
     for sample in fh:
         sample = sample.rstrip('\n')
-        check = list_bam(project, align_dir, sample)
+        check = list_bam(project, project_dir, align_dir, sample)
         if not check:
             missing.append(sample)
     return missing

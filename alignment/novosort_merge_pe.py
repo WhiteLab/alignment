@@ -12,12 +12,12 @@ import subprocess
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'], \
-           config_data['refs']['project'], config_data['refs']['align'], config_data['params']['threads'], \
-           config_data['params']['ram'], config_data['params']['novaflag'], \
+           config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align'], \
+           config_data['params']['threads'], config_data['params']['ram'], config_data['params']['novaflag'], \
            config_data['tools']['novo_merge_rmdup_slurm'], config_data['tools']['novo_merge_picard_rmdup_slurm']
 
 
-def list_bam(project, align, sample, rmdup):
+def list_bam(project, align, sample):
     bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
     find_bam_cmd = 'find ' + bam_dir + '*.rmdup.srt.bam'
     sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
@@ -38,16 +38,16 @@ def list_bam(project, align, sample, rmdup):
 
 def novosort_merge_pe(config_file, sample_list):
     fh = open(sample_list, 'r')
-    (novosort, java_tool, picard_tool, project, align, threads, ram, rmdup, novo_merge_rmdup_slurm,
+    (novosort, java_tool, picard_tool, project, project_dir, align, threads, ram, rmdup, novo_merge_rmdup_slurm,
      novo_picard_merge_rmdup_slurm) = parse_config(config_file)
 
     for sample in fh:
         sample = sample.rstrip('\n')
         loc = '../LOGS/' + sample + '.novosort_merge.log'
         job_loc = sample + '.novosort_merge.log'
-        (bam_list, bai_list, n) = list_bam(project, align, sample, rmdup)
+        (bam_list, bai_list, n) = list_bam(project, align, sample)
         bam_string = " ".join(bam_list)
-        cur_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
+        cur_dir = project_dir + project + '/' + align + '/' + sample + '/BAM/'
         os.chdir(cur_dir)
         out_bam = sample + '.merged.final.bam'
         if n > 1:
