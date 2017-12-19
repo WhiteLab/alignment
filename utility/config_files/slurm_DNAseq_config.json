@@ -15,12 +15,12 @@
     "novo_merge_picard_rmdup_slurm": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/slurm_squad/novosort_merge_picard_rmdup.sl",
     "bedtools": "/cephfs/users/mbrown/PIPELINES/TOOLS/bedtools2/bin/bedtools",
     "qc_stats": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/parse_qc.py",
-    "mutect": "/home/ubuntu/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
+    "mutect": "/cephfs/users/mbrown/PIPELINES/TOOLS/mutect-1.1.7mutect-1.1.7.jar",
     "report": "/cephfs/users/mbrown/PIPELINES/DNAseq/annotation/report.py",
-    "platypus": "/home/ubuntu/TOOLS/Platypus/bin/Platypus.py",
+    "platypus": "/cephfs/users/mbrown/PIPELINES/TOOLS/Platypus_0.8.1/Platypus.py",
     "gatk": "/home/ubuntu/TOOLS/GATK/GenomeAnalysisTK.jar",
-    "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-84/scripts/variant_effect_predictor/variant_effect_predictor.pl",
-    "scalpel": "/home/ubuntu/TOOLS/scalpel-0.5.3/scalpel-discovery"
+    "VEP": "/cephfs/users/mbrown/PIPELINES/TOOLS/ensembl-tools-release-84/scripts/variant_effect_predictor/variant_effect_predictor.pl",
+    "scalpel": "/cephfs/users/mbrown/PIPELINES/TOOLS/scalpel-0.5.3/scalpel-discovery"
   },
   "refs": {
     "bwa": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/2015DECREFS/bwa-0.7.8/hg19_karyo_ordered.fa",
