@@ -124,31 +124,28 @@ def merge_sort(suffix_dict, pair, fai_list):
     sys.stderr.write(date_time() + 'File merging complete for ' + pair + '\n')
 
 
-def mutect_merge_sort(config_file, sample_pairs, ref_mnt):
+def mutect_merge_sort(config_file, sample_pair):
     # use fasta index to get sort order for file output
     (fai) = parse_config(config_file)
     fai_list = []
-    fai_fh = open(ref_mnt + '/' + fai, 'r')
+    fai_fh = open(fai, 'r')
     for line in fai_fh:
         line = line.rstrip('\n')
         data = line.split('\t')
         fai_list.append(data[0])
     fai_fh.close()
     # output files should be in directory named after sample-pairs
-    sp_fh = open(sample_pairs, 'r')
-    for line in sp_fh:
-        line = line.rstrip('\n')
-        sp = line.split('\t')
-        dir_list = os.listdir(sp[0])
-        suffix_dict = {}
-        for fn in dir_list:
-            parts = fn.split('.')
-            if parts[2] == 'out' or parts[2] == 'vcf':
-                suffix = '.'.join(parts[2:])
-                if suffix not in suffix_dict:
-                    suffix_dict[suffix] = []
-                suffix_dict[suffix].append(fn)
-        merge_sort(suffix_dict, sp[0], fai_list)
+
+    dir_list = os.listdir('./')
+    suffix_dict = {}
+    for fn in dir_list:
+        parts = fn.split('.')
+        if parts[2] == 'out' or parts[2] == 'vcf':
+            suffix = '.'.join(parts[2:])
+            if suffix not in suffix_dict:
+                suffix_dict[suffix] = []
+            suffix_dict[suffix].append(fn)
+    merge_sort(suffix_dict, sample_pair, fai_list)
     sys.stderr.write(date_time() + 'File merging completed\n')
     return 0
 
@@ -159,14 +156,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Merge and sort output from mutect variant caller.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
-    parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs')
-    parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
-                        help='Reference drive path - i.e. /mnt/cinder/REFS_XXXX')
+    parser.add_argument('-s', '--sample_pair', action='store', dest='sample_pair', help='Sample tumor/normal pairs')
+
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, ref_mnt) = (inputs.config_file, inputs.sample_pairs, inputs.ref_mnt)
-    mutect_merge_sort(config_file, sample_pairs, ref_mnt)
+    (config_file, sample_pair) = (inputs.config_file, inputs.sample_pair)
+    mutect_merge_sort(config_file, sample_pair)

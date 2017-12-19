@@ -3,8 +3,8 @@
 import sys
 import os
 import signal
-from vep_subsitution_report import gen_report as gen_snv_report
-from vep_indel_report import gen_report as gen_indel_report
+from annotation.vep_subsitution_report import gen_report as gen_snv_report
+from annotation.vep_indel_report import gen_report as gen_indel_report
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
@@ -70,13 +70,9 @@ def watch_mem(proc_obj, source, sample, loc):
     return proc_obj.poll()
 
 
-def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source):
+def annot_vcf_vep_pipe(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index) \
         = parse_config(config_file)
-    fasta = ref_mnt + '/' + fasta
-    vep_cache = ref_mnt + '/' + vep_cache
-    intvl = ref_mnt + '/' + intvl
-    tx_index = ref_mnt + '/' + tx_index
     # scale back on the forking a bit
 
     if int(threads) > 2:
@@ -134,6 +130,7 @@ def annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix
                 exit(1)
     return 0
 
+
 if __name__ == "__main__":
     import argparse
 
@@ -147,14 +144,12 @@ if __name__ == "__main__":
     parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output vcf files')
     parser.add_argument('-im', '--in_mutect', action='store', dest='in_mutect', help='Suffix of input mutect files, '
                                                                                      'can be \'NA\' if not from mutect')
-    parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
-                        help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
-            inputs.sample_pairs, inputs.ref_mnt, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
-    annot_vcf_vep_pipe(config_file, sample_pairs, ref_mnt, in_suffix, out_suffix, in_mutect, source)
+    (config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
+            inputs.sample_pairs, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
+    annot_vcf_vep_pipe(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source)

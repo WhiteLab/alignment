@@ -3,11 +3,9 @@
 import sys
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import json
-import os
 from utility.date_time import date_time
 from subprocess import call
 from utility.log import log
-from alignment.check_for_merged_bams import check_for_merged_bams
 from analysis.dustmask_filter import filter_indel
 
 
@@ -15,32 +13,13 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['scalpel'], config_data['tools']['bedtools'], config_data['refs']['capture'], \
            config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['dustmask_flag'],\
-           config_data['refs']['dustmask'], config_data['params']['wg_flag']
+           config_data['refs']['dustmask'], config_data['params']['wg_flag'], config_data['refs']['project_dir'], \
+           config_data['refs']['project'], config_data['refs']['align']
 
 
-def create_sample_list(sample_pairs):
-    sample_list = 'sample_list.txt'
-    fh = open(sample_pairs, 'r')
-    sl = open(sample_list, 'w')
-    temp = {}
-    for line in fh:
-        cur = line.rstrip('\n').split('\t')
-        if cur[1] not in temp:
-            sl.write(cur[1] + '\n')
-            temp[cur[1]] = 1
-        if cur[2] not in temp:
-            sl.write(cur[2] + '\n')
-            temp[cur[2]] = 1
-    sl.close()
-    fh .close()
-    del temp
-
-
-def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file, ref_mnt):
-    # use half CPUS for memory purposes
-    # cpus = str(int(round((float(cpus)/2), 0)))
+def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    exome = ref_mnt + '/' + config_data['refs']['exome']
+    exome = config_data['refs']['exome']
     loc = 'LOGS/' + pair + '_' + pair + '.genome_as_exome.scalpel.log'
     cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
     + normal_bam + ' --window 600 --two-pass --bed ' + exome + ' --ref ' + fasta + ' 2> ' + loc
@@ -51,55 +30,44 @@ def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file, ref_
     return 0, pair
 
 
-
-def scalpel_indel(pairs, log_dir, config_file, ref_mnt):
-    (scalpel, bedtools, bed, fasta, cpus, dustmask_flag, dustmask_bed, wg) = parse_config(config_file)
-    bed = ref_mnt + '/' + bed
-    fasta = ref_mnt + '/' + fasta
-    dustmask_bed = ref_mnt + '/' + dustmask_bed
-    # use get_merged_bams api
-    sample_list = 'sample_list.txt'
-    if not os.path.isfile(sample_list):
-        create_sample_list(pairs)
-        sys.stderr.write(date_time() + 'Sample pairs list not created - creating one since this is being run likely '
-                                       'outside of pipeline')
-        check_for_merged_bams(config_file, sample_list)
-    fh = open(pairs, 'r')
-    for line in fh:
-        cur = line.rstrip('\n').split('\t')
-        loc = log_dir + cur[0] + '.scalpel.log'
-        tumor_bam = cur[1] + '.merged.final.bam'
-        normal_bam = cur[2] + '.merged.final.bam'
-        if wg == 'n':
-            scalpel_cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
-                          + normal_bam + ' --bed ' + bed + ' --ref ' + fasta + ' 2>> ' + loc
-            sys.stderr.write(date_time() + 'Starting indel calls for ' + cur[0] + '\n')
-            log(loc, date_time() + 'Starting indel calls for ' + cur[0] + ' in capture mode with command:\n'
-                + scalpel_cmd + '\n')
-            check = call(scalpel_cmd, shell=True)
-            if check != 0:
-                sys.stderr.write(date_time() + 'Indel calling failed for pair ' + cur[0] + ' with command:\n' +
-                                 scalpel_cmd + '\n')
-                exit(1)
+def scalpel_indel(tumor_id, normal_id, log_dir, config_file):
+    (scalpel, bedtools, bed, fasta, cpus, dustmask_flag, dustmask_bed, wg, project_dir, project, align) \
+        = parse_config(config_file)
+    
+    sample_pair = tumor_id + '_' + normal_id
+    loc = log_dir + sample_pair + '.scalpel.log'
+    bam_dir = project_dir + project
+    tumor_bam = bam_dir + '/' + tumor_id + '/BAM/' + tumor_id + '.merged.final.bam'
+    normal_bam = bam_dir + '/' + normal_id + '/BAM/' + normal_id + '.merged.final.bam'
+    if wg == 'n':
+        scalpel_cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
+                      + normal_bam + ' --bed ' + bed + ' --ref ' + fasta + ' 2>> ' + loc
+        sys.stderr.write(date_time() + 'Starting indel calls for ' + sample_pair + '\n')
+        log(loc, date_time() + 'Starting indel calls for ' + sample_pair + ' in capture mode with command:\n'
+            + scalpel_cmd + '\n')
+        check = call(scalpel_cmd, shell=True)
+        if check != 0:
+            sys.stderr.write(date_time() + 'Indel calling failed for pair ' + sample_pair + ' with command:\n' +
+                             scalpel_cmd + '\n')
+            exit(1)
+    else:
+        check = wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, sample_pair, config_file)
+        if check[0] != 0:
+            sys.stderr.write('Scalpel failed for ' + normal_id + ' at ' + tumor_id + '\n')
+            exit(1)
+    log(loc, date_time() + 'Indel calling complete for pair ' + sample_pair + ' moving output files\n')
+    mv_cmd = 'mv outdir/main/* .; rm -rf outdir/main;'
+    log(loc, date_time() + mv_cmd + '\n')
+    call(mv_cmd, shell=True)
+    sys.stderr.write(date_time() + 'Completed indel calls for ' + sample_pair + '\n')
+    if dustmask_flag == 'Y':
+        log(loc, date_time() + 'Filter dustmask flag given\n')
+        check = filter_indel(bedtools, dustmask_bed, sample_pair)
+        if check != 0:
+            sys.stderr.write(date_time() + 'Dustmask failed for ' + sample_pair + '\n')
+            exit(1)
         else:
-            check = wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, cur[0], config_file, ref_mnt)
-            if check[0] != 0:
-                sys.stderr.write('Scalpel failed for ' + cur[2] + ' at ' + cur[1] + '\n')
-                exit(1)
-        log(loc, date_time() + 'Indel calling complete for pair ' + cur[0] + ' moving output files\n')
-        mv_cmd = 'mkdir ' + cur[0] + '; mv outdir/main/* ' + cur[0] + '; rm -rf outdir/main;'
-        log(loc, date_time() + mv_cmd + '\n')
-        call(mv_cmd, shell=True)
-        sys.stderr.write(date_time() + 'Completed indel calls for ' + cur[0] + '\n')
-        if dustmask_flag == 'Y':
-            log(loc, date_time() + 'Filter dustmask flag given\n')
-            check = filter_indel(bedtools, dustmask_bed, cur[0])
-            if check != 0:
-                sys.stderr.write(date_time() + 'Dustmask failed for ' + cur[0] + '\n')
-                exit(1)
-            else:
-                log(loc, date_time() + 'Dustmask complete for ' + cur[0] + '\n')
-    fh.close()
+            log(loc, date_time() + 'Dustmask complete for ' + sample_pair + '\n')
     sys.stderr.write(date_time() + 'Indel call completed\n')
     return 0
 
@@ -110,19 +78,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Scalpel indel caller wrapper script.  Samples must have been aligned and bams merged '
                     'ahead of time')
-    parser.add_argument('-sp', '--sample-pairs', action='store', dest='sample_pairs',
-                        help='Tumor/normal sample pair list')
+    parser.add_argument('-t', '--tumor', action='store', dest='tumor', help='Tumor sample id')
+    parser.add_argument('-n', '--normal', action='store', dest='normal', help='Normal sample id')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
-    parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
-                        help='Reference drive path - i.e. /mnt/cinder/REFS_XXXX')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, log_dir, config_file, ref_mnt) = (inputs.sample_pairs, inputs.log_dir, inputs.config_file
-                                                     , inputs.ref_mnt)
-    scalpel_indel(sample_pairs, log_dir, config_file, ref_mnt)
+    (tumor_id, normal_id, log_dir, config_file) = (inputs.tumor, inputs.normal, inputs.log_dir, inputs.config_file)
+    scalpel_indel(tumor_id, normal_id, log_dir, config_file)
