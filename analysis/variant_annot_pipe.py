@@ -8,7 +8,6 @@ from utility.date_time import date_time
 from subprocess import call
 from analysis.mutect_pipe import mutect_pipe
 from analysis.mutect_merge_sort import mutect_merge_sort
-from utility.upload_variants_to_swift import upload_variants_to_swift
 from annotation.annot_platypus_VEP import annot_platypus
 from analysis.platypus_germline import platypus_germline
 from analysis.scalpel_indel import scalpel_indel
@@ -36,6 +35,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file):
     (project_dir, project, align, analysis, annotation, germ_flag, indel_flag, annot_used, wg) \
         = parse_config(config_file)
     sample_pair = tumor_id + '_' + normal_id
+    # Working directory is sample analysis directory
     ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair
     if not os.path.isdir(ana_dir):
         mk_ana = 'mkdir -p ' + ana_dir + ' ' + ana_dir + '/LOGS ' + ana_dir + '/OUTPUT'
@@ -60,29 +60,65 @@ def variant_annot_pipe(tumor_id, normal_id, config_file):
     else:
         sys.stderr.write(date_time() + 'scalpel failed.\n')
         exit(1)
+    # organize analysis files
+    reorg = 'mv *.log LOGS; rmdir outdir; find . -maxdepth 1 -type f -exec mv {} OUTPUT \;'
+    sys.stderr.write('Reorganizing analysis files ' + reorg + '\n')
+    call(reorg, shell=True)
+    # Working directory now annotation directory
+    ann_dir = project_dir + project + '/' + annotation + '/' + sample_pair
+    if not os.path.isdir(ana_dir):
+        mk_ann = 'mkdir -p ' + ann_dir + ' ' + ann_dir + '/LOGS ' + ann_dir + '/OUTPUT'
+        sys.stderr.write('Creating anaylsis output directories ' + mk_ann + '\n')
+        call(mk_ann, shell=True)
 
+    os.chdir(ann_dir)
     if annot_used == 'vep':
-        vep(config_file, sample_pair, '.vcf.keep', '.snv.vep.vcf', '.out.keep', 'mutect')
-        vep(config_file, sample_pair, '.indel.vcf', '.somatic.indel.vep.vcf', 'NA', 'scalpel')
+        check = vep(config_file, sample_pair, '.vcf.keep', '.snv.vep.vcf', '.out.keep', 'mutect')
+        check += vep(config_file, sample_pair, '.indel.vcf', '.somatic.indel.vep.vcf', 'NA', 'scalpel')
+
+    if check == 0:
+        sys.stderr.write(date_time() + 'File annotation successful, reorganizing files\n')
+    else:
+        sys.stderr.write(date_time() + 'File annotation failed! Check logs!\n')
+    # organize annotation files
+    reorg = 'mv *.log LOGS; find . -maxdepth 1 -type f -exec mv {} OUTPUT \;'
+    sys.stderr.write(reorg + '\n')
+    call(reorg, shell=True)
 
     if germ_flag == 'Y':
         sys.stderr.write(date_time() + 'Germ line call flag indicated\n')
-        check = platypus_germline(config_file, sample_pair, 'LOGS/', wg, ref_mnt)
-        check += annot_platypus(config_file, sample_pair, ref_mnt)
+        # check for germline analysis dir
+        germ_ana_dir = project_dir + project + '/' + analysis + '/' + normal_id
+        if not os.path.isdir(germ_ana_dir):
+            mk_ana = 'mkdir -p ' + germ_ana_dir
+            sys.stderr.write('Creating analysis output directories ' + mk_ana + '\n')
+            call(mk_ana, shell=True)
+        os.chdir(germ_ana_dir)
+        check = platypus_germline(config_file, normal_id, ana_dir + '/LOGS/', wg)
+        reorg = 'mv *.log ' + ana_dir + '/LOGS;'
+        sys.stderr.write('Reorganizing germline analysis files ' + reorg + '\n')
+        call(reorg, shell=True)
+        # check for germline annotation dir
+        germ_ann_dir = project_dir + project + '/' + annotation + '/' + normal_id
+        if not os.path.isdir(germ_ann_dir):
+            mk_ann = 'mkdir -p ' + germ_ann_dir
+            sys.stderr.write('Creating analysis output directories ' + mk_ann + '\n')
+            call(mk_ann, shell=True)
+        os.chdir(germ_ann_dir)
+        check += annot_platypus(config_file, normal_id)
+        reorg = 'mv *.log ' + ann_dir + '/LOGS;'
+        sys.stderr.write('Reorganizing germline analysis files ' + reorg + '\n')
+        call(reorg, shell=True)
         if check == 0:
             sys.stderr.write(date_time() + 'Germ line call complete\n')
         else:
             sys.stderr.write(date_time() + 'Error during germline calls.  Check output\n')
             exit(1)
 
-    # relocate stuff, then upload
-    mv_cmds = 'rm -rf outdir; mv *.bai *.bam BAM; mv *.xls *eff* *sift* *vep* ANNOTATION; mv *out* *vcf* ANALYSIS;'
-    call(mv_cmds, shell=True)
-    check = upload_variants_to_swift(cont, obj, sample_list, sample_pairs, analysis, annotation, annot_used)
     if check == 0:
-        sys.stderr.write(date_time() + 'Uploading data to swift successful!\n')
+        sys.stderr.write(date_time() + 'Variant calling pipeline complete.  Check outputs\n')
     else:
-        sys.stderr.write(date_time() + 'Uploading data to swift failed!\n')
+        sys.stderr.write(date_time() + 'Variant calling pipeline FAILED.  Check outputs!\n')
         exit(1)
 
 

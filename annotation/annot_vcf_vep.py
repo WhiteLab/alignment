@@ -15,16 +15,17 @@ import psutil
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],
-            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'],
-            config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'],
-            config_data['params']['wg_flag'], config_data['refs']['tx_index'])
+    return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'], \
+           config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'], \
+           config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'], \
+           config_data['params']['wg_flag'], config_data['refs']['tx_index'], config_data['refs']['project_dir'], \
+           config_data['refs']['project'], config_data['refs']['analysis']
 
 
-def pass_filter(sample, in_suffix, dustmask_flag):
-    in_fn = sample + '/somatic' + in_suffix
+def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
+    in_fn = ana_dir + '/somatic' + in_suffix
     if dustmask_flag == 'Y':
-        in_fn = sample + '/' + sample + '.somatic.indel.dustmasked.vcf'
+        in_fn = ana_dir + '/' + sample + '.somatic.indel.dustmasked.vcf'
     pass_val = 'PASS'
     out_suffix = '.somatic_indel.PASS.vcf'
     out_fn = sample + out_suffix
@@ -70,64 +71,58 @@ def watch_mem(proc_obj, source, sample, loc):
     return proc_obj.poll()
 
 
-def annot_vcf_vep_pipe(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index) \
-        = parse_config(config_file)
+def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutect, source):
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index, project_dir,
+     project, analysis) = parse_config(config_file)
     # scale back on the forking a bit
 
     if int(threads) > 2:
         # threads = str(int(threads)/2 - 1)
         threads = str(int(threads) - 1)
-    # parse sample file, use only last if pairs
-    samp_fh = open(sample_pairs, 'r')
     # track to prevent repeat annotation if same sample used as comparison
-    for line in samp_fh:
-        info = line.rstrip('\n').split('\t')
-        sample = info[0]
-        mk_log_dir = 'mkdir LOGS'
-        subprocess.call(mk_log_dir, shell=True)
-        loc = 'LOGS/' + sample + '.vep_anno.log'
-        in_vcf = sample + in_suffix
-        out_vcf = sample + out_suffix
-        if source == 'scalpel':
-            pass_filter(sample, in_suffix, dustmask_flag)
-            in_vcf = sample + '.somatic_indel.PASS.vcf'
-        # run_vep = ''
-        buffer_size = '2000'
+    loc = 'LOGS/' + sample_pair + '.vep_anno.log'
+    ana_dir = project_dir + project + '/' + analysis + '/OUTPUT/' + sample_pair
+    in_vcf = ana_dir + '/' + sample_pair + in_suffix
+    out_vcf = sample_pair + out_suffix
+    if source == 'scalpel':
+        pass_filter(ana_dir, sample_pair, in_suffix, dustmask_flag)
+        in_vcf = sample_pair + '.somatic_indel.PASS.vcf'
+    # run_vep = ''
+    buffer_size = '2000'
+    run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
+    log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
+    # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
+    check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+    check_run = watch_mem(check, source, sample_pair, loc)
+    if check_run != 0:
+
+        buffer_size = str(int(buffer_size)/2)
+        clean_up = 'rm ' + out_vcf + '*'
+        log(loc, date_time() + 'VEP failed. Status of run was ' + str(check_run) + ' Trying smaller buffer size of '
+            + buffer_size + '\n' + clean_up + '\n')
+        os.killpg(os.getpgid(check.pid), signal.SIGINT)
+
+        subprocess.call(clean_up, shell=True)
         run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
-        log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
-        # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
-        check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-        check_run = watch_mem(check, source, sample, loc)
-        if check_run != 0:
-
-            buffer_size = str(int(buffer_size)/2)
-            clean_up = 'rm ' + out_vcf + '*'
-            log(loc, date_time() + 'VEP failed. Status of run was ' + str(check_run) + ' Trying smaller buffer size of '
-                + buffer_size + '\n' + clean_up + '\n')
-            os.killpg(os.getpgid(check.pid), signal.SIGINT)
-
-            subprocess.call(clean_up, shell=True)
-            run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
-            log(loc, date_time() + 'Annotating sample ' + sample + in_suffix + '\n')
-            check = subprocess.call(run_cmd, shell=True)
-            if check != 0:
-                log(loc, date_time() + 'VEP failed for sample ' + sample + '\n')
-                exit(1)
-        else:
-            log(loc, date_time() + 'VEP annotation of ' + sample + in_suffix + ' successful!\n')
-        if source == 'mutect':
-            if wg_flag == 'y':
-                intvl = 'n'
-            check = gen_snv_report(out_vcf, sample + in_mutect, intvl, tx_index)
-            if check != 0:
-                log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
-                exit(1)
-        else:
-            check = gen_indel_report(out_vcf, tx_index)
-            if check != 0:
-                log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
-                exit(1)
+        log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
+        check = subprocess.call(run_cmd, shell=True)
+        if check != 0:
+            log(loc, date_time() + 'VEP failed for sample ' + sample_pair + '\n')
+            exit(1)
+    else:
+        log(loc, date_time() + 'VEP annotation of ' + sample_pair + in_suffix + ' successful!\n')
+    if source == 'mutect':
+        if wg_flag == 'y':
+            intvl = 'n'
+        check = gen_snv_report(out_vcf, sample_pair + in_mutect, intvl, tx_index)
+        if check != 0:
+            log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
+            exit(1)
+    else:
+        check = gen_indel_report(out_vcf, tx_index)
+        if check != 0:
+            log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
+            exit(1)
     return 0
 
 
@@ -137,7 +132,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SNP annotation.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
-    parser.add_argument('-sp', '--sample_pairs', action='store', dest='sample_pairs', help='Sample tumor/normal pairs')
+    parser.add_argument('-sp', '--sample_pair', action='store', dest='sample_pair', help='Sample tumor/normal pair')
     parser.add_argument('-so', '--source', action='store', dest='source', help='Variant call annot source - mutect or'
                                                                                ' scalpel')
     parser.add_argument('-is', '--in_suffix', action='store', dest='in_suffix', help='Suffix of input files')
@@ -150,6 +145,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
-            inputs.sample_pairs, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
-    annot_vcf_vep_pipe(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source)
+    (config_file, sample_pair, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
+            inputs.sample_pair, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
+    annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutect, source)

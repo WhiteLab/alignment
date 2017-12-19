@@ -14,26 +14,12 @@ def parse_config(config_file):
 
 
 def variant_pipe_wrap(config_file, sample_pairs):
-    # create eventual output location directories
-
     # create sample list
     fh = open(sample_pairs, 'r')
 
     for line in fh:
         (sample_pair, tumor_id, normal_id) = line.rstrip('\n').split('\t')
         (cores, mem, variant_pipe, variant_slurm_wrap) = parse_config(config_file)
-        # likely not needed, will revisit
-        # if kflag == 'y':
-        #     # create bam list for ksort
-        #     bam_list = 'bam_list.txt'
-        #     blist_cmd = 'ls *.merged.final.bam > ' + bam_list
-        #     call(blist_cmd, shell=True)
-        #     check = ksort(config_file, bam_list, kflag, ref_mnt)
-        #     if check == 0:
-        #         sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files completed\n')
-        #     else:
-        #         sys.stderr.write(date_time() + 'Karyotypic reorder of BAM files failed.\n')
-        #         exit(1)
         # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
         job_log = sample_pair + '.anno.log'
         batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
