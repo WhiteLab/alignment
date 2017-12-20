@@ -24,13 +24,15 @@ def parse_config(config_file, cflag):
 def platypus_germline(config_file, sample, log_dir, cflag):
 
     loc = log_dir + sample + ".platypus.log"
-
-    (platypus, fasta, threads, project_dir, project, align) = parse_config(config_file, cflag)
-    bam = project_dir + project + '/' + align + '/' + sample + '/BAM/' + sample + '.merged.final.bam'
-    platypus_cmd = "python2.7 " + platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta \
-                   + " --bamFiles=" + bam + " -o " + sample + ".germline_calls.vcf --logFileName=" \
-                   + log_dir + sample + ".platypus.log" + " >> " + loc + " 2>&1"
-    if cflag == 'n':
+    # here for safety as python is confusing about whether variables exist outside of if-else statements or not
+    platypus_cmd = ''
+    if cflag == 'y':
+        (platypus, fasta, threads, project_dir, project, align) = parse_config(config_file, cflag)
+        bam = project_dir + project + '/' + align + '/' + sample + '/BAM/' + sample + '.merged.final.bam'
+        platypus_cmd = "python2.7 " + platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta \
+                       + " --bamFiles=" + bam + " -o " + sample + ".germline_calls.vcf --logFileName=" \
+                       + log_dir + sample + ".platypus.log" + " >> " + loc + " 2>&1"
+    else:
         (platypus, fasta, threads, region_file, minVAF, samtools, project_dir, project, align) \
             = parse_config(config_file, cflag)
 
@@ -40,10 +42,10 @@ def platypus_germline(config_file, sample, log_dir, cflag):
             cmd = samtools + ' index ' + bam
             log(loc, date_time() + cmd + '\n')
             subprocess.call(cmd, shell=True)
-            platypus_cmd = "python2.7 " + platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta \
-                           + " --bamFiles=" + bam + " --filterDuplicates=0 -o " + sample \
-                           + ".germline_calls.vcf --minVarFreq=" + minVAF + " --regions=" + region_file \
-                           + " --logFileName=" + loc + " >> " + loc + " 2>&1"
+        platypus_cmd = "python2.7 " + platypus + " callVariants --nCPU=" + threads + " --refFile=" + fasta \
+                       + " --bamFiles=" + bam + " --filterDuplicates=0 -o " + sample \
+                       + ".germline_calls.vcf --minVarFreq=" + minVAF + " --regions=" + region_file \
+                       + " --logFileName=" + loc + " >> " + loc + " 2>&1"
     log(loc, date_time() + platypus_cmd + "\n")
     f = 0
     try:

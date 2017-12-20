@@ -112,7 +112,6 @@ def gen_report(vcf, sample, ref_flag):
     if ref_flag != 'n':
         ref_flag = create_index(ref_flag)
     for record in vcf_in.fetch():
-        #pdb.set_trace()
         (chrom, pos, ref, alt, alt_ct, tot_ct) = (record.contig, str(record.pos), record.ref, record.alts[0],
                                                   str(record.info['TR']), str(record.info['TC']))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]

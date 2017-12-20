@@ -83,7 +83,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         threads = str(int(threads) - 1)
     # track to prevent repeat annotation if same sample used as comparison
     loc = 'LOGS/' + sample_pair + '.vep_anno.log'
-    ana_dir = project_dir + project + '/' + analysis + '/OUTPUT/' + sample_pair
+    ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair + '/OUTPUT'
     in_vcf = ana_dir + '/' + sample_pair + in_suffix
     out_vcf = sample_pair + out_suffix
     if source == 'scalpel':

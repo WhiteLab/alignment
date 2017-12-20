@@ -13,8 +13,8 @@ import signal
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'],\
-           config_data['params']['threads'], config_data['tools']['snpsift'], config_data['tools']['java'], \
+    return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['params']['plugin_dir'], \
+           config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['tools']['java'], \
            config_data['refs']['cadd'], config_data['refs']['tx_index'], config_data['refs']['project_dir'], \
            config_data['refs']['project'], config_data['refs']['analysis']
 
@@ -35,11 +35,11 @@ def pass_filter(sample):
     out.close()
 
 
-def run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size):
+def run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size, plugin_dir):
     cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field ANN ' \
         '--canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --buffer_size ' \
-          + buffer_size + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache \
-          + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
+          + buffer_size + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache  + ' --dir_plugins '\
+          + plugin_dir + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
     return cmd
 
 
@@ -58,14 +58,14 @@ def watch_mem(proc_obj, sample):
 
 
 def annot_platypus(config_file, sample):
-    (vep_tool, vep_cache, fasta, threads, snpsift, java, cadd, tx_index, project_dir, project, analysis) \
+    (vep_tool, vep_cache, plugin_dir, fasta, threads, java, cadd, tx_index, project_dir, project, analysis) \
         = parse_config(config_file)
     ana_dir = project_dir + project + '/' + analysis + '/' + sample
     pass_filter(ana_dir + '/' + sample)
     in_vcf = ana_dir + '/' + sample + '.germline_pass.vcf'
     out_vcf = sample + '.germline_pass.vep.vcf'
     buffer_size = '2000'
-    run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size)
+    run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size, plugin_dir)
     sys.stderr.write(date_time() + 'Annotating sample ' + in_vcf + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
     check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SNP annotation.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
-    parser.add_argument('-s', '--sample', action='store', dest='sampl', help='Normal sample ID')
+    parser.add_argument('-s', '--sample', action='store', dest='sample', help='Normal sample ID')
 
     if len(sys.argv) == 1:
         parser.print_help()
