@@ -15,7 +15,7 @@
     "novo_merge_picard_rmdup_slurm": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/slurm_squad/novosort_merge_picard_rmdup.sl",
     "bedtools": "/cephfs/users/mbrown/PIPELINES/TOOLS/bedtools2/bin/bedtools",
     "qc_stats": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/parse_qc.py",
-    "mutect": "/cephfs/users/mbrown/PIPELINES/TOOLS/mutect-1.1.7mutect-1.1.7.jar",
+    "mutect": "/cephfs/users/mbrown/PIPELINES/TOOLS/mutect-1.1.7/mutect-1.1.7.jar",
     "report": "/cephfs/users/mbrown/PIPELINES/DNAseq/annotation/report.py",
     "platypus": "/cephfs/users/mbrown/PIPELINES/TOOLS/Platypus_0.8.1/Platypus.py",
     "gatk": "/home/ubuntu/TOOLS/GATK/GenomeAnalysisTK.jar",

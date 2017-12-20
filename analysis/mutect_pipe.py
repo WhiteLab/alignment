@@ -6,7 +6,6 @@ from utility.date_time import date_time
 from utility.job_manager import job_manager
 import subprocess
 import json
-import pdb
 
 
 def parse_config(config_file):
@@ -47,7 +46,6 @@ def mutect_pipe(config_file, tumor_id, normal_id):
     tumor_bam = bam_dir + '/' + tumor_id + '/BAM/' + tumor_id + '.merged.final.bam'
     normal_bam = bam_dir + '/' + normal_id + '/BAM/' + normal_id + '.merged.final.bam'
     sys.stderr.write(date_time() + 'Processing pair T: ' + tumor_bam + ' N: ' + normal_bam + '\n')
-    pdb.set_trace()
     out = tumor_id + '_' + normal_id
     # make result directory for current pair
     i = 1
@@ -68,12 +66,15 @@ def mutect_pipe(config_file, tumor_id, normal_id):
         cmd_list.append(cur)
         i += 1
     # fix encode flag won't work if already phred 33, if a job fails try without
-    # try:
-    #     job_manager(cmd_list, max_t)
-    # except:
-    #     for i in range(0, len(cmd_list), 1):
-    #         cmd_list[i] = cmd_list[i].replace('-fixMisencodedQuals ', '')
-    #     job_manager(cmd_list, max_t)
+    try:
+        job_manager(cmd_list, max_t)
+    except:
+        for i in range(0, len(cmd_list), 1):
+            cmd_list[i] = cmd_list[i].replace('-fixMisencodedQuals ', '')
+        job_manager(cmd_list, max_t)
+    cleanup_temp_dirs = 'rm -rf temp bed'
+    sys.stderr.write('Cleaning up temp dirs ' + cleanup_temp_dirs + '\n')
+    subprocess.call(cleanup_temp_dirs, shell=True)
     sys.stderr.write(date_time() + 'SNV calling completed for ' + out + '\n')
     return 0
 
