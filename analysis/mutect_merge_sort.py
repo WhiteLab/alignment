@@ -140,11 +140,12 @@ def mutect_merge_sort(config_file, sample_pair):
     suffix_dict = {}
     for fn in dir_list:
         parts = fn.split('.')
-        if parts[2] == 'out' or parts[2] == 'vcf':
-            suffix = '.'.join(parts[2:])
-            if suffix not in suffix_dict:
-                suffix_dict[suffix] = []
-            suffix_dict[suffix].append(fn)
+        if len(parts) >= 3:
+            if parts[2] == 'out' or parts[2] == 'vcf':
+                suffix = '.'.join(parts[2:])
+                if suffix not in suffix_dict:
+                    suffix_dict[suffix] = []
+                suffix_dict[suffix].append(fn)
     merge_sort(suffix_dict, sample_pair, fai_list)
     sys.stderr.write(date_time() + 'File merging completed\n')
     return 0
