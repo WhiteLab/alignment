@@ -54,7 +54,8 @@ def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep
         run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
                   + ' --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
-                  ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' + loc
+                  ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir \
+                  + ' 2>> ' + loc + ' >> ' + loc
     return run_cmd
 
 
@@ -90,7 +91,8 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         in_vcf = sample_pair + '.somatic_indel.PASS.vcf'
     # run_vep = ''
     buffer_size = '2000'
-    run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
+    run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
+                      plugin_dir)
     log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
     check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
@@ -104,7 +106,8 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         os.killpg(os.getpgid(check.pid), signal.SIGINT)
 
         subprocess.call(clean_up, shell=True)
-        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc)
+        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
+                          plugin_dir)
         log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
         check = subprocess.call(run_cmd, shell=True)
         if check != 0:
