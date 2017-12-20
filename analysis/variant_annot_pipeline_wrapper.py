@@ -9,8 +9,8 @@ from subprocess import call
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['params']['threads'], config_data['params']['ram'], config_data['refs']['variant_pipe'], \
-           config_data['refs']['variant_slurm_wrap']
+    return config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['variant_pipe'], \
+           config_data['tools']['variant_slurm_wrap']
 
 
 def variant_pipe_wrap(config_file, sample_pairs):
@@ -22,7 +22,7 @@ def variant_pipe_wrap(config_file, sample_pairs):
         (cores, mem, variant_pipe, variant_slurm_wrap) = parse_config(config_file)
         # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
         job_log = sample_pair + '.anno.log'
-        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
+        batch = 'sbatch -J ' + sample_pair + '_DNAseq_annotation -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
                 + ' --export=pipeline="' + variant_pipe + '",tumor="' + tumor_id + '",normal="' + normal_id \
                 + '",j="' + config_file + '"' + ' ' + variant_slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
