@@ -6,6 +6,7 @@ from utility.date_time import date_time
 from utility.job_manager import job_manager
 import subprocess
 import json
+import pdb
 
 
 def parse_config(config_file):
@@ -17,7 +18,7 @@ def parse_config(config_file):
 
 def mutect_pipe(config_file, tumor_id, normal_id):
     (java, mutect, intervals, fa_ordered, max_t, ram, project_dir, project, align) = parse_config(config_file)
-
+    pdb.set_trace()
     # break up intervals into max threads junks to run all in parallel
     int_fh = open(intervals, 'r')
     int_dict = {}
@@ -66,12 +67,12 @@ def mutect_pipe(config_file, tumor_id, normal_id):
         cmd_list.append(cur)
         i += 1
     # fix encode flag won't work if already phred 33, if a job fails try without
-    try:
-        job_manager(cmd_list, max_t)
-    except:
-        for i in range(0, len(cmd_list), 1):
-            cmd_list[i] = cmd_list[i].replace('-fixMisencodedQuals ', '')
-        job_manager(cmd_list, max_t)
+    # try:
+    #     job_manager(cmd_list, max_t)
+    # except:
+    #     for i in range(0, len(cmd_list), 1):
+    #         cmd_list[i] = cmd_list[i].replace('-fixMisencodedQuals ', '')
+    #     job_manager(cmd_list, max_t)
     sys.stderr.write(date_time() + 'SNV calling completed for ' + out + '\n')
     return 0
 
