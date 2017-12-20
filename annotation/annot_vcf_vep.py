@@ -17,9 +17,9 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'], \
            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'], \
-           config_data['params']['threads'], config_data['refs']['intervals'], config_data['params']['dustmask_flag'], \
-           config_data['params']['wg_flag'], config_data['refs']['tx_index'], config_data['refs']['project_dir'], \
-           config_data['refs']['project'], config_data['refs']['analysis']
+           config_data['params']['plugin_dir'], config_data['params']['threads'], config_data['refs']['intervals'], \
+           config_data['params']['dustmask_flag'], config_data['params']['wg_flag'], config_data['refs']['tx_index'],\
+           config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['analysis']
 
 
 def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
@@ -42,12 +42,13 @@ def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
     out.close()
 
 
-def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc):
+def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir):
     if wg_flag == 'n':
         run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
                   + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
                   + ' --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
-                  + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' 2>> ' + loc + ' >> ' \
+                  + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir\
+                  + '  2>> ' + loc + ' >> ' \
                   + loc
     else:
         run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
@@ -72,8 +73,8 @@ def watch_mem(proc_obj, source, sample, loc):
 
 
 def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutect, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, threads, intvl, dustmask_flag, wg_flag, tx_index, project_dir,
-     project, analysis) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, plugin_dir, threads, intvl, dustmask_flag, wg_flag, tx_index,
+     project_dir, project, analysis) = parse_config(config_file)
     # scale back on the forking a bit
 
     if int(threads) > 2:

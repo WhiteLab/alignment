@@ -36,7 +36,7 @@ def scalpel_indel(tumor_id, normal_id, log_dir, config_file):
     
     sample_pair = tumor_id + '_' + normal_id
     loc = log_dir + sample_pair + '.scalpel.log'
-    bam_dir = project_dir + project
+    bam_dir = project_dir + project + '/' + align
     tumor_bam = bam_dir + '/' + tumor_id + '/BAM/' + tumor_id + '.merged.final.bam'
     normal_bam = bam_dir + '/' + normal_id + '/BAM/' + normal_id + '.merged.final.bam'
     if wg == 'n':
@@ -56,13 +56,13 @@ def scalpel_indel(tumor_id, normal_id, log_dir, config_file):
             sys.stderr.write('Scalpel failed for ' + normal_id + ' at ' + tumor_id + '\n')
             exit(1)
     log(loc, date_time() + 'Indel calling complete for pair ' + sample_pair + ' moving output files\n')
-    mv_cmd = 'mv outdir/main/* .; rm -rf outdir/main;'
+    mv_cmd = 'mv outdir/main/* .; rmdir outdir/main;'
     log(loc, date_time() + mv_cmd + '\n')
     call(mv_cmd, shell=True)
     sys.stderr.write(date_time() + 'Completed indel calls for ' + sample_pair + '\n')
     if dustmask_flag == 'Y':
         log(loc, date_time() + 'Filter dustmask flag given\n')
-        check = filter_indel(bedtools, dustmask_bed, sample_pair)
+        check = filter_indel(bedtools, dustmask_bed, sample_pair, loc)
         if check != 0:
             sys.stderr.write(date_time() + 'Dustmask failed for ' + sample_pair + '\n')
             exit(1)

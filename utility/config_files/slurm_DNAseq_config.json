@@ -64,6 +64,7 @@
     "cutflag": "Y",
     "aflag": "a",
     "vep_cache_version":"84",
+    "plugin_dir": "/cephfs/users/mbrown/PIPELINES/TOOLS/.vep",
     "novaflag": "Y",
     "pdxflag": "N",
     "germflag": "Y",
