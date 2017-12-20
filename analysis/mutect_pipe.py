@@ -58,11 +58,11 @@ def mutect_pipe(config_file, tumor_id, normal_id):
         cur = cur + ' -T MuTect -fixMisencodedQuals -R ' + fa_ordered + ' --intervals ' + int_dict[intvl][
             'fn'] + '  --input_file:normal ' + normal_bam + '  --input_file:tumor ' + tumor_bam + \
               ' --max_alt_alleles_in_normal_count 1000 --max_alt_alleles_in_normal_qscore_sum 37 ' \
-              '--max_alt_allele_in_normal_fraction 0.05 --out ' + out + '/' + output_file + ' -vcf ' + out + '/' \
-              + vcf_file + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file \
-              + ' >> ' + log_file + ' 2>> ' + log_file + '; cat ' + out + '/' + output_file \
-              + ' | grep -v REJECT > ' + out + '/' + output_file + '.keep; cat ' + out + '/' + vcf_file \
-              + ' | grep -v REJECT > ' + out + '/' + vcf_file + '.keep '
+              '--max_alt_allele_in_normal_fraction 0.05 --out ' + output_file + ' -vcf ' + vcf_file \
+              + ' --enable_extended_output --strand_artifact_power_threshold 0 -log ' + log_file \
+              + ' >> ' + log_file + ' 2>> ' + log_file + '; cat ' + output_file \
+              + ' | grep -v REJECT > ' + output_file + '.keep; cat ' + vcf_file \
+              + ' | grep -v REJECT > ' + vcf_file + '.keep '
         cmd_list.append(cur)
         i += 1
     # fix encode flag won't work if already phred 33, if a job fails try without
