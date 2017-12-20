@@ -18,7 +18,7 @@ def merge_sort(suffix_dict, pair, fai_list):
         out = {}
         head = ''
         for fn in suffix_dict['out']:
-            fh = open(pair + '/' + fn, 'r')
+            fh = open(fn, 'r')
             head = next(fh)
             head += next(fh)
             for line in fh:
@@ -43,7 +43,7 @@ def merge_sort(suffix_dict, pair, fai_list):
         out = {}
         head = ''
         for fn in suffix_dict['out.keep']:
-            fh = open(pair + '/' + fn, 'r')
+            fh = open(fn, 'r')
             head = ''
             head = next(fh)
             head += next(fh)
@@ -69,7 +69,7 @@ def merge_sort(suffix_dict, pair, fai_list):
         out = {}
         head = ''
         for fn in suffix_dict['vcf']:
-            fh = open(pair + '/' + fn, 'r')
+            fh = open(fn, 'r')
             head = ''
             for line in fh:
                 head += line
@@ -97,7 +97,7 @@ def merge_sort(suffix_dict, pair, fai_list):
         out = {}
         head = ''
         for fn in suffix_dict['vcf.keep']:
-            fh = open(pair + '/' + fn, 'r')
+            fh = open(fn, 'r')
             head = ''
             for line in fh:
                 head += line
