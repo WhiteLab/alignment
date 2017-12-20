@@ -42,7 +42,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file):
     if not os.path.isdir(ana_dir):
         mk_ana = 'mkdir -p ' + ana_dir + ' ' + ana_dir + '/LOGS ' + ana_dir + '/OUTPUT'
         sys.stderr.write('Creating anaylsis output directories ' + mk_ana + '\n')
-        # call(mk_ana, shell=True)
+        call(mk_ana, shell=True)
     os.chdir(ana_dir)
     check = mutect_pipe(config_file, tumor_id, normal_id)
     if check == 0:
