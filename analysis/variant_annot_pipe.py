@@ -66,10 +66,10 @@ def variant_annot_pipe(tumor_id, normal_id, config_file):
     call(reorg, shell=True)
     # Working directory now annotation directory
     ann_dir = project_dir + project + '/' + annotation + '/' + sample_pair
-    if not os.path.isdir(ana_dir):
+    if not os.path.isdir(ann_dir):
         mk_ann = 'mkdir -p ' + ann_dir + ' ' + ann_dir + '/LOGS ' + ann_dir + '/OUTPUT'
-        sys.stderr.write('Creating anaylsis output directories ' + mk_ann + '\n')
-        # call(mk_ann, shell=True)
+        sys.stderr.write('Creating annotation output directories ' + mk_ann + '\n')
+        call(mk_ann, shell=True)
 
     os.chdir(ann_dir)
     if annot_used == 'vep':
