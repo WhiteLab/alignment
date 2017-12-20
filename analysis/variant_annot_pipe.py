@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--normal', action='store', dest='normal',
                         help='Normal id')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
-                        help='JSON config file with tool and ref locations')
+                        help='JSON config file with tool and ref locations - use FULL PATH!')
 
     if len(sys.argv) == 1:
         parser.print_help()

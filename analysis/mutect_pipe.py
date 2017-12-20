@@ -18,7 +18,7 @@ def parse_config(config_file):
 
 def mutect_pipe(config_file, tumor_id, normal_id):
     (java, mutect, intervals, fa_ordered, max_t, ram, project_dir, project, align) = parse_config(config_file)
-    pdb.set_trace()
+
     # break up intervals into max threads junks to run all in parallel
     int_fh = open(intervals, 'r')
     int_dict = {}
@@ -47,6 +47,7 @@ def mutect_pipe(config_file, tumor_id, normal_id):
     tumor_bam = bam_dir + '/' + tumor_id + '/BAM/' + tumor_id + '.merged.final.bam'
     normal_bam = bam_dir + '/' + normal_id + '/BAM/' + normal_id + '.merged.final.bam'
     sys.stderr.write(date_time() + 'Processing pair T: ' + tumor_bam + ' N: ' + normal_bam + '\n')
+    pdb.set_trace()
     out = tumor_id + '_' + normal_id
     # make result directory for current pair
     i = 1
