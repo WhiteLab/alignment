@@ -38,7 +38,7 @@ def mutect_pipe(config_file, tumor_id, normal_id):
             int_dict[chrom]['fh'] = open(int_dict[chrom]['fn'], 'w')
             int_dict[chrom]['fh'].write(interval)
         i += 1
-    job_ram = (int(ram) / int(max_t))
+    job_ram = int(int(ram) / int(max_t))
     run_mut = java + ' -Djava.io.tmpdir=./temp -Xmx' + str(job_ram) + 'g -jar ' + mutect
     # array will store commands to run, next def will take care of job management using popen
     cmd_list = []
