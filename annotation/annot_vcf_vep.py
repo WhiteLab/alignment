@@ -93,7 +93,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
     buffer_size = '2000'
     run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
                       plugin_dir)
-    log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
+    log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + ' ' + run_cmd + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
     check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
     check_run = watch_mem(check, source, sample_pair, loc)
