@@ -95,9 +95,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file):
             call(mk_ana, shell=True)
         os.chdir(germ_ana_dir)
         check = platypus_germline(config_file, normal_id, ana_dir + '/LOGS/', wg)
-        reorg = 'mv *.log ' + ana_dir + '/LOGS;'
-        sys.stderr.write('Reorganizing germline analysis files ' + reorg + '\n')
-        call(reorg, shell=True)
+
         # check for germline annotation dir
         germ_ann_dir = project_dir + project + '/' + annotation + '/' + normal_id
         if not os.path.isdir(germ_ann_dir):

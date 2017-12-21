@@ -39,7 +39,7 @@ def run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, 
     cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field ANN ' \
         '--canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --buffer_size ' \
           + buffer_size + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache  + ' --dir_plugins '\
-          + plugin_dir + ' --plugin CADD,' + cadd + ' 2>> LOGS/' + sample + '.vep.log >> LOGS/' + sample + '.vep.log;'
+          + plugin_dir + ' --plugin CADD,' + cadd + ' 2>> ' + sample + '.vep.log >> ' + sample + '.vep.log;'
     return cmd
 
 
