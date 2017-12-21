@@ -114,7 +114,7 @@ def gen_report(vcf, sample, ref_flag):
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct, tot_ct) = (record.contig, str(record.pos), record.ref, record.alts[0],
                                                   str(record.info['TR']), str(record.info['TC']))
-        ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
+        ann_list = [_.split('|') for _ in record.info['ANN']]
         output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, desired, out, ref_flag)
     out.close()
     return 0
