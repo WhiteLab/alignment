@@ -123,7 +123,7 @@ def gen_report(vcf, ref_flag):
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf) = (record.contig, str(record.pos), record.ref, record.alts[0],
                                 str(record.info['MINCOV']), str(record.info['ALTCOV']), str(record.info['COVRATIO']))
-        ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
+        ann_list = [_.split('|') for _ in record.info['ANN']]
         output_highest_impact(chrom, pos, ref, alt, alt_ct, non_alt_ct, vaf, ann_list, desired, out, ref_flag)
 
     out.close()

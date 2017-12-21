@@ -162,7 +162,7 @@ def gen_report(vcf, out, c, ref_flag):
         ref_flag = create_index(ref_flag)
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt) = record.contig, str(record.pos), record.ref, record.alts[0]
-        ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
+        ann_list = [_.split('|') for _ in record.info['ANN']]
         tflag = 'NA'
         if c != 'n':
             tflag = mark_target(chrom, pos, on_dict)
