@@ -118,7 +118,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
     if source == 'mutect':
         if wg_flag == 'y':
             intvl = 'n'
-        check = gen_snv_report(out_vcf, sample_pair + in_mutect, intvl, tx_index)
+        check = gen_snv_report(out_vcf, ana_dir + '/' + sample_pair + in_mutect, intvl, tx_index)
         if check != 0:
             log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
             exit(1)
