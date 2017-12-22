@@ -66,7 +66,7 @@ def annot_platypus(config_file, sample):
     out_vcf = sample + '.germline_pass.vep.vcf'
     buffer_size = '2000'
     if int(threads) > 1:
-        threads = int(threads) - 1
+        threads = str(int(threads) - 1)
     run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size, plugin_dir)
     sys.stderr.write(date_time() + 'Annotating sample ' + in_vcf + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
