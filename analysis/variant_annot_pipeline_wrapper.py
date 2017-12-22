@@ -13,7 +13,7 @@ def parse_config(config_file):
            config_data['tools']['variant_slurm_wrap']
 
 
-def variant_pipe_wrap(config_file, sample_pairs):
+def variant_pipe_wrap(config_file, sample_pairs, estep):
     # create sample list
     fh = open(sample_pairs, 'r')
 
@@ -24,7 +24,7 @@ def variant_pipe_wrap(config_file, sample_pairs):
         job_log = sample_pair + '.anno.log'
         batch = 'sbatch -J ' + sample_pair + '_DNAseq_annotation -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
                 + ' --export=pipeline="' + variant_pipe + '",tumor="' + tumor_id + '",normal="' + normal_id \
-                + '",j="' + config_file + '"' + ' ' + variant_slurm_wrap
+                + '",j="' + config_file + '"e="' + estep + '" ' + variant_slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:
             call(batch, shell=True)
@@ -43,11 +43,14 @@ if __name__ == "__main__":
                         help='Tumor/normal sample pair list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations, USE FULL PATH!')
+    parser.add_argument('-e', '--execute', action='store', dest='estep',
+                        help='Steps to start at, valid entries are start, indel, snv-annot, snv-indel, germ-call, '
+                             'germ-annot')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file) = (inputs.sample_pairs, inputs.config_file)
-    variant_pipe_wrap(config_file, sample_pairs)
+    (sample_pairs, config_file, estep) = (inputs.sample_pairs, inputs.config_file, inputs.estep)
+    variant_pipe_wrap(config_file, sample_pairs, estep)
