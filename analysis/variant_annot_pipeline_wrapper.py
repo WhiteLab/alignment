@@ -24,7 +24,7 @@ def variant_pipe_wrap(config_file, sample_pairs, estep):
         job_log = sample_pair + '.anno.log'
         batch = 'sbatch -J ' + sample_pair + '_DNAseq_annotation -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
                 + ' --export=pipeline="' + variant_pipe + '",tumor="' + tumor_id + '",normal="' + normal_id \
-                + '",j="' + config_file + '"e="' + estep + '" ' + variant_slurm_wrap
+                + '",j="' + config_file + '",e="' + estep + '" ' + variant_slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:
             call(batch, shell=True)
