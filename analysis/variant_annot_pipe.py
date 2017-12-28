@@ -65,6 +65,9 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
         reorg = 'mv *.log LOGS; rmdir outdir; find . -maxdepth 1 -type f -exec mv {} OUTPUT \;'
         sys.stderr.write('Reorganizing analysis files ' + reorg + '\n')
         call(reorg, shell=True)
+        cleanup = 'rm /cephfs/PROJECTS/PANCAN/ANALYSIS/' + sample_pair + '/OUTPUT/' + sample_pair + '.chr*'
+        sys.stderr.write('Clearing out unmerged mutect output ' + cleanup + '\n')
+        call(cleanup, shell=True)
     # Working directory now annotation directory
     ann_dir = project_dir + project + '/' + annotation + '/' + sample_pair
     if estep == 'start' or estep == 'snv-annot' or estep == 'indel-annot':
