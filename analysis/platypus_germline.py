@@ -13,12 +13,12 @@ def parse_config(config_file, cflag):
     config_data = json.loads(open(config_file, 'r').read())
     if cflag == 'y':
         return config_data['tools']['platypus'], config_data['refs']['fa_ordered'], config_data['params']['threads'], \
-               config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align']
+               config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir']
     else:
         return config_data['tools']['platypus'], config_data['refs']['fa_ordered'], config_data['params']['threads'],\
                config_data['refs']['intervals_0base'], config_data['params']['min_VAF_GL'], \
                config_data['tools']['samtools'], config_data['refs']['project_dir'], config_data['refs']['project'], \
-               config_data['refs']['align']
+               config_data['refs']['align_dir']
 
 
 def platypus_germline(config_file, sample, log_dir, cflag):

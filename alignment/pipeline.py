@@ -54,8 +54,9 @@ class Pipeline:
         self.ram = self.config_data['params']['ram']
         self.threads = self.config_data['params']['threads']
         self.qc_stats = self.config_data['tools']['qc_stats']
+        self.project_dir = self.config_data['refs']['project_dir']
         self.project = self.config_data['refs']['project']
-        self.align = self.config_data['refs']['align']
+        self.align_dir = self.config_data['refs']['align_dir']
         self.bed_ref = self.config_data['refs'][self.seqtype]
         self.bedtools2_tool = self.config_data['tools']['bedtools']
         self.picard_tmp = 'picard_tmp'
@@ -67,10 +68,10 @@ class Pipeline:
         self.samtools_tool = self.config_data['tools']['samtools']
         self.bwa_tool = self.config_data['tools']['bwa']
         self.cutadapter = self.config_data['tools']['cutadapt']
-        self.bid = hgac_ID[0]
+        self.bnid = hgac_ID[0].decode()
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
-        self.cwd = '/cephfs/PROJECTS/' + self.project + '/' + self.align + '/' + self.bid + '/' + self.sample
+        self.cwd = self.project_dir + '/' + self.project + '/' + self.align_dir + '/' + self.bnid + '/' + self.sample
         self.user = self.config_data['params']['user']
         self.group = self.config_data['params']['group']
         self.bam_dir = 'BAM/'
@@ -184,7 +185,7 @@ class Pipeline:
         log(self.loc,
             date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
 
-        RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
+        RGRP = "@RG\\tID:" + self.sample + "\\tLB:" + self.bnid + "\\tSM:" + self.bnid + "\\tPL:illumina"
 
         # initialize fail return values
         check = 1
@@ -204,7 +205,7 @@ class Pipeline:
                 check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
                                self.hsa_samtools_ref, self.sample, self.log_dir, self.threads)
         else:
-            log(self.loc, date_time() + 'Starting BWA align\n')
+            log(self.loc, date_time() + 'Starting BWA align_dir\n')
             # check certain key processes
             # skip aligning if bam already exists
             if not os.path.isfile(self.sample + '.bam'):

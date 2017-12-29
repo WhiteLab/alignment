@@ -27,7 +27,7 @@ fh = open(inputs.fn, 'r')
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['project'], config_data['refs']['align'], config_data['refs']['config'], \
+    return config_data['refs']['project'], config_data['refs']['align_dir'], config_data['refs']['config'], \
            config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['align_pipe'], \
            config_data['tools']['slurm_wrap']
 

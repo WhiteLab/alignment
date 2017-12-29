@@ -14,7 +14,7 @@ def parse_config(config_file):
     return config_data['tools']['scalpel'], config_data['tools']['bedtools'], config_data['refs']['capture'], \
            config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['dustmask_flag'],\
            config_data['refs']['dustmask'], config_data['params']['wg_flag'], config_data['refs']['project_dir'], \
-           config_data['refs']['project'], config_data['refs']['align']
+           config_data['refs']['project'], config_data['refs']['align_dir']
 
 
 def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file):

@@ -9,7 +9,7 @@ from utility.date_time import date_time
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align']
+    return config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align_dir']
 
 
 def list_bam(project, project_dir, align_dir, sample):

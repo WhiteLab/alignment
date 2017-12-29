@@ -12,7 +12,7 @@ import subprocess
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'], \
-           config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align'], \
+           config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align_dir'], \
            config_data['params']['threads'], config_data['params']['ram'], config_data['params']['novaflag'], \
            config_data['tools']['novo_merge_rmdup_slurm'], config_data['tools']['novo_merge_picard_rmdup_slurm']
 

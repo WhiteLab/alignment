@@ -15,7 +15,7 @@ from analysis.scalpel_indel import scalpel_indel
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align'], \
+    return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'], \
            config_data['params']['indelflag'], config_data['params']['annotator'], config_data['params']['wg_flag']
 
