@@ -47,7 +47,6 @@ for line in fh:
 
     cur_dir = cwd + '/RAW/' + bnid
     # iterate through sample/lane pairs
-    # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
     for lane in lane_csv.split(', '):
         file_prefix = bnid + '_' + lane
         (contents, seqfile, sf1, sf2) = ('', [], '', '')
@@ -79,6 +78,5 @@ for line in fh:
             call(batch, shell=True)
         except:
             sys.stderr.write(date_time() + 'Batch submission for ' + lane + ' failed! Check logs!\n')
-        # change back to parent directory so that new sequencing files can be searched
 
 sys.stderr.write(date_time() + "Jobs submitted.  Check logs for any errors\n")
