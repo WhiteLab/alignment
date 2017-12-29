@@ -41,19 +41,19 @@ if not os.path.isdir(cwd):
 # check_dir = os.path.isdir(cwd)
 for line in fh:
     line = line.rstrip('\n')
-    (bid, seqtype, lane_csv) = line.split('\t')
+    (bnid, seqtype, lane_csv) = line.split('\t')
 
-    # All files for current bid to be stored in cwd
+    # All files for current bnid to be stored in cwd
 
-    cur_dir = cwd + '/RAW/' + bid
+    cur_dir = cwd + '/RAW/' + bnid
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
     for lane in lane_csv.split(', '):
-        file_prefix = bid + '_' + lane
+        file_prefix = bnid + '_' + lane
         (contents, seqfile, sf1, sf2) = ('', [], '', '')
         # attempt to find sequencing files
         try:
-            sys.stderr.write(date_time() + 'Searching for sequencing files related to bnid ' + bid + ' in lane '
+            sys.stderr.write(date_time() + 'Searching for sequencing files related to bnid ' + bnid + ' in lane '
                              + lane + '\n')
             contents = find_project_files(cur_dir, file_prefix)
             # standard file naming should work with this
@@ -63,14 +63,14 @@ for line in fh:
             sf1 = seqfile[0]
             sf2 = seqfile[1]
         except:
-            sys.stderr.write(date_time() + 'Getting sequencing files for ' + bid + ' lane ' + lane
+            sys.stderr.write(date_time() + 'Getting sequencing files for ' + bnid + ' lane ' + lane
                              + ' failed.  Moving on\n')
             continue
 
         # Create sbatch script and submit
         # p = Pipeline(end1, end2, seqtype, pipe_cfg)
         # batch params $pipeline $f1 $f2 $t $j
-        job_log = bid + '_' + lane + '.log'
+        job_log = bnid + '_' + lane + '.log'
         batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
                 + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
                 + '",j="' + pipe_cfg + '"' + ' ' + slurm_wrap
