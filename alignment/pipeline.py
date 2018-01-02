@@ -68,7 +68,7 @@ class Pipeline:
         self.samtools_tool = self.config_data['tools']['samtools']
         self.bwa_tool = self.config_data['tools']['bwa']
         self.cutadapter = self.config_data['tools']['cutadapt']
-        self.bnid = hgac_ID[0].decode()
+        self.bnid = hgac_ID[0]
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         self.json_config = json_config
         self.cwd = self.project_dir + '/' + self.project + '/' + self.align_dir + '/' + self.bnid + '/' + self.sample
