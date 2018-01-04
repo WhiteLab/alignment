@@ -39,7 +39,7 @@
     "dbsnp": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/GENCODE24GRCH37/GATK/dbSNP_r142.vcf.gz",
     "project_dir": "/cephfs/PROJECTS/",
     "project": "PANCAN",
-    "align": "ALIGN",
+    "align_dir": "ALIGN",
     "analysis": "ANALYSIS",
     "annotation": "ANNOTATION",
     "config": "/cephfs/users/mbrown/JOB_SUBMISSIONS/2017-Dec-12_slurm_align_test/2017-Dec-12_config.json"
