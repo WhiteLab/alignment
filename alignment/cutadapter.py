@@ -34,7 +34,7 @@ def cutadapter(sample, end1, end2, config_file):
     aflag2 = aflag.upper()
     cut_th = threads
     if int(cut_th) >= 4:
-        cut_th = str((int(threads) - 2)/2)
+        cut_th = str(int((int(threads) - 2)/2))
     cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -' + aflag + ' ' + r1_adapt + ' -' + aflag2 + ' ' + r2_adapt + ' -u ' + r1trim + ' -U ' \
                    + r2trim + ' -n ' + ntrim + ' -o ' + temp1 + ' -p ' + temp2 + ' ' + end1 + ' ' + end2 + ' >> ' \
