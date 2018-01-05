@@ -8,11 +8,17 @@ from utility.log import log
 
 
 def picard_insert_size(java_tool, picard_tool, sample, log_dir, ram):
+    loc = log_dir + sample + ".picard.insert_size.log"
     picard_insert_size_cmd = java_tool + " -Xmx" + ram + "g -jar " + picard_tool + " CollectInsertSizeMetrics I=" \
                              + sample + ".rmdup.srt.bam H=" + sample + ".insert_metrics.pdf O=" \
-                             + sample + ".insert_metrics.hist  > " + log_dir + sample + ".picard.insert_size.log 2>&1"
-    log(log_dir + sample + ".picard.insert_size.log", date_time() + picard_insert_size_cmd + "\n")
-    call(picard_insert_size_cmd, shell=True)
+                             + sample + ".insert_metrics.hist  >> " + log_dir + sample + ".picard.insert_size.log 2>&1"
+    log(loc , date_time() + picard_insert_size_cmd + "\n")
+    try:
+        call(picard_insert_size_cmd, shell=True)
+    except:
+        log(loc, date_time() + 'Picard failed using java ' + java_tool + '. Trying system default java\n')
+        picard_insert_size_cmd = picard_insert_size_cmd.replace(java_tool, 'java')
+        log(loc, date_time() + picard_insert_size_cmd + "\n")
 
 
 if __name__ == "__main__":
