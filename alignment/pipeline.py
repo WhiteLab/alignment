@@ -63,6 +63,8 @@ class Pipeline:
         self.novosort = self.config_data['tools']['novosort']
         self.picard_tool = self.config_data['tools']['picard']
         self.java_tool = self.config_data['tools']['java']
+        # picard is stupid and can't handle subversion in java 1.7, but can for 1.8+
+        self.javap = self.config_data['tools']['javap']
         # setting java ram to 6GB
         self.jram = '6'
         self.samtools_tool = self.config_data['tools']['samtools']
@@ -242,7 +244,7 @@ class Pipeline:
         flagstats(self.samtools_tool, self.sample)
         log(self.loc, date_time() + 'Calculating insert sizes\n')
         # get insert size metrics
-        picard_insert_size(self.java_tool, self.picard_tool, self.sample, self.log_dir, self.jram)
+        picard_insert_size(self.javap, self.picard_tool, self.sample, self.log_dir, self.jram)
 
         # figure out which coverage method to call using seqtype
         log(self.loc, date_time() + 'Calculating coverage for ' + self.seqtype + '\n')

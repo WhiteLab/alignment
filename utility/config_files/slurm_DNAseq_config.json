@@ -9,6 +9,7 @@
     "bwa": "/cephfs/users/mbrown/PIPELINES/TOOLS/bwa-0.7.8/bwa",
     "samtools": "/cephfs/software/samtools-1.6/samtools",
     "java": "/cephfs/users/mbrown/PIPELINES/TOOLS/jdk1.7.0_80/bin/java",
+    "javap": "java",
     "picard": "/cephfs/users/mbrown/PIPELINES/TOOLS/picard-2.16.0/picard.jar",
     "novosort": "/cephfs/software/novosort/novosort",
     "novo_merge_rmdup_slurm": "/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/slurm_squad/novosort_merge_rmdup.sl",

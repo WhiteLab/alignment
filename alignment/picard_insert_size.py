@@ -15,10 +15,10 @@ def picard_insert_size(java_tool, picard_tool, sample, log_dir, ram):
     log(loc , date_time() + picard_insert_size_cmd + "\n")
     try:
         call(picard_insert_size_cmd, shell=True)
+        return 0
     except:
-        log(loc, date_time() + 'Picard failed using java ' + java_tool + '. Trying system default java\n')
-        picard_insert_size_cmd = picard_insert_size_cmd.replace(java_tool, 'java')
-        log(loc, date_time() + picard_insert_size_cmd + "\n")
+        log(loc, date_time() + 'Picard failed using java ' + java_tool + '\n')
+        return 1
 
 
 if __name__ == "__main__":
