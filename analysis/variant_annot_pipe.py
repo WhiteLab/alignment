@@ -11,13 +11,15 @@ from analysis.mutect_merge_sort import mutect_merge_sort
 from annotation.annot_platypus_VEP import annot_platypus
 from analysis.platypus_germline import platypus_germline
 from analysis.scalpel_indel import scalpel_indel
+from utility.set_acls import set_acls
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'], \
-           config_data['params']['indelflag'], config_data['params']['annotator'], config_data['params']['wg_flag']
+           config_data['params']['indelflag'], config_data['params']['annotator'], config_data['params']['wg_flag'], \
+           config_data['params']['user'], config_file['params']['group']
 
 
 def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
@@ -32,7 +34,7 @@ def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
 
 
 def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
-    (project_dir, project, align, analysis, annotation, germ_flag, indel_flag, annot_used, wg) \
+    (project_dir, project, align, analysis, annotation, germ_flag, indel_flag, annot_used, wg, user, group) \
         = parse_config(config_file)
     sample_pair = tumor_id + '_' + normal_id
     # Working directory is sample analysis directory
@@ -68,6 +70,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
         cleanup = 'rm /cephfs/PROJECTS/PANCAN/ANALYSIS/' + sample_pair + '/OUTPUT/' + sample_pair + '.chr*'
         sys.stderr.write('Clearing out unmerged mutect output ' + cleanup + '\n')
         call(cleanup, shell=True)
+
     # Working directory now annotation directory
     ann_dir = project_dir + project + '/' + annotation + '/' + sample_pair
     if estep == 'start' or estep == 'snv-annot' or estep == 'indel-annot':
@@ -104,7 +107,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
                 call(mk_ana, shell=True)
             os.chdir(germ_ana_dir)
             check = platypus_germline(config_file, normal_id, ana_dir + '/LOGS/', wg)
-
+        set_acls(germ_ana_dir, user, group)
         # check for germline annotation dir
         germ_ann_dir = project_dir + project + '/' + annotation + '/' + normal_id
         if estep == 'start' or estep == 'germ-annot':
@@ -117,12 +120,14 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
         reorg = 'mv *.log ' + ann_dir + '/LOGS;'
         sys.stderr.write('Reorganizing germline analysis files ' + reorg + '\n')
         call(reorg, shell=True)
+        set_acls(germ_ann_dir, user, group)
         if check == 0:
             sys.stderr.write(date_time() + 'Germ line call complete\n')
         else:
             sys.stderr.write(date_time() + 'Error during germline calls.  Check output\n')
             exit(1)
-
+    set_acls(ana_dir, user, group)
+    set_acls(ann_dir, user, group)
     sys.stderr.write(date_time() + 'Variant calling pipeline complete.  Check outputs\n')
 
 

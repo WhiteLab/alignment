@@ -16,6 +16,7 @@ from alignment.coverage import *
 from subprocess import call
 import json
 from utility.log import log
+from utility.set_acls import set_acls
 from alignment.parse_qc import parse_qc
 
 
@@ -283,9 +284,7 @@ class Pipeline:
         rm_wd = 'rmdir ' + self.cwd
         call(rm_wd, shell=True)
         # change ownership to be project-specific
-        set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
-        sys.stderr.write(date_time() + 'Setting acls for current directory ' + set_acl + '\n')
-        call(set_acl, shell=True)
+        set_acls('./', self.user, self.group)
         self.status = 0
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
 
