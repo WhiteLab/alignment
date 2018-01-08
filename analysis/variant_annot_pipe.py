@@ -19,7 +19,7 @@ def parse_config(config_file):
     return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'], \
            config_data['params']['indelflag'], config_data['params']['annotator'], config_data['params']['wg_flag'], \
-           config_data['params']['user'], config_file['params']['group']
+           config_data['params']['user'], config_data['params']['group']
 
 
 def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
