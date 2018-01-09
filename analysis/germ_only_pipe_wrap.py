@@ -16,6 +16,7 @@ def parse_config(config_file):
 def germ_pipe_wrap(config_file, samples, estep):
     (cores, mem, germ_pipe, germ_slurm_wrap) = parse_config(config_file)
     for sample in open(samples):
+        sample = sample.rstrip('\n')
         job_name = 'dnaseq-germ-' + sample
         job_log = sample + '.anno.log'
         batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
