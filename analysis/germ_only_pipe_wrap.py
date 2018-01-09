@@ -18,7 +18,7 @@ def germ_pipe_wrap(config_file, samples, estep):
     for sample in open(samples):
         sample = sample.rstrip('\n')
         job_name = 'dnaseq-germ-' + sample
-        job_log = sample + '.anno.log'
+        job_log = sample + '.germ_anno.log'
         batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
                 + ' --export=germ_pipe="' + germ_pipe + '",normal="' + sample \
                 + '",j="' + config_file + '",e="' + estep + '" ' + germ_slurm_wrap
