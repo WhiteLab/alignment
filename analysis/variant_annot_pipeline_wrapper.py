@@ -16,10 +16,10 @@ def parse_config(config_file):
 def variant_pipe_wrap(config_file, sample_pairs, estep):
     # create sample list
     fh = open(sample_pairs, 'r')
-
+    (cores, mem, variant_pipe, variant_slurm_wrap) = parse_config(config_file)
     for line in fh:
         (sample_pair, tumor_id, normal_id) = line.rstrip('\n').split('\t')
-        (cores, mem, variant_pipe, variant_slurm_wrap) = parse_config(config_file)
+
         # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
         job_name = 'dnaseq-annot-' + sample_pair
         job_log = sample_pair + '.anno.log'
