@@ -36,6 +36,8 @@ def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
 def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
     (project_dir, project, align, analysis, annotation, germ_flag, indel_flag, annot_used, wg, user, group) \
         = parse_config(config_file)
+    src_env = '. /etc/environment'
+    call(src_env, shell=True)
     sample_pair = tumor_id + '_' + normal_id
     # Working directory is sample analysis directory
     ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair

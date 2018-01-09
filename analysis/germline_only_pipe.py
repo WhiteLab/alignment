@@ -14,6 +14,8 @@ def parse_config(config_file):
 
 def temp_germline_pipe(config_file, sample, estep):
     (project_dir, project , analysis, annotation, user, group) = parse_config(config_file)
+    src_env = '. /etc/environment'
+    call(src_env, shell=True)
     if estep == 'start':
         germ_ana_dir = project_dir + project + '/' + analysis + '/' + sample
         if not os.path.isdir(germ_ana_dir):
