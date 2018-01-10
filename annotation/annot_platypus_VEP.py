@@ -38,7 +38,7 @@ def pass_filter(sample):
 def run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size, plugin_dir):
     cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field ANN ' \
         '--canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --buffer_size ' \
-          + buffer_size + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache  + ' --dir_plugins '\
+          + buffer_size + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --dir_plugins '\
           + plugin_dir + ' --plugin CADD,' + cadd + ' 2>> ' + sample + '.vep.log >> ' + sample + '.vep.log;'
     return cmd
 
@@ -68,7 +68,7 @@ def annot_platypus(config_file, sample):
     if int(threads) > 1:
         threads = str(int(threads) - 1)
     run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size, plugin_dir)
-    sys.stderr.write(date_time() + 'Annotating sample ' + in_vcf + '\n')
+    sys.stderr.write(date_time() + 'Annotating sample ' + in_vcf + ' ' + run_cmd + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
     check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
     check_run = watch_mem(check, sample)
