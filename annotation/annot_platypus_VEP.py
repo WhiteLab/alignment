@@ -75,13 +75,16 @@ def annot_platypus(config_file, sample):
     if check_run != 0:
 
         buffer_size = str(int(buffer_size) / 2)
-        clean_up = 'rm ' + out_vcf + '*'
+        clean_up = 'rm \'' + out_vcf + '*\''
         sys.stderr.write(date_time() + 'VEP failed. Status of run was ' + str(check_run)
                          + ' Trying smaller buffer size of ' + buffer_size + '\n' + clean_up + '\n')
-        os.killpg(os.getpgid(check.pid), signal.SIGINT)
+        try:
+            os.killpg(os.getpgid(check.pid), signal.SIGINT)
+        except:
+            sys.stderr.write(date_time() + 'Killing process failed.  Might have already died for other reasons...\n')
 
         subprocess.call(clean_up, shell=True)
-        run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size)
+        run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd, sample, buffer_size, plugin_dir)
         sys.stderr.write(date_time() + 'Annotating sample ' + sample + in_vcf + '\n')
         check = subprocess.call(run_cmd, shell=True)
         if check != 0:

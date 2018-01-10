@@ -32,7 +32,7 @@ def temp_germline_pipe(config_file, sample, estep):
     if estep == 'start' or estep == 'annot':
         germ_ann_dir = project_dir + project + '/' + annotation + '/' + sample
         if not os.path.isdir(germ_ann_dir):
-            mk_ann = 'mkdir -p ' + germ_ann_dir
+            mk_ann = 'mkdir -p ' + germ_ann_dir + '/LOGS'
             sys.stderr.write('Creating analysis output directories ' + mk_ann + '\n')
             call(mk_ann, shell=True)
         os.chdir(germ_ann_dir)
@@ -46,7 +46,7 @@ def temp_germline_pipe(config_file, sample, estep):
         sys.stderr.write('Reorganizing germline log files ' + reorg + '\n')
         set_acls(germ_ann_dir, user, group)
     sys.stderr.write(date_time() + 'Standalone germline pipe starting at ' + estep + ' for sample ' + sample
-                     + 'complete. Check logs and outputs.\n')
+                     + ' complete. Check logs and outputs.\n')
     return 0
 
 
