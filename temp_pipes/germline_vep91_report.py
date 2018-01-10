@@ -3,6 +3,7 @@
 import re
 from pysam import VariantFile
 import sys
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from annotation.report_tools import create_index
 
 
