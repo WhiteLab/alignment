@@ -43,6 +43,7 @@ def temp_germline_pipe(config_file, sample, estep):
             sys.stderr.write(date_time() + 'Error during germline calls.  Check output\n')
             exit(1)
         reorg = 'mv *.log LOGS;'
+        call(reorg, shell=True)
         sys.stderr.write('Reorganizing germline log files ' + reorg + '\n')
         set_acls(germ_ann_dir, user, group)
     sys.stderr.write(date_time() + 'Standalone germline pipe starting at ' + estep + ' for sample ' + sample
