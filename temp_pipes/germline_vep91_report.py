@@ -53,8 +53,8 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                         check = re.match(alt + ':(\S+)', maf)
                         if check:
                             ExAC_MAF = check.group(1)
-                cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, tx_id, effect, impact, biotype, codon,
-                                            aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
+                cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, hgvsc, hgvsp, tx_id, effect, impact,
+                                     biotype, codon, aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
                 if ref_flag == 'n':
                     if f == 0:
                         top_gene = gene
@@ -107,7 +107,7 @@ def gen_report(vcf, sample, ref_flag):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tHGVSc\tHGVSpTranscript_id'
+    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tHGVSc\tHGVSp\tTranscript_id'
               '\tEffect\tIMPACT\tBIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\tSIFT\tgnomAD_AF'
               '\tCLIN_SIG\tCADD_PHRED\n')
     if ref_flag != 'n':
