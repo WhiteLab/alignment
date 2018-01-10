@@ -91,7 +91,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
 
 def gen_report(vcf, sample, ref_flag):
     vcf_in = VariantFile(vcf)
-    out = open(sample + '.germline_pass.xls', 'w')
+    out = open(sample + '.germline.vep91.xls', 'w')
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'HGVSc': 0, 'HGVSp': 0, 'Protein_position': 0,
                'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0, 'Existing_variation': 0, 'VARIANT_CLASS': 0,
                'gnomAD_AF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
