@@ -31,7 +31,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                 r_flag = cur_rank
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, tx_id, hgvsc, hgvsp, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAFs, biotype, sift,
+                (gene, tx_id, hgvsc, hgvsp, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAF, biotype, sift,
                  clin_sig, phred) = (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['HGVSc']],
                  ann[loc_dict['HGVSp']], ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
                  ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
@@ -46,13 +46,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                     else:
                         aa = test[0] + str(aa_pos) + test[1]
                 # need to parse exac maf to get desired allele freq, not all possible
-                ExAC_MAF = ''
-                if len(ExAC_MAFs) > 1:
-                    maf_list = ExAC_MAFs.split('&')
-                    for maf in maf_list:
-                        check = re.match(alt + ':(\S+)', maf)
-                        if check:
-                            ExAC_MAF = check.group(1)
+
                 cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, hgvsc, hgvsp, tx_id, effect, impact,
                                      biotype, codon, aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
                 if ref_flag == 'n':
