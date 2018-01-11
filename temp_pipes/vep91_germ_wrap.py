@@ -21,7 +21,7 @@ def queue_vep91(config_file, sample_list, skip):
         job_name = 'dnaseq-vep91-germ-' + sample
         job_log = sample + '.vep91-germ.log'
         batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
-                + ' --export=germ_pipe="' + vep91_pipe + '",normal="' + sample_list + '",j="' + config_file + '",f="' \
+                + ' --export=germ_pipe="' + vep91_pipe + '",normal="' + sample + '",j="' + config_file + '",f="' \
                 + skip + '" ' + vep91_slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
         try:
