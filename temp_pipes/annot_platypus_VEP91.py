@@ -41,8 +41,8 @@ def run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd_snv, cadd
     cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field ANN ' \
         '--canonical --variant_class --sift b --offline --af_gnomad --hgvs --hgvsg  --buffer_size ' + buffer_size \
           + ' --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --dir_plugins ' + plugin_dir \
-          + ' --plugin CADD,' + cadd_snv + ' --plugin CADD,' + cadd_indel + ' 2>> ' + sample + '.vep.log >> ' \
-          + sample + '.vep.log;'
+          + ' --plugin CADD,' + cadd_snv + ' --plugin CADD,' + cadd_indel + ' 2>> ' + sample + '.vep91.log >> ' \
+          + sample + '.vep91.log;'
     return cmd
 
 
@@ -70,7 +70,7 @@ def annot_platypus(config_file, sample, skip):
         pass_filter(ana_dir + '/' + sample)
         set_acls(ana_dir, user, group)
     in_vcf = ana_dir + '/' + sample + '.germline_pass.vcf'
-    out_vcf = sample + '.germline_pass.vep.vcf'
+    out_vcf = sample + '.germline_pass.vep91.vcf'
     buffer_size = '5000'
     ann_dir = project_dir + project + '/' + annotation + '/' + sample
     if not os.path.isdir(ann_dir):
@@ -78,6 +78,7 @@ def annot_platypus(config_file, sample, skip):
         sys.stderr.write('Creating annotation output directories ' + mk_ann + '\n')
         subprocess.call(mk_ann, shell=True)
     os.chdir(ann_dir)
+    sys.stderr.write(date_time() + 'Changed to working directory ' + ann_dir + '\n')
     if int(threads) > 1:
         threads = str(int(threads) - 1)
     run_cmd = run_vep(vep_tool, in_vcf, out_vcf, threads, fasta, vep_cache, cadd_snv, cadd_indel, sample, buffer_size,
@@ -88,7 +89,7 @@ def annot_platypus(config_file, sample, skip):
     check_run = watch_mem(check, sample)
     if check_run != 0:
 
-        buffer_size = str(int(buffer_size) / 2)
+        buffer_size = str(int(int(buffer_size) / 2))
         clean_up = 'rm \'' + out_vcf + '*\''
         sys.stderr.write(date_time() + 'VEP failed. Status of run was ' + str(check_run)
                          + ' Trying smaller buffer size of ' + buffer_size + '\n' + clean_up + '\n')
