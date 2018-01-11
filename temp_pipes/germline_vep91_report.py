@@ -106,7 +106,7 @@ def gen_report(vcf, sample, ref_flag):
     for i in range(0, ann_size, 1):
         if desc_list[i] in desired:
             f_pos_list.append(i)
-            if desired[desc_list[i]] == 'CADD_PHRED':
+            if desc_list[i] == 'CADD_PHRED':
                 desired[desc_list[i]].append(i)
             else:
                 desired[desc_list[i]] = i
