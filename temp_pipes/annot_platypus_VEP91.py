@@ -70,7 +70,7 @@ def annot_platypus(config_file, sample, skip):
         pass_filter(ana_dir + '/' + sample)
         set_acls(ana_dir, user, group)
     in_vcf = ana_dir + '/' + sample + '.germline_pass.vcf'
-    out_vcf = sample + '.germline_pass.vep91.vcf'
+    out_vcf = sample + '.germline.vep91.vcf'
     buffer_size = '5000'
     ann_dir = project_dir + project + '/' + annotation + '/' + sample
     if not os.path.isdir(ann_dir):
@@ -89,7 +89,7 @@ def annot_platypus(config_file, sample, skip):
     check_run = watch_mem(check, sample)
     if check_run != 0:
 
-        buffer_size = str(int(int(buffer_size) / 2))
+        buffer_size = str(int(buffer_size) // 2)
         clean_up = 'rm \'' + out_vcf + '*\''
         sys.stderr.write(date_time() + 'VEP failed. Status of run was ' + str(check_run)
                          + ' Trying smaller buffer size of ' + buffer_size + '\n' + clean_up + '\n')
