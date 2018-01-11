@@ -31,12 +31,15 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                 r_flag = cur_rank
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
-                (gene, tx_id, hgvsc, hgvsp, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAF, biotype, sift,
-                 clin_sig, phred) = (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['HGVSc']],
-                 ann[loc_dict['HGVSp']], ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
+                (gene, tx_id, hgvsg, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAF, biotype, sift,
+                 clin_sig) = (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['HGVSc']],
+                 ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
                  ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
                  ann[loc_dict['Existing_variation']], ann[loc_dict['gnomAD_AF']], ann[loc_dict['BIOTYPE']],
-                 ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']], ann[loc_dict['CADD_PHRED']])
+                 ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']])
+                phred = ann[loc_dict['CADD_PHRED']][0]
+                if variant_class != 'SNV':
+                    phred = ann[loc_dict['CADD_PHRED'][1]]
                 # Format amino acid change to be oldPOSnew
                 if len(aa) > 0:
                     # if a snv or syn, just aaPOS
@@ -46,8 +49,10 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                     else:
                         aa = test[0] + str(aa_pos) + test[1]
                 # need to parse exac maf to get desired allele freq, not all possible
-
-                cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, hgvsc, hgvsp, tx_id, effect, impact,
+                alt_ct = alt_ct.replace('(', '')
+                alt_ct = alt_ct.replace(')', '')
+                alt_ct = alt_ct.split(',')[0]
+                cur_var = '\t'.join((chrom, pos, ref, alt, alt_ct, tot_ct, gene, hgvsg, tx_id, effect, impact,
                                      biotype, codon, aa, snp_id, variant_class, sift, ExAC_MAF, clin_sig, phred)) + '\n'
                 if ref_flag == 'n':
                     if f == 0:
@@ -85,10 +90,11 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
 
 def gen_report(vcf, sample, ref_flag):
     vcf_in = VariantFile(vcf)
+    # run cadd twice over snv and indel file
     out = open(sample + '.germline.vep91.xls', 'w')
-    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'HGVSc': 0, 'HGVSp': 0, 'Protein_position': 0,
+    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'HGVSg': 0, 'Protein_position': 0,
                'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0, 'Existing_variation': 0, 'VARIANT_CLASS': 0,
-               'gnomAD_AF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
+               'gnomAD_AF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': []}
 
     desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
@@ -100,8 +106,11 @@ def gen_report(vcf, sample, ref_flag):
     for i in range(0, ann_size, 1):
         if desc_list[i] in desired:
             f_pos_list.append(i)
-            desired[desc_list[i]] = i
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tHGVSc\tHGVSp\tTranscript_id'
+            if desired[desc_list[i]] == 'CADD_PHRED':
+                desired[desc_list[i]].append(i)
+            else:
+                desired[desc_list[i]] = i
+    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tGene\tHGVSg\tTranscript_id'
               '\tEffect\tIMPACT\tBIOTYPE\tCodons\tAmino_acids\tExisting_variation\tVARIANT_CLASS\tSIFT\tgnomAD_AF'
               '\tCLIN_SIG\tCADD_PHRED\n')
     if ref_flag != 'n':

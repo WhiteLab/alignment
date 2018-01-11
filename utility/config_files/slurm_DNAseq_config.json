@@ -38,7 +38,7 @@
     "fai": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/2015DECREFS/FASTA/hg19_karyo_ordered.fa.fai",
     "dustmask": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/2015DECREFS/BED/hg19_dustmasked_merged.bed",
     "vepCache": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/2015DECREFS/VEP",
-    "cadd": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/CADD/capture_panel_v3_SNVs.tsv.gz",
+    "cadd": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/CADD_v1.2/capture_panel_v3_SNVs.tsv.gz",
     "dbsnp": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/GENCODE24GRCH37/GATK/dbSNP_r142.vcf.gz",
     "project_dir": "/cephfs/PROJECTS/",
     "project": "PANCAN",
