@@ -37,7 +37,7 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
                  ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']],
                  ann[loc_dict['gnomAD_AF']], ann[loc_dict['BIOTYPE']],
                  ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']])
-                phred = ann[loc_dict['CADD_PHRED']][0]
+                phred = ann[loc_dict['CADD_PHRED'][0]]
                 if variant_class != 'SNV':
                     phred = ann[loc_dict['CADD_PHRED'][1]]
                 # Format amino acid change to be oldPOSnew
