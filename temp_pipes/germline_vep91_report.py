@@ -32,10 +32,10 @@ def output_highest_impact(chrom, pos, ref, alt, alt_ct, tot_ct, ann_list, loc_di
             for ann in rank_dict[impact]:
                 # need to add coverage info for indels
                 (gene, tx_id, hgvsg, variant_class, effect, aa_pos, aa, codon, snp_id, ExAC_MAF, biotype, sift,
-                 clin_sig) = (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['HGVSc']],
-                 ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']],
-                 ann[loc_dict['Protein_position']], ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']],
-                 ann[loc_dict['Existing_variation']], ann[loc_dict['gnomAD_AF']], ann[loc_dict['BIOTYPE']],
+                 clin_sig) = (ann[loc_dict['SYMBOL']], ann[loc_dict['Feature']], ann[loc_dict['HGVSg']],
+                 ann[loc_dict['VARIANT_CLASS']], ann[loc_dict['Consequence']], ann[loc_dict['Protein_position']],
+                 ann[loc_dict['Amino_acids']], ann[loc_dict['Codons']], ann[loc_dict['Existing_variation']],
+                 ann[loc_dict['gnomAD_AF']], ann[loc_dict['BIOTYPE']],
                  ann[loc_dict['SIFT']], ann[loc_dict['CLIN_SIG']])
                 phred = ann[loc_dict['CADD_PHRED']][0]
                 if variant_class != 'SNV':
