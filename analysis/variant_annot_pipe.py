@@ -115,7 +115,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
         if estep == 'start' or estep == 'germ-annot':
             if not os.path.isdir(germ_ann_dir):
                 mk_ann = 'mkdir -p ' + germ_ann_dir
-                sys.stderr.write('Creating analysis output directories ' + mk_ann + '\n')
+                sys.stderr.write('Creating annotation output directories ' + mk_ann + '\n')
                 call(mk_ann, shell=True)
             os.chdir(germ_ann_dir)
             check += annot_platypus(config_file, normal_id)
