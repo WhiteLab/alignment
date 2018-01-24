@@ -77,13 +77,12 @@ def cnv_wrap(config_file, sample_pairs, project2):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Pipeline for variant calls and annotation using mutect and snpEff')
+    parser = argparse.ArgumentParser(description='Pipeline wrapper to estimate CNV from tumor/normal '
+                                                 'bams from custom capture')
     parser.add_argument('-sp', '--sample-pairs', action='store', dest='sample_pairs',
                         help='Tumor/normal sample pair list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-r', '--reference', action='store', dest='ref_mnt',
-                        help='Directory references are mounted, i.e. /mnt/cinder/REFS_XXX')
     parser.add_argument('-o', '--project2', action='store', dest='poject2',
                         help='Backup project in case the first location does not work')
 

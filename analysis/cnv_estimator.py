@@ -153,7 +153,7 @@ def cnv_pipe(config_file, pair, tum_bam, norm_bam):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Pipeline for variant calls and annotation using mutect and snpEff')
+    parser = argparse.ArgumentParser(description='Pipeline to estimate CNV from tumor/normal bams from custom capture')
     parser.add_argument('-s', '--sample-pair', action='store', dest='pair',
                         help='Tumor/normal sample pair id')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
