@@ -71,7 +71,7 @@ for line in fh:
         # batch params $pipeline $f1 $f2 $t $j
         job_log = bnid + '_' + lane + '.log'
         job_name = 'dnaseq-align-' + file_prefix
-        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -J ' + job_name + ' -o ' + job_log \
+        batch = 'sbatch -c ' + cores + ' --mem ' + mem + 'G -J ' + job_name + ' -o ' + job_log \
                 + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",t="' + seqtype \
                 + '",j="' + pipe_cfg + '"' + ' ' + slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
