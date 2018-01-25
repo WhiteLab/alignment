@@ -25,7 +25,7 @@ def get_genes(bed):
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['tools']['bedtools'], \
-           config_data['refs']['analysis'], config_data['refs']['capture']
+           config_data['refs']['analysis'], config_data['refs']['capture'], config_data['params']['threads']
 
 
 def get_bam_name(bnid, project_dir, project, align_dir):
@@ -126,7 +126,7 @@ def calc_tn_cov_ratios(cnv_dir, tum, norm, t1_genes, t2_genes, t1_suffix, t2_suf
 
 
 def cnv_pipe(config_file, tum_bam, norm_bam):
-    (project_dir, project, bedtools, ana, bed) = parse_config(config_file)
+    (project_dir, project, bedtools, ana, bed, cores) = parse_config(config_file)
     job_list = []
     tum_id = re.match('(\d+-\d+)\.', os.path.basename(tum_bam))
     tum_id = tum_id.group(1)
@@ -146,7 +146,7 @@ def cnv_pipe(config_file, tum_bam, norm_bam):
     job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + norm_id + t1_suffix)
     job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t2 + ' > ' + cnv_dir + norm_id + t2_suffix)
     sys.stderr.write(date_time() + 'Calculating read depth for ' + pair + '\n')
-    job_manager(job_list, '8')
+    job_manager(job_list, cores)
     # process coverage files, assess cnv
     sys.stderr.write(date_time() + 'Collapsing read counts in to tiers and gene\n')
     calc_tn_cov_ratios(cnv_dir, tum_id, norm_id, t1_genes, t2_genes, t1_suffix, t2_suffix)
