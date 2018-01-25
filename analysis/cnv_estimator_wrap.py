@@ -64,7 +64,7 @@ def cnv_wrap(config_file, sample_pairs, project2):
             job_log = pair_set[0] + '.cnv.log'
             batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + 'G -o ' + job_log \
                     + ' --export=cnv_pipe="' + cnv_pipe + '",tumor="' + tum_bam + '",normal="' + norm_bam \
-                    + '",j="' + config_file + '",p="' + pair_set[0] + '" ' + cnv_slurm
+                    + '",j="' + config_file + '" ' + cnv_slurm
             sys.stderr.write(date_time() + 'Submitted cnv est job for ' + pair_set[0] + '\n' + batch + '\n')
             subprocess.call(batch, shell=True)
         else:

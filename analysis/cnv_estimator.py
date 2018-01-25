@@ -55,10 +55,9 @@ def get_gene_counts(ct_dict, tier, bnid, suffix):
         ct_dict[bnid][tier][g.group(1)] += int(data[4])
 
 
-def calc_tn_cov_ratios(cnv_dir, pair, t1_genes, t2_genes, t1_suffix, t2_suffix):
-    sys.stderr.write(date_time() + 'Collapsing reads for ' + pair + '\n')
-    (tum, norm) = pair.split('\t')
-    pair = pair.replace('\t', '_')
+def calc_tn_cov_ratios(cnv_dir, tum, norm, t1_genes, t2_genes, t1_suffix, t2_suffix):
+    pair = tum + '_' + norm
+    sys.stderr.write(date_time() + 'Collapsing coverage for ' + pair + '\n')
     out = open(cnv_dir + pair + '_cnv_estimate.txt', 'w')
     out.write('CHROM\tGENE\tTier\tTum Read ct\tNorm Read ct\tT/N ratio\tlog2 ratio\n')
 
@@ -129,23 +128,29 @@ def calc_tn_cov_ratios(cnv_dir, pair, t1_genes, t2_genes, t1_suffix, t2_suffix):
 def cnv_pipe(config_file, pair, tum_bam, norm_bam):
     (project_dir, project, bedtools, ana, bed) = parse_config(config_file)
     job_list = []
+    tum_id = re.match('(\d+-\d+)\.', os.path.basename(tum_bam))
+    tum_id = tum_id.group(1)
+    norm_id = re.match('(\d+-\d+)\.', os.path.basename(norm_bam))
+    norm_id = norm_id.group(1)
     bed_t1 = bed.replace('.bed', '_t1.bed')
     bed_t2 = bed.replace('.bed', '_t2.bed')
     t1_genes = get_genes(bed_t1)
     t2_genes = get_genes(bed_t2)
     t1_suffix = '.t1.bedtools.coverage.txt'
     t2_suffix = '.t2.bedtools.coverage.txt'
-    cnv_dir = project_dir + project + '/' + ana + '/' + pair + '/OUTPUT/'
+    tum_dir = project_dir + project + '/' + ana + '/' + tum_id + '/OUTPUT/'
+    norm_dir = project_dir + project + '/' + ana + '/' + norm_id + '/OUTPUT/'
+    out_dir = project_dir + project + '/' + ana + '/' + pair + '/OUTPUT/'
 
-    job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + pair + t1_suffix)
-    job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t2 + ' > ' + cnv_dir + pair + t2_suffix)
-    job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + pair + t1_suffix)
-    job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t2 + ' > ' + cnv_dir + pair + t2_suffix)
+    job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + tum_dir + tum_id + t1_suffix)
+    job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t2 + ' > ' + tum_dir + tum_id + t2_suffix)
+    job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t1 + ' > ' + norm_dir + norm_id + t1_suffix)
+    job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t2 + ' > ' + norm_dir + norm_id + t2_suffix)
     sys.stderr.write(date_time() + 'Calculating read depth for ' + pair + '\n')
     job_manager(job_list, '8')
     # process coverage files, assess cnv
     sys.stderr.write(date_time() + 'Collapsing read counts in to tiers and gene\n')
-    calc_tn_cov_ratios(cnv_dir, pair, t1_genes, t2_genes, t1_suffix, t2_suffix)
+    calc_tn_cov_ratios(out_dir, tum_id, norm_id, t1_genes, t2_genes, t1_suffix, t2_suffix)
     sys.stderr.write(date_time() + 'CNV analysis complete for ' + pair + '\n')
     return 0
 
