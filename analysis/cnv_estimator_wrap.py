@@ -50,7 +50,6 @@ def cnv_wrap(config_file, sample_pairs, project2):
             (flag, tum_bam, tum_bai) = get_bam_name(pair_set[1], project_dir, project2, align_dir)
             if not (flag == 0 and os.path.getsize(tum_bam) > 0):
                 sys.stderr.write(date_time() + 'Suitable bam for ' + pair_set[1] + ' not found. Check parameters!\n')
-                exit(1)
         (flag, norm_bam, norm_bai) = get_bam_name(pair_set[2], project_dir, project, align_dir)
         # ensure bam is complete, otherwise try a different location
         if not (flag == 0 and os.path.getsize(norm_bam) > 0):
@@ -58,7 +57,6 @@ def cnv_wrap(config_file, sample_pairs, project2):
             (flag, norm_bam, norm_bai) = get_bam_name(pair_set[2], project_dir, project2, align_dir)
             if not (flag == 0 and os.path.getsize(norm_bam) > 0):
                 sys.stderr.write(date_time() + 'Suitable bam for ' + pair_set[2] + ' not found. Check parameters!\n')
-                exit(1)
         if flag == 0:
             job_name = 'cnv-est_' + pair_set[0]
             job_log = pair_set[0] + '.cnv.log'
