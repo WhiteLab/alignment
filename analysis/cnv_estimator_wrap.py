@@ -83,7 +83,7 @@ if __name__ == "__main__":
                         help='Tumor/normal sample pair list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-o', '--project2', action='store', dest='poject2',
+    parser.add_argument('-o', '--project2', action='store', dest='project2',
                         help='Backup project in case the first location does not work')
 
     if len(sys.argv) == 1:
