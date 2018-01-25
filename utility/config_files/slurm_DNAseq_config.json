@@ -7,7 +7,7 @@
     "germ_pipe": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/germline_only_pipe.py",
     "germ_slurm_wrap": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/slurm_squad/germ_only_annot.sl",
     "cnv_pipe": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/cnv_estimator.py",
-    "cnv_slurm": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/slurm_squad/cnv_esitmator.sl",
+    "cnv_slurm": "/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/slurm_squad/cnv_estimator_wrap.sl",
     "cutadapt": "cutadapt",
     "fastqc": "/cephfs/users/mbrown/PIPELINES/TOOLS/FastQC/fastqc",
     "bwa": "/cephfs/users/mbrown/PIPELINES/TOOLS/bwa-0.7.8/bwa",
