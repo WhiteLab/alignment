@@ -140,7 +140,9 @@ def cnv_pipe(config_file, tum_bam, norm_bam):
     t1_suffix = '.t1.bedtools.coverage.txt'
     t2_suffix = '.t2.bedtools.coverage.txt'
     cnv_dir = project_dir + project + '/' + ana + '/' + pair + '/OUTPUT/'
-
+    if not os.path.isdir(cnv_dir):
+        sys.stderr.write(date_time() + 'Output path ' + cnv_dir + ' does not exist! Check config and try again!\n')
+        exit(1)
     job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + tum_id + t1_suffix)
     job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t2 + ' > ' + cnv_dir + tum_id + t2_suffix)
     job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + norm_id + t1_suffix)
