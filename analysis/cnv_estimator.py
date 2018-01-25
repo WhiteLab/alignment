@@ -125,13 +125,14 @@ def calc_tn_cov_ratios(cnv_dir, tum, norm, t1_genes, t2_genes, t1_suffix, t2_suf
     return 0
 
 
-def cnv_pipe(config_file, pair, tum_bam, norm_bam):
+def cnv_pipe(config_file, tum_bam, norm_bam):
     (project_dir, project, bedtools, ana, bed) = parse_config(config_file)
     job_list = []
     tum_id = re.match('(\d+-\d+)\.', os.path.basename(tum_bam))
     tum_id = tum_id.group(1)
     norm_id = re.match('(\d+-\d+)\.', os.path.basename(norm_bam))
     norm_id = norm_id.group(1)
+    pair = tum_id + '_' + norm_id
     bed_t1 = bed.replace('.bed', '_t1.bed')
     bed_t2 = bed.replace('.bed', '_t2.bed')
     t1_genes = get_genes(bed_t1)
@@ -159,8 +160,6 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Pipeline to estimate CNV from tumor/normal bams from custom capture')
-    parser.add_argument('-p', '--sample-pair', action='store', dest='pair',
-                        help='Tumor/normal sample pair id')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
     parser.add_argument('-t', '--tumor', action='store', dest='tum_bam',
@@ -173,5 +172,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, pair, tum_bam, norm_bam) = (inputs.config_file, inputs.pair, inputs.tum_bam, inputs.norm_bam)
-    cnv_pipe(config_file, pair, tum_bam, norm_bam)
+    (config_file, tum_bam, norm_bam) = (inputs.config_file, inputs.tum_bam, inputs.norm_bam)
+    cnv_pipe(config_file, tum_bam, norm_bam)
