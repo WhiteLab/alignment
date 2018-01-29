@@ -43,8 +43,9 @@ def novosort_merge_pe(config_file, sample_list):
 
     for sample in fh:
         sample = sample.rstrip('\n')
-        loc = '../LOGS/' + sample + '.novosort_merge.log'
+        loc = sample + '.novosort_merge.log'
         job_loc = sample + '.novosort_merge.log'
+        job_name = sample + '_novosort_merge'
         (bam_list, bai_list, n) = list_bam(project, align, sample)
         bam_string = " ".join(bam_list)
         cur_dir = project_dir + project + '/' + align + '/' + sample + '/BAM/'
@@ -52,9 +53,10 @@ def novosort_merge_pe(config_file, sample_list):
         out_bam = sample + '.merged.final.bam'
         if n > 1:
             if rmdup == 'Y':
-                batch = 'sbatch -c ' + threads + ' --mem ' + ram + 'G -o ' + job_loc + ' --export=novosort="' \
-                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",out_bam="' + out_bam \
-                        + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
+                batch = 'sbatch -c ' + threads + ' -J ' + job_name + ' --mem ' + ram + 'G -o ' + job_loc \
+                        + ' --export=novosort="' + novosort + '",threads="' + threads + '",ram="' + ram \
+                        + 'G",out_bam="' + out_bam + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' \
+                        + novo_merge_rmdup_slurm
                 log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")
                 subprocess.call(batch, shell=True)
 
