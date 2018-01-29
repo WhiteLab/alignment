@@ -44,8 +44,6 @@ def novosort_merge_pe(config_file, sample_list):
     for sample in fh:
         sample = sample.rstrip('\n')
         loc = sample + '.novosort_merge.log'
-        job_loc = sample + '.novosort_merge.log'
-        job_name = sample + '_novosort_merge'
         (bam_list, bai_list, n) = list_bam(project, align, sample)
         bam_string = " ".join(bam_list)
         cur_dir = project_dir + project + '/' + align + '/' + sample + '/BAM/'
@@ -53,6 +51,9 @@ def novosort_merge_pe(config_file, sample_list):
         out_bam = sample + '.merged.final.bam'
         if n > 1:
             if rmdup == 'Y':
+                job_loc = sample + '.novosort_merge.log'
+                job_name = sample + '_novosort_merge'
+
                 batch = 'sbatch -c ' + threads + ' -J ' + job_name + ' --mem ' + ram + 'G -o ' + job_loc \
                         + ' --export=novosort="' + novosort + '",threads="' + threads + '",ram="' + ram \
                         + 'G",out_bam="' + out_bam + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' \
@@ -63,17 +64,20 @@ def novosort_merge_pe(config_file, sample_list):
             else:
                 # run legacy pipe for removing dups using picard
                 picard_tmp = 'picard_tmp'
+                job_loc = sample + '.novosort_merge.picard_rmdup.log'
+                job_name = sample + '_novosort_merge.picard_rmdup'
+
                 # setting max records in ram to half of ram
                 recs = (int(ram) / 2) * (1000000000 / 200)
                 in_bam = sample + '.merged.bam'
-                in_bai = sample + '.merged.bai'
+                in_bai = sample + '.merged.bam.bai'
 
                 mets = sample + '.rmdup.srt.metrics'
-                batch = 'sbatch -c ' + threads + ' --mem ' + ram + 'G -o ' + job_loc + ' --export=novosort="' \
-                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",in_bam="' + in_bam \
-                        + '",bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' + java_tool \
-                        + '",picard_tool="' + picard_tool + '",tmp="' + picard_tmp + '",recs="' + str(recs) \
-                        + '",out_bam="' + out_bam + '",mets="' + mets + '",in_bai="' + in_bai + '" ' \
+                batch = 'sbatch -c ' + threads + ' --mem ' + ram + 'G -o ' + job_loc + ' -J ' + job_name \
+                        + ' --export=novosort="' + novosort + '",threads="' + threads + '",ram="' + ram \
+                        + 'G",in_bam="' + in_bam + '",bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' \
+                        + java_tool + '",picard_tool="' + picard_tool + '",tmp="' + picard_tmp + '",recs="' \
+                        + str(recs) + '",out_bam="' + out_bam + '",mets="' + mets + '",in_bai="' + in_bai + '" ' \
                         + novo_picard_merge_rmdup_slurm
                 sys.stderr.write(date_time() + 'Merging with novosort and rmdup with picard for legacy reasons!\n'
                                  + batch + '\n')
