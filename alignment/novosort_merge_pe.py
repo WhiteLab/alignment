@@ -70,7 +70,7 @@ def novosort_merge_pe(config_file, sample_list):
 
                 mets = sample + '.rmdup.srt.metrics'
                 batch = 'sbatch -c ' + threads + ' --mem ' + ram + 'G -o ' + job_loc + ' --export=novosort="' \
-                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",inbam="' + in_bam \
+                        + novosort + '",threads="' + threads + '",ram="' + ram + 'G",in_bam="' + in_bam \
                         + '",bam_string="' + bam_string + '",loc="' + loc + '",java_tool="' + java_tool \
                         + '",picard_tool="' + picard_tool + '",tmp="' + picard_tmp + '",recs="' + str(recs) \
                         + '",out_bam="' + out_bam + '",mets="' + mets + '",in_bai="' + in_bai + '" ' \
