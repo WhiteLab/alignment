@@ -34,7 +34,7 @@ def get_bam_name(bnid, project_dir, project, align_dir):
     return f, bam, bai
 
 
-def cnv_wrap(config_file, sample_pairs, project2):
+def cnv_wrap(config_file, sample_pairs, project2, o_flag):
     (project_dir, project, align_dir, cores, mem, cnv_pipe, cnv_slurm) = parse_config(config_file)
 
     pair_list = []
@@ -62,7 +62,7 @@ def cnv_wrap(config_file, sample_pairs, project2):
             job_log = pair_set[0] + '.cnv.log'
             batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + 'G -o ' + job_log \
                     + ' --export=cnv_pipe="' + cnv_pipe + '",tumor="' + tum_bam + '",normal="' + norm_bam \
-                    + '",j="' + config_file + '" ' + cnv_slurm
+                    + '",j="' + config_file + '",o="' + o_flag + '" ' + cnv_slurm
             sys.stderr.write(date_time() + 'Submitted cnv est job for ' + pair_set[0] + '\n' + batch + '\n')
             subprocess.call(batch, shell=True)
         else:
@@ -83,11 +83,14 @@ if __name__ == "__main__":
                         help='JSON config file with tool and ref locations')
     parser.add_argument('-o', '--project2', action='store', dest='project2',
                         help='Backup project in case the first location does not work')
+    parser.add_argument('-w', '--overwrite', action='store', dest='o_flag',
+                        help='overwrite flag to determine whether to wrote over existing coverage files')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file, project2) = (inputs.sample_pairs, inputs.config_file, inputs.project2)
-    cnv_wrap(config_file, sample_pairs, project2)
+    (sample_pairs, config_file, project2, o_flag) = (inputs.sample_pairs, inputs.config_file, inputs.project2,
+                                                     inputs.o_flag)
+    cnv_wrap(config_file, sample_pairs, project2, o_flag)

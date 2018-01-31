@@ -125,7 +125,7 @@ def calc_tn_cov_ratios(cnv_dir, tum, norm, t1_genes, t2_genes, t1_suffix, t2_suf
     return 0
 
 
-def cnv_pipe(config_file, tum_bam, norm_bam):
+def cnv_pipe(config_file, tum_bam, norm_bam, o_flag):
     (project_dir, project, bedtools, ana, bed, cores) = parse_config(config_file)
     job_list = []
     tum_id = re.match('(\d+-\d+)\.', os.path.basename(tum_bam))
@@ -143,10 +143,20 @@ def cnv_pipe(config_file, tum_bam, norm_bam):
     if not os.path.isdir(cnv_dir):
         sys.stderr.write(date_time() + 'Output path ' + cnv_dir + ' does not exist! Check config and try again!\n')
         exit(1)
-    job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + tum_id + t1_suffix)
-    job_list.append(bedtools + ' coverage -abam ' + tum_bam + ' -b ' + bed_t2 + ' > ' + cnv_dir + tum_id + t2_suffix)
-    job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t1 + ' > ' + cnv_dir + norm_id + t1_suffix)
-    job_list.append(bedtools + ' coverage -abam ' + norm_bam + ' -b ' + bed_t2 + ' > ' + cnv_dir + norm_id + t2_suffix)
+    clist = (tum_bam + ' -b ' + bed_t1 + ' > ', tum_bam + ' -b ' + bed_t2 + ' > ', norm_bam + ' -b ' + bed_t1
+             + ' > ', norm_bam + ' -b ' + bed_t2 + ' > ')
+    flist = (cnv_dir + tum_id + t1_suffix, cnv_dir + tum_id + t2_suffix, cnv_dir + norm_id + t1_suffix, cnv_dir
+             + norm_id + t2_suffix)
+    if o_flag == 'y':
+        sys.stderr.write(date_time() + 'Overwrite yes given, creating new coverage files\n')
+        for i in range(0, len(flist)):
+            job_list.append(bedtools + ' coverage -abam ' + clist[i] + flist[i])
+    else:
+        sys.stderr.write(date_time() + 'Overwrite no given, checking for existing coverage files first\n')
+        for i in range(0, len(flist)):
+            if not os.path.isfile(flist[i]):
+                job_list.append(bedtools + ' coverage -abam ' + clist[i] + flist[i])
+
     sys.stderr.write(date_time() + 'Calculating read depth for ' + pair + '\n')
     job_manager(job_list, cores)
     # process coverage files, assess cnv
@@ -166,11 +176,13 @@ if __name__ == "__main__":
                         help='Tumor bam location')
     parser.add_argument('-n', '--normal', action='store', dest='norm_bam',
                         help='Normal bam location')
+    parser.add_argument('-o', '--overwrite', action='store', dest='o_flag',
+                        help='overwrite flag to determine whether to wrote over existing coverage files')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, tum_bam, norm_bam) = (inputs.config_file, inputs.tum_bam, inputs.norm_bam)
-    cnv_pipe(config_file, tum_bam, norm_bam)
+    (config_file, tum_bam, norm_bam, o_flag) = (inputs.config_file, inputs.tum_bam, inputs.norm_bam, inputs.o_flag)
+    cnv_pipe(config_file, tum_bam, norm_bam, o_flag)
