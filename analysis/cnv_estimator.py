@@ -125,7 +125,7 @@ def calc_tn_cov_ratios(cnv_dir, tum, norm, t1_genes, t2_genes, t1_suffix, t2_suf
     return 0
 
 
-def cnv_pipe(config_file, tum_bam, norm_bam, o_flag):
+def cnv_pipe(config_file, tum_bam, norm_bam, o_flag, project2):
     (project_dir, project, bedtools, ana, bed, cores) = parse_config(config_file)
     job_list = []
     tum_id = re.match('(\d+-\d+)\.', os.path.basename(tum_bam))
@@ -141,8 +141,12 @@ def cnv_pipe(config_file, tum_bam, norm_bam, o_flag):
     t2_suffix = '.t2.bedtools.coverage.txt'
     cnv_dir = project_dir + project + '/' + ana + '/' + pair + '/OUTPUT/'
     if not os.path.isdir(cnv_dir):
-        sys.stderr.write(date_time() + 'Output path ' + cnv_dir + ' does not exist! Check config and try again!\n')
-        exit(1)
+        sys.stderr.write(date_time() + 'Output path ' + cnv_dir + ' does not exist! Trying with backup project '
+                         + project2 + '\n')
+        cnv_dir = project_dir + project2 + '/' + ana + '/' + pair + '/OUTPUT/'
+        if not os.path.isdir(cnv_dir):
+            sys.stderr.write(date_time() + 'Output path ' + cnv_dir + ' does not exist! Check config and try again!\n')
+            exit(1)
     clist = (tum_bam + ' -b ' + bed_t1 + ' > ', tum_bam + ' -b ' + bed_t2 + ' > ', norm_bam + ' -b ' + bed_t1
              + ' > ', norm_bam + ' -b ' + bed_t2 + ' > ')
     flist = (cnv_dir + tum_id + t1_suffix, cnv_dir + tum_id + t2_suffix, cnv_dir + norm_id + t1_suffix, cnv_dir
@@ -178,11 +182,14 @@ if __name__ == "__main__":
                         help='Normal bam location')
     parser.add_argument('-o', '--overwrite', action='store', dest='o_flag',
                         help='overwrite flag to determine whether to wrote over existing coverage files')
+    parser.add_argument('-p', '--project2', action='store', dest='project2',
+                        help='backup project to try for write output')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, tum_bam, norm_bam, o_flag) = (inputs.config_file, inputs.tum_bam, inputs.norm_bam, inputs.o_flag)
-    cnv_pipe(config_file, tum_bam, norm_bam, o_flag)
+    (config_file, tum_bam, norm_bam, o_flag, project2) = (inputs.config_file, inputs.tum_bam, inputs.norm_bam, inputs.o_flag,
+                                                inputs.project2)
+    cnv_pipe(config_file, tum_bam, norm_bam, o_flag, project2)
