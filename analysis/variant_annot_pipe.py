@@ -8,7 +8,7 @@ from utility.date_time import date_time
 from subprocess import call
 from analysis.mutect_pipe import mutect_pipe
 from analysis.mutect_merge_sort import mutect_merge_sort
-from annotation.annot_platypus_VEP import annot_platypus
+from annotation.annot_platypus_VEP91 import annot_platypus
 from analysis.platypus_germline import platypus_germline
 from analysis.scalpel_indel import scalpel_indel
 from utility.set_acls import set_acls
@@ -118,7 +118,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
                 sys.stderr.write('Creating annotation output directories ' + mk_ann + '\n')
                 call(mk_ann, shell=True)
             os.chdir(germ_ann_dir)
-            check += annot_platypus(config_file, normal_id)
+            check += annot_platypus(config_file, normal_id, 'n')
         reorg = 'mv *.log ' + ann_dir + '/LOGS;'
         sys.stderr.write('Reorganizing germline analysis files ' + reorg + '\n')
         call(reorg, shell=True)

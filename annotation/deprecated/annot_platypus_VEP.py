@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
-from annotation.germline_report import gen_report
+from annotation.deprecated.germline_report import gen_report
 from utility.date_time import date_time
 import subprocess
 import json
