@@ -156,7 +156,7 @@ def gen_report(vcf, out, c, ref_flag):
             f_pos_list.append(i)
             desired[desc_list[i]] = i
     out.write('chr\tpos\tcontext\tref\talt\tnormal_ref_count\tnormal_alt_count\t%_normal_alt\ttumor_ref_count\t'
-              'tumor_alt_count\t%_tumor_alt\tT/N_%_alt_ratio\tsnp_ID\tExAC_MAF\tgene\ttx_id\teffect\timpact\tbiotype\t'
+              'tumor_alt_count\t%_tumor_alt\tT/N_%_alt_ratio\tsnp_ID\tgnomAD_AF\tgene\ttx_id\teffect\timpact\tbiotype\t'
               'codon_change\tamino_acid_change\ton/off-target\n')
     if ref_flag != 'n':
         ref_flag = create_index(ref_flag)
