@@ -19,11 +19,14 @@ def parse_config(config_file):
     return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
            config_data['refs']['analysis'], config_data['refs']['annotation'], config_data['params']['germflag'], \
            config_data['params']['indelflag'], config_data['params']['annotator'], config_data['params']['wg_flag'], \
-           config_data['params']['user'], config_data['params']['group']
+           config_data['params']['user'], config_data['params']['group'], config_data['params']['vep_cache_version']
 
 
-def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
-    from annotation.annot_vcf_vep import annot_vcf_vep_pipe
+def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source, vep_cache):
+    if vep_cache == '84':
+        from annotation.deprecated.annot_vcf_vep import annot_vcf_vep_pipe
+    else:
+        from annotation.annot_vcf_VEP91 import annot_vcf_vep_pipe
     check = annot_vcf_vep_pipe(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source)
     if check == 0:
         sys.stderr.write(date_time() + 'vep annotation of ' + source + ' output successful.\n')
@@ -34,7 +37,7 @@ def vep(config_file, sample_pairs, in_suffix, out_suffix, in_mutect, source):
 
 
 def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
-    (project_dir, project, align, analysis, annotation, germ_flag, indel_flag, annot_used, wg, user, group) \
+    (project_dir, project, align, analysis, annotation, germ_flag, indel_flag, annot_used, wg, user, group, vep_cache) \
         = parse_config(config_file)
     src_env = '. /etc/environment'
     call(src_env, shell=True)
@@ -84,9 +87,14 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
 
         os.chdir(ann_dir)
         if annot_used == 'vep':
+            vep_suff = 'vep'
+            if vep_cache == '91':
+                vep_suff = vep_suff + vep_cache
             if estep != 'indel-annot':
-                check = vep(config_file, sample_pair, '.vcf.keep', '.snv.vep.vcf', '.out.keep', 'mutect')
-            check += vep(config_file, sample_pair, '.indel.vcf', '.somatic.indel.vep.vcf', 'NA', 'scalpel')
+                check = vep(config_file, sample_pair, '.vcf.keep', '.snv.' + vep_suff + '.vcf', '.out.keep', 'mutect',
+                            vep_cache)
+            check += vep(config_file, sample_pair, '.indel.vcf', '.somatic.indel.' + vep_suff + '.vcf', 'NA',
+                         'scalpel', vep_cache)
 
         if check == 0:
             sys.stderr.write(date_time() + 'File annotation successful, reorganizing files\n')
