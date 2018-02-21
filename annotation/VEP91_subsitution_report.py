@@ -133,8 +133,8 @@ def gen_report(vcf, out, c, ref_flag, cache):
     vcf_in = VariantFile(vcf)
     out_fn = sample + suffix
     out = open(out_fn, 'w')
-    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0, 'Amino_acids': 0,
-               'Codons': 0, 'Existing_variation': 0, 'ExAC_MAF': 0, 'BIOTYPE': 0}
+    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'HGVSg': 0, 'Protein_position': 0,
+               'Amino_acids': 0, 'Codons': 0, 'Existing_variation': 0, 'ExAC_MAF': 0, 'BIOTYPE': 0}
 
     desc_string = vcf_in.header.info['ANN'].record['Description']
     desc_string = desc_string.lstrip('"')
