@@ -187,6 +187,7 @@ def main():
                         help='bed file to mark whether hit was on or off-target. if not desired, enter \'n\' ')
     parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
                     'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
+    parser.add_argument('-n', '--cache', action='store', dest='cache', help='compatibility placeholder in this script')
 
     if len(sys.argv) == 1:
         parser.print_help()

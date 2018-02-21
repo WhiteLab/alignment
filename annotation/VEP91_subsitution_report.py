@@ -116,11 +116,13 @@ def output_highest_impact(chrom, pos, ref, alt, ann_list, mut_dict, loc_dict, tf
     out.write(outstring)
 
 
-def gen_report(vcf, out, c, ref_flag):
+def gen_report(vcf, out, c, ref_flag, cache):
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
-    loc = 'LOGS/' + parts[0] + '.subsitutions.vep.priority_report.log'
+    sample = parts[0]
+    loc = 'LOGS/' + sample + '.subsitutions.vep' + cache + '.priority_report.log'
+    suffix = '.subsitutions.vep' + cache + '.prioritized_impact.report.xls'
     log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
     mut_dict = create_mutect_ind(out)
     log(loc, date_time() + 'Created index for added mutect info\n')
@@ -129,8 +131,8 @@ def gen_report(vcf, out, c, ref_flag):
         on_dict = create_target(c)
         log(loc, date_time() + 'Target file given, creating index for on target info\n')
     vcf_in = VariantFile(vcf)
-
-    out = open(parts[0] + '.subsitutions.vep.prioritized_impact.report.xls', 'w')
+    out_fn = sample + suffix
+    out = open(out_fn, 'w')
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0, 'Amino_acids': 0,
                'Codons': 0, 'Existing_variation': 0, 'ExAC_MAF': 0, 'BIOTYPE': 0}
 
@@ -177,13 +179,14 @@ def main():
                         help='bed file to mark whether hit was on or off-target. if not desired, enter \'n\' ')
     parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
                     'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
+    parser.add_argument('-n', '--cache', action='store', dest='cache', help='vep version, i.e. 91')
 
     if len(sys.argv) == 1:
         parser.print_help()
         exit(1)
     args = parser.parse_args()
 
-    gen_report(args.vcf, args.out, args.c, args.ref)
+    gen_report(args.vcf, args.out, args.c, args.ref, args.cache)
 
 
 if __name__ == '__main__':

@@ -96,11 +96,12 @@ def gen_report(vcf, ref_flag):
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
-    loc = 'LOGS/' + parts[0] + '.indels.vep_priority.report.log'
+    sample = parts[0]
+    loc = 'LOGS/' + sample + '.indels.vep_priority.report.log'
     log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
     vcf_in = VariantFile(vcf)
-
-    out = open(parts[0] + '.indels.vep.prioritized_impact.report.xls', 'w')
+    out_fn = sample + '.indels.vep.prioritized_impact.report.xls'
+    out = open(out_fn, 'w')
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0, 'Amino_acids': 0,
                'Codons': 0, 'Existing_variation': 0, 'ExAC_MAF': 0, 'BIOTYPE': 0, 'VARIANT_CLASS': 0}
 
@@ -138,6 +139,7 @@ def main():
                         help='VEP annotated variant file')
     parser.add_argument('-r', '--reference', action='store', dest='ref', help='Tab-separated reference table with gene '
                     'symbols and refseq + ensembl ids to standardize what transcript is used.  Use flag \'n\' to skip')
+    parser.add_argument('-n', '--cache', action='store', dest='cache', help='compatibility placeholder in this script')
 
     if len(sys.argv) == 1:
         parser.print_help()

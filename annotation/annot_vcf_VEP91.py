@@ -108,6 +108,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
             exit(1)
     else:
         log(loc, date_time() + 'VEP annotation of ' + sample_pair + in_suffix + ' successful!\n')
+
     if vep_cache == '84':
         from annotation.deprecated.vep_subsitution_report import gen_report as gen_snv_report
         from annotation.deprecated.vep_indel_report import gen_report as gen_indel_report
@@ -117,12 +118,12 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
     if source == 'mutect':
         if wg_flag == 'y':
             intvl = 'n'
-        check = gen_snv_report(out_vcf, ana_dir + '/' + sample_pair + in_mutect, intvl, tx_index)
+        check = gen_snv_report(out_vcf, ana_dir + '/' + sample_pair + in_mutect, intvl, tx_index, vep_cache)
         if check != 0:
             log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
             exit(1)
     else:
-        check = gen_indel_report(out_vcf, tx_index)
+        check = gen_indel_report(out_vcf, tx_index, vep_cache)
         if check != 0:
             log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
             exit(1)
