@@ -17,8 +17,7 @@ def parse_config(config_file):
            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'], \
            config_data['params']['plugin_dir'], config_data['params']['threads'], config_data['refs']['intervals'], \
            config_data['params']['dustmask_flag'], config_data['params']['wg_flag'], config_data['refs']['tx_index'],\
-           config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['analysis'], \
-           config_data['refs']['cadd_snv'], config_data['refs']['cadd_indel']
+           config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['analysis']
 
 
 def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
@@ -41,13 +40,12 @@ def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
     out.close()
 
 
-def run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir, cadd_snv,
-            cadd_indel):
+def run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir):
     run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
               + ' --symbol --sift b --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
               + ' --offline --af_gnomad --hgvs --hgvsg --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' \
-              + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir + ' --plugin CADD,' \
-              + cadd_snv + ' --plugin CADD,' + cadd_indel + '  2>> ' + loc + ' >> ' + loc
+              + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir + '  2>> ' + loc + ' >> ' \
+              + loc
 
     return run_cmd
 
@@ -68,7 +66,7 @@ def watch_mem(proc_obj, source, sample, loc):
 
 def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutect, source):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, plugin_dir, threads, intvl, dustmask_flag, wg_flag, tx_index,
-     project_dir, project, analysis, cadd_snv, cadd_indel) = parse_config(config_file)
+     project_dir, project, analysis) = parse_config(config_file)
     # scale back on the forking a bit
 
     if int(threads) > 2:
@@ -85,7 +83,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
     # run_vep = ''
     buffer_size = '5000'
     run_cmd = run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
-                      plugin_dir, cadd_snv, cadd_indel)
+                      plugin_dir)
     log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + ' ' + run_cmd + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
     check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
@@ -100,7 +98,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
 
         subprocess.call(clean_up, shell=True)
         run_cmd = run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
-                          plugin_dir, cadd_snv, cadd_indel)
+                          plugin_dir)
         log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
         check = subprocess.call(run_cmd, shell=True)
         if check != 0:
