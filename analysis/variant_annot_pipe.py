@@ -110,7 +110,7 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
         check = 0
         # check for germline analysis dir
         germ_ana_dir = project_dir + project + '/' + analysis + '/' + normal_id
-        if estep == 'start' or estep == 'germ-call':
+        if estep != 'germ-annot':
             if not os.path.isdir(germ_ana_dir):
                 mk_ana = 'mkdir -p ' + germ_ana_dir
                 sys.stderr.write('Creating analysis output directories ' + mk_ana + '\n')
@@ -120,13 +120,12 @@ def variant_annot_pipe(tumor_id, normal_id, config_file, estep):
         set_acls(germ_ana_dir, user, group)
         # check for germline annotation dir
         germ_ann_dir = project_dir + project + '/' + annotation + '/' + normal_id
-        if estep == 'start' or estep == 'germ-annot':
-            if not os.path.isdir(germ_ann_dir):
-                mk_ann = 'mkdir -p ' + germ_ann_dir
-                sys.stderr.write('Creating annotation output directories ' + mk_ann + '\n')
-                call(mk_ann, shell=True)
-            os.chdir(germ_ann_dir)
-            check += annot_platypus(config_file, normal_id, 'n')
+        if not os.path.isdir(germ_ann_dir):
+            mk_ann = 'mkdir -p ' + germ_ann_dir
+            sys.stderr.write('Creating annotation output directories ' + mk_ann + '\n')
+            call(mk_ann, shell=True)
+        os.chdir(germ_ann_dir)
+        check += annot_platypus(config_file, normal_id, 'n')
         reorg = 'mv *.log ' + ann_dir + '/LOGS;'
         sys.stderr.write('Reorganizing germline analysis files ' + reorg + '\n')
         call(reorg, shell=True)
