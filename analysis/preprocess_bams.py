@@ -34,8 +34,8 @@ def preprocess_bams(config_file, sample_pairs):
                 temp[cur[2]] = 1
         else:
             if cur[0] not in temp:
-                sl.write(cur[1] + '\n')
-                temp[cur[1]] = 1
+                sl.write(cur[0] + '\n')
+                temp[cur[0]] = 1
     sl.close()
     fh .close()
     miss_list = check_for_merged_bams(config_file, sample_list)
