@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--sample-list', action='store', dest='samples',
                         help='Single sample list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
-                        help='JSON config file with tool and ref locations')
+                        help='JSON config file with tool and ref locations. USE COMPLETE PATH')
     parser.add_argument('-e', '--estep', action='store', dest='estep',
                         help='Step to start at, \'start\' or \'annot\'')
 
