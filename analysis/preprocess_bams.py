@@ -56,7 +56,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Pre-variant calling step to merge all bam files for each sample '
                                                  'before running')
     parser.add_argument('-sp', '--sample-pairs', action='store', dest='sample_pairs',
-                        help='Tumor/normal sample pair list')
+                        help='Tumor/normal sample pair list or single ID list if not paired')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
 
