@@ -36,7 +36,7 @@ def temp_germline_pipe(config_file, sample, estep):
             sys.stderr.write('Creating analysis output directories ' + mk_ann + '\n')
             call(mk_ann, shell=True)
         os.chdir(germ_ann_dir)
-        check = annot_platypus(config_file, sample)
+        check = annot_platypus(config_file, sample, 'n')
         if check == 0:
             sys.stderr.write(date_time() + 'Germ line call complete\n')
         else:
