@@ -25,12 +25,17 @@ def preprocess_bams(config_file, sample_pairs):
     temp = {}
     for line in fh:
         cur = line.rstrip('\n').split('\t')
-        if cur[1] not in temp:
-            sl.write(cur[1] + '\n')
-            temp[cur[1]] = 1
-        if cur[2] not in temp:
-            sl.write(cur[2] + '\n')
-            temp[cur[2]] = 1
+        if len(cur) == 3:
+            if cur[1] not in temp:
+                sl.write(cur[1] + '\n')
+                temp[cur[1]] = 1
+            if cur[2] not in temp:
+                sl.write(cur[2] + '\n')
+                temp[cur[2]] = 1
+        else:
+            if cur[0] not in temp:
+                sl.write(cur[1] + '\n')
+                temp[cur[1]] = 1
     sl.close()
     fh .close()
     miss_list = check_for_merged_bams(config_file, sample_list)
