@@ -4,8 +4,6 @@ import sys
 import os
 import signal
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
-from annotation.vep_subsitution_report import gen_report as gen_snv_report
-from annotation.vep_indel_report import gen_report as gen_indel_report
 from utility.date_time import date_time
 from utility.log import log
 import subprocess
@@ -42,20 +40,13 @@ def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
     out.close()
 
 
-def run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir):
-    if wg_flag == 'n':
-        run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                  + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                  + ' --offline --maf_exac --no_whole_genome --fork ' + threads + ' --fasta ' \
-                  + fasta + ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir\
-                  + '  2>> ' + loc + ' >> ' \
-                  + loc
-    else:
-        run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
-                  + ' --symbol --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
-                  + ' --offline --maf_exac --fork ' + threads + ' --fasta ' + fasta + \
-                  ' --dir_cache ' + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir \
-                  + ' 2>> ' + loc + ' >> ' + loc
+def run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir):
+    run_cmd = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf \
+              + ' --symbol --sift b --vcf_info_field ANN --canonical --variant_class --buffer_size ' + buffer_size \
+              + ' --offline --af_gnomad --hgvs --hgvsg --fork ' + threads + ' --fasta ' + fasta + ' --dir_cache ' \
+              + vep_cache + ' --cache_version ' + vcache + ' --dir_plugins ' + plugin_dir + '  2>> ' + loc + ' >> ' \
+              + loc
+
     return run_cmd
 
 
@@ -82,7 +73,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         # threads = str(int(threads)/2 - 1)
         threads = str(int(threads) - 1)
     # track to prevent repeat annotation if same sample used as comparison
-    loc = 'LOGS/' + sample_pair + '.vep_anno.log'
+    loc = 'LOGS/' + sample_pair + '.vep91_anno.log'
     ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair + '/OUTPUT'
     in_vcf = ana_dir + '/' + sample_pair + in_suffix
     out_vcf = sample_pair + out_suffix
@@ -90,8 +81,8 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         pass_filter(ana_dir, sample_pair, in_suffix, dustmask_flag)
         in_vcf = sample_pair + '.somatic_indel.PASS.vcf'
     # run_vep = ''
-    buffer_size = '2000'
-    run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
+    buffer_size = '5000'
+    run_cmd = run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
                       plugin_dir)
     log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + ' ' + run_cmd + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
@@ -106,7 +97,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         os.killpg(os.getpgid(check.pid), signal.SIGINT)
 
         subprocess.call(clean_up, shell=True)
-        run_cmd = run_vep(wg_flag, vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
+        run_cmd = run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
                           plugin_dir)
         log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + '\n')
         check = subprocess.call(run_cmd, shell=True)
@@ -115,15 +106,22 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
             exit(1)
     else:
         log(loc, date_time() + 'VEP annotation of ' + sample_pair + in_suffix + ' successful!\n')
+
+    if vep_cache == '84':
+        from annotation.deprecated.vep_subsitution_report import gen_report as gen_snv_report
+        from annotation.deprecated.vep_indel_report import gen_report as gen_indel_report
+    else:
+        from annotation.VEP91_subsitution_report import gen_report as gen_snv_report
+        from annotation.VEP91_indel_report import gen_report as gen_indel_report
     if source == 'mutect':
         if wg_flag == 'y':
             intvl = 'n'
-        check = gen_snv_report(out_vcf, ana_dir + '/' + sample_pair + in_mutect, intvl, tx_index)
+        check = gen_snv_report(out_vcf, ana_dir + '/' + sample_pair + in_mutect, intvl, tx_index, vcache)
         if check != 0:
             log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
             exit(1)
     else:
-        check = gen_indel_report(out_vcf, tx_index)
+        check = gen_indel_report(out_vcf, tx_index, vcache)
         if check != 0:
             log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
             exit(1)

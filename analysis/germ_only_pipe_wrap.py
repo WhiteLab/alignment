@@ -19,7 +19,7 @@ def germ_pipe_wrap(config_file, samples, estep):
         sample = sample.rstrip('\n')
         job_name = 'dnaseq-germ-' + sample
         job_log = sample + '.germ_anno.log'
-        batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
+        batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + 'G -o ' + job_log \
                 + ' --export=germ_pipe="' + germ_pipe + '",normal="' + sample \
                 + '",j="' + config_file + '",e="' + estep + '" ' + germ_slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--sample-list', action='store', dest='samples',
                         help='Single sample list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
-                        help='JSON config file with tool and ref locations')
+                        help='JSON config file with tool and ref locations. USE COMPLETE PATH')
     parser.add_argument('-e', '--estep', action='store', dest='estep',
                         help='Step to start at, \'start\' or \'annot\'')
 

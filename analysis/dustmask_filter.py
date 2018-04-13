@@ -30,5 +30,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (bedtools, bed_ref, pair, loc) = (inputs.bedtools, inputs.ref, inputs.pair, inputs.loc)
+    (bedtools, bed_ref, pair, loc) = (inputs.bedtools, inputs.bed_ref, inputs.pair, inputs.loc)
     filter_indel(bedtools, bed_ref, pair, loc)

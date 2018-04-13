@@ -25,12 +25,17 @@ def preprocess_bams(config_file, sample_pairs):
     temp = {}
     for line in fh:
         cur = line.rstrip('\n').split('\t')
-        if cur[1] not in temp:
-            sl.write(cur[1] + '\n')
-            temp[cur[1]] = 1
-        if cur[2] not in temp:
-            sl.write(cur[2] + '\n')
-            temp[cur[2]] = 1
+        if len(cur) == 3:
+            if cur[1] not in temp:
+                sl.write(cur[1] + '\n')
+                temp[cur[1]] = 1
+            if cur[2] not in temp:
+                sl.write(cur[2] + '\n')
+                temp[cur[2]] = 1
+        else:
+            if cur[0] not in temp:
+                sl.write(cur[0] + '\n')
+                temp[cur[0]] = 1
     sl.close()
     fh .close()
     miss_list = check_for_merged_bams(config_file, sample_list)
@@ -51,7 +56,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Pre-variant calling step to merge all bam files for each sample '
                                                  'before running')
     parser.add_argument('-sp', '--sample-pairs', action='store', dest='sample_pairs',
-                        help='Tumor/normal sample pair list')
+                        help='Tumor/normal sample pair list or single ID list if not paired')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
 

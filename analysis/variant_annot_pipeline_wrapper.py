@@ -20,10 +20,10 @@ def variant_pipe_wrap(config_file, sample_pairs, estep):
     for line in fh:
         (sample_pair, tumor_id, normal_id) = line.rstrip('\n').split('\t')
 
-        # quick check to see if just need to restart pipleine from mutect, or actually get merged bams
-        job_name = 'dnaseq-annot-' + sample_pair
-        job_log = sample_pair + '.anno.log'
-        batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
+        # quick check to see if just need to restart pipeline from mutect, or actually get merged bams
+        job_name = 'dnaseq-annot-' + estep + '-' + sample_pair
+        job_log = sample_pair + '.anno.' + estep + '.log'
+        batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + 'G -o ' + job_log \
                 + ' --export=pipeline="' + variant_pipe + '",tumor="' + tumor_id + '",normal="' + normal_id \
                 + '",j="' + config_file + '",e="' + estep + '" ' + variant_slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
