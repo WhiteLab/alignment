@@ -5,7 +5,7 @@ Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Febr
 You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with OpenStack 
 is highly recommended.
 
-#####1) Set up vm - on head node, will give updates on set up
+##### 1) Set up vm - on head node, will give updates on set up
 VMs related to this pipeline have an image with the suffix DNAseqPEvx.xx and a date prefix.  Best to choose the latest.
 Image list can be viewed using:
 ```
@@ -38,7 +38,7 @@ sudo mkdir /mnt/WORK; sudo chown ubuntu:ubuntu /mnt/WORK; swift download MB_TEST
 REFS;
 ```
 
-#####2) Create job run files
+##### 2) Create job run files
 ##### a) Get list of fastq files to process from swift, one file per line
 ##### b) Use this list to create a run file, in this example for custom capture:
 ```
@@ -78,7 +78,7 @@ Resultant lane_list:
 	"cc_vsn":"V3", # custom capture version
     }
 
-#####3) Pipeline run - QC:
+##### 3) Pipeline run - QC:
 
 ```
 /home/ubuntu/TOOLS/Scripts/alignment/pipeline_wrapper.py -f lane_list.txt -j hg19_pe_config.json -m location_of_volume_mount 2> run.log
