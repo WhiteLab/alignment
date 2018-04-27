@@ -11,8 +11,9 @@ You don't have time to read through what each script does, and you're a BAMF.  H
 ```
 cat <bnids_list> | xargs -IBN find <fastq file home directory>/BN -name '*.gz' > fastq_list 
 ```
-###### b) Use this list to create a run file, in this example for custom capture:
+###### b) Use this list to create a run file:
 ```
+# for seq type, choices are capture, exome, or genome
 <DNA pipe home dir>/utility/fq2lane.py -f fastq_list -s <seq type> > lane_list
 ```
 Typical fastq list:
