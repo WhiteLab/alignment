@@ -9,7 +9,7 @@ You don't have time to read through what each script does, and you're a BAMF.  H
 ##### 1) Create job run files
 ###### a) Get list of fastq files to process from swift, one file per line, using a new-line separated list of bionimbus ids:
 ```
-cat <bnids_list> | xargs -IFN find <fastq file home directory>/BN -name '*.gz' > fastq_list 
+cat <bnids_list> | xargs -IBN find <fastq file home directory>/BN -name '*.gz' > fastq_list 
 ```
 ###### b) Use this list to create a run file, in this example for custom capture:
 ```
@@ -17,17 +17,17 @@ cat <bnids_list> | xargs -IFN find <fastq file home directory>/BN -name '*.gz' >
 ```
 Typical fastq list:
 
-2018-254_180309_NB551089_0045_AHJGNFBGX5_1_1_sequence.txt.gz
-2018-254_180309_NB551089_0045_AHJGNFBGX5_1_2_sequence.txt.gz
-2016-2199_180302_K00216R_0042_BHNVTKBBXX_1_1_sequence.txt.gz
-2016-2199_180302_K00216R_0042_BHNVTKBBXX_1_2_sequence.txt.gz
-2016-2209_180302_K00216R_0042_BHNVTKBBXX_1_1_sequence.txt.gz
+2018-254_180309_NB551089_0045_AHJGNFBGX5_1_1_sequence.txt.gz  
+2018-254_180309_NB551089_0045_AHJGNFBGX5_1_2_sequence.txt.gz  
+2016-2199_180302_K00216R_0042_BHNVTKBBXX_1_1_sequence.txt.gz  
+2016-2199_180302_K00216R_0042_BHNVTKBBXX_1_2_sequence.txt.gz  
+2016-2209_180302_K00216R_0042_BHNVTKBBXX_1_1_sequence.txt.gz  
 2016-2209_180302_K00216R_0042_BHNVTKBBXX_1_2_sequence.txt.gz
 
 Resultant lane_list:
 
-2018-254	capture	180309_NB551089_0045_AHJGNFBGX5_1
-2016-2199	capture	180302_K00216R_0042_BHNVTKBBXX_1
+2018-254	capture	180309_NB551089_0045_AHJGNFBGX5_1  
+2016-2199	capture	180302_K00216R_0042_BHNVTKBBXX_1  
 2016-2209	capture	180302_K00216R_0042_BHNVTKBBXX_1
 
 ##### c) Check config file - this file is typically in <DNA pipe home dir>/utility/config_files/slurm_DNAseq_vep91_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
