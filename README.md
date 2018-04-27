@@ -30,7 +30,7 @@ Resultant lane_list:
 2016-2199	capture	180302_K00216R_0042_BHNVTKBBXX_1
 2016-2209	capture	180302_K00216R_0042_BHNVTKBBXX_1
 
-##### c) Check config file - this file is typically in <RNA pipe hoe dir>/utility/config_files/v2.5_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
+##### c) Check config file - this file is typically in <DNA pipe home dir>/utility/config_files/slurm_DNAseq_vep91_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
 
     "refs":{
     "project_dir": "/cephfs/PROJECTS/",
