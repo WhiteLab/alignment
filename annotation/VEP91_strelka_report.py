@@ -159,7 +159,7 @@ def gen_report(vcf, c, ref_flag):
                            'tum_alt_ct': record.samples['TUMOR'][(record.alts[0] + 'U')][0]}
         else:
             not_shared = {}
-        ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
+        ann_list = [_.split('|') for _ in record.info['ANN']]
         tflag = 'NA'
         if c != 'n':
             tflag = mark_target(chrom, pos, on_dict)
