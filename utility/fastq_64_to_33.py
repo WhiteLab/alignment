@@ -25,7 +25,7 @@ indir = os.path.dirname(fn)
 bn = os.path.basename(fn)
 if not os.path.isdir(indir + '/converted'):
     os.mkdir(indir + '/converted')
-out = gzip.open(indir + '/converted/' + bn, 'wb')
+out = gzip.open(indir + '/converted/' + bn, 'wt')
 sys.stderr.write('Opened output file ' + indir + '/converted/' + bn + '\n')
 # code snippets obtained from https://github.com/vpiro/readtools/blob/master/PHRED_converter.py
 quali = 'fastq-illumina'
