@@ -19,7 +19,7 @@ from docopt import docopt
 
 args = docopt(__doc__)
 fn = args['<fastq>']
-fastq = gzip.open(fn, 'rb')
+fastq = gzip.open(fn, 'rt')
 sys.stderr.write('Processing file ' + fn + '\n')
 indir = os.path.dirname(fn)
 bn = os.path.basename(fn)
