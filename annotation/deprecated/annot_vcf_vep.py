@@ -4,7 +4,7 @@ import sys
 import os
 import signal
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
-from annotation.deprecated.vep_subsitution_report import gen_report as gen_snv_report
+from annotation.deprecated.vep_substitution_report import gen_report as gen_snv_report
 from annotation.deprecated.vep_indel_report import gen_report as gen_indel_report
 from utility.date_time import date_time
 from utility.log import log

@@ -108,10 +108,10 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         log(loc, date_time() + 'VEP annotation of ' + sample_pair + in_suffix + ' successful!\n')
 
     if vep_cache == '84':
-        from annotation.deprecated.vep_subsitution_report import gen_report as gen_snv_report
+        from annotation.deprecated.vep_substitution_report import gen_report as gen_snv_report
         from annotation.deprecated.vep_indel_report import gen_report as gen_indel_report
     else:
-        from annotation.VEP91_subsitution_report import gen_report as gen_snv_report
+        from annotation.VEP91_substitution_report import gen_report as gen_snv_report
         from annotation.VEP91_indel_report import gen_report as gen_indel_report
     if source == 'mutect':
         if wg_flag == 'y':
