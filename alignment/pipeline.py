@@ -142,8 +142,8 @@ class Pipeline:
                 mk_log_dir = 'mkdir ../' + self.log_dir
                 log(self.loc, date_time() + 'Making LOGS directory ' + mk_log_dir + '\n')
                 call(mk_log_dir, shell=True)
-            reloc_files = 'mv ' + self.bam_dir + '/* ../' + self.bam_dir + '; mv ' + self.log_dir + '/* ../' \
-                          + self.log_dir + '; mv ' + self.qc_dir + '/* ../' + self.qc_dir
+            reloc_files = 'mv ' + self.bam_dir + '* ../' + self.bam_dir + '; mv ' + self.log_dir + '* ../' \
+                          + self.log_dir + '; mv ' + self.qc_dir + '* ../' + self.qc_dir
             log(self.loc, date_time() + 'Relocating files ' + reloc_files + '\n')
             call(reloc_files, shell=True)
             # need to reassign log file location since it's being moved!
@@ -208,7 +208,7 @@ class Pipeline:
                 check = bwa_mem_pe(self.bwa_tool, RGRP, self.hsa_bwa_ref, self.end1, self.end2, self.samtools_tool,
                                self.hsa_samtools_ref, self.sample, self.log_dir, self.threads)
         else:
-            log(self.loc, date_time() + 'Starting BWA align_dir\n')
+            log(self.loc, date_time() + 'Starting BWA\n')
             # check certain key processes
             # skip aligning if bam already exists
             if not os.path.isfile(self.sample + '.bam'):

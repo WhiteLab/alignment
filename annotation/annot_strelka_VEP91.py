@@ -16,31 +16,8 @@ def parse_config(config_file):
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['fa_ordered'], \
            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'], \
            config_data['params']['plugin_dir'], config_data['params']['threads'], config_data['refs']['intervals'], \
-           config_data['params']['dustmask_flag'], config_data['params']['wg_flag'], config_data['refs']['tx_index'],\
+           config_data['params']['wg_flag'], config_data['refs']['tx_index'],\
            config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['analysis']
-
-
-def pass_filter(ana_dir, sample, in_suffix, dustmask_flag):
-    in_fn = ana_dir + '/somatic' + in_suffix
-    if dustmask_flag == 'Y':
-        in_fn = ana_dir + '/' + sample + '.somatic.indel.dustmasked.vcf'
-    pass_val = 'PASS'
-    out_suffix = '.somatic_indel.PASS.vcf'
-    out_fn = sample + out_suffix
-    out = open(out_fn, 'w')
-    infile = open(in_fn, 'r')
-    zero_check = 0
-    for line in infile:
-        if line[0] == '#':
-            out.write(line)
-        else:
-            fields = line.split('\t')
-            if fields[6] == pass_val:
-                out.write(line)
-                zero_check += 1
-    infile.close()
-    out.close()
-    return zero_check
 
 
 def run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir):
@@ -67,8 +44,8 @@ def watch_mem(proc_obj, source, sample, loc):
     return proc_obj.poll()
 
 
-def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutect, source):
-    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, plugin_dir, threads, intvl, dustmask_flag, wg_flag, tx_index,
+def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
+    (vep_tool, vep_cache, fasta, report, dbsnp, vcache, plugin_dir, threads, intvl, wg_flag, tx_index,
      project_dir, project, analysis) = parse_config(config_file)
     # scale back on the forking a bit
 
@@ -76,17 +53,11 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
         # threads = str(int(threads)/2 - 1)
         threads = str(int(threads) - 1)
     # track to prevent repeat annotation if same sample used as comparison
-    loc = 'LOGS/' + sample_pair + '.vep91_anno.log'
+
     ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair + '/OUTPUT'
+    loc = project_dir + project + '/' + analysis + '/' + sample_pair + '/LOGS/' + sample_pair + '.vep91_anno.log'
     in_vcf = ana_dir + '/' + sample_pair + in_suffix
     out_vcf = sample_pair + out_suffix
-
-    if source == 'scalpel':
-        z_check = pass_filter(ana_dir, sample_pair, in_suffix, dustmask_flag)
-        if z_check == 0:
-            log(loc, date_time() + '0 variant calls PASS scalpel\'s filters, skipping annotation!\n')
-            return 0
-        in_vcf = sample_pair + '.somatic_indel.PASS.vcf'
     # run_vep = ''
     buffer_size = '5000'
     run_cmd = run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc,
@@ -114,24 +85,12 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutec
     else:
         log(loc, date_time() + 'VEP annotation of ' + sample_pair + in_suffix + ' successful!\n')
 
-    if vep_cache == '84':
-        from annotation.deprecated.vep_substitution_report import gen_report as gen_snv_report
-        from annotation.deprecated.vep_indel_report import gen_report as gen_indel_report
-    else:
-        from annotation.VEP91_substitution_report import gen_report as gen_snv_report
-        from annotation.VEP91_indel_report import gen_report as gen_indel_report
-    if source == 'mutect':
-        if wg_flag == 'y':
-            intvl = 'n'
-        check = gen_snv_report(out_vcf, ana_dir + '/' + sample_pair + in_mutect, intvl, tx_index, vcache)
-        if check != 0:
-            log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
-            exit(1)
-    else:
-        check = gen_indel_report(out_vcf, tx_index, vcache)
-        if check != 0:
-            log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
-            exit(1)
+    from annotation.vep_strelka_report import gen_report as gen_strelka_report
+
+    check = gen_strelka_report(out_vcf, intvl, tx_index)
+    if check != 0:
+        log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
+        exit(1)
     return 0
 
 
@@ -142,12 +101,8 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and reference locations')
     parser.add_argument('-sp', '--sample_pair', action='store', dest='sample_pair', help='Sample tumor/normal pair')
-    parser.add_argument('-so', '--source', action='store', dest='source', help='Variant call annot source - mutect or'
-                                                                               ' scalpel')
     parser.add_argument('-is', '--in_suffix', action='store', dest='in_suffix', help='Suffix of input files')
     parser.add_argument('-os', '--out_suffix', action='store', dest='out_suffix', help='Suffix of output vcf files')
-    parser.add_argument('-im', '--in_mutect', action='store', dest='in_mutect', help='Suffix of input mutect files, '
-                                                                                     'can be \'NA\' if not from mutect')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -156,4 +111,4 @@ if __name__ == "__main__":
     inputs = parser.parse_args()
     (config_file, sample_pair, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
             inputs.sample_pair, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
-    annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix, in_mutect, source)
+    annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix)
