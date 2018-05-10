@@ -55,7 +55,10 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
     # track to prevent repeat annotation if same sample used as comparison
 
     ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair + '/OUTPUT'
-    loc = project_dir + project + '/' + analysis + '/' + sample_pair + '/LOGS/' + sample_pair + '.vep91_anno.log'
+    loc = 'LOGS/' + sample_pair + '.vep91_anno.log'
+    cwd = os.getcwd()
+    os.chdir(ana_dir)
+    log(loc, date_time() + 'Changed to annotation directory ' + ana_dir + '\n')
     in_vcf = ana_dir + '/' + sample_pair + in_suffix
     out_vcf = sample_pair + out_suffix
     # run_vep = ''
@@ -91,6 +94,8 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
     if check != 0:
         log(loc, date_time() + 'Report generation for ' + out_vcf + ' failed\n')
         exit(1)
+    log(loc, date_time() + 'Changing back to working directory ' + cwd + '\n')
+    os.chdir(cwd)
     return 0
 
 

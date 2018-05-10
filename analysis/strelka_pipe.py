@@ -5,7 +5,9 @@ sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import json
 from utility.date_time import date_time
 from subprocess import call
+from subprocess import check_output
 from utility.log import log
+from annotation.annot_strelka_VEP91 import annot_vcf_vep_pipe
 
 
 def parse_config(config_file):
@@ -94,8 +96,31 @@ def run_strelka(tumor_id, normal_id, log_dir, config_file):
     log(loc, date_time() + filter_vcf_cmd + '\n')
     call(filter_vcf_cmd, shell=True)
     sys.stderr.write(date_time() + 'Completed variant calls for ' + sample_pair + '\n')
+    # check pass vcf before calling vep
+    check_snv = 'cat ' + strelka_snv_pass + ' grep PASS | wc -l'
+    check_snv = check_output(check_snv, shell=True)
+    if check_snv.decode().rstrip('\n') == '0':
+        sys.stderr.write(date_time() + 'Starting vep strelka snv annotation for ' + sample_pair + '\n')
+        annot_vcf_vep_pipe(config_file, sample_pair, '.strelka.snv_PASS.vcf', '.strelka.snv.VEP91.vcf')
+    else:
+        sys.stderr.write(date_time() + 'No PASS calls for ' + strelka_snv_pass + ', skipping annotation!\n')
+    check_indel = 'cat ' + strelka_indel_pass + ' grep PASS | wc -l'
+    check_indel = check_output(check_indel, shell=True)
+    if check_indel.decode().rstrip('\n') == '0':
+        sys.stderr.write(date_time() + 'Starting vep strelka indel annotation for ' + sample_pair + '\n')
+        annot_vcf_vep_pipe(config_file, sample_pair, '.strelka.indel_PASS.vcf', '.strelka.indel.VEP91.vcf')
+    else:
+        sys.stderr.write(date_time() + 'No PASS calls for ' + strelka_indel_pass + ', skipping annotation!\n')
+    # cleanup and reorg
+    rm_manta = 'rm -rf ' + manta_dir
 
-    sys.stderr.write(date_time() + 'Starting vep annotation for ' + sample_pair + '\n')
+    mv_vcf = 'mv -t ' + run_dir_prefix + '/OUTPUT ' + ' '.join((strelka_snv_pass, strelka_indel_pass,
+                                                                strelka_indel_vcf, strelka_snv_vcf))
+    rm_strelka = 'rm -rf ' + strelka_dir
+    sys.stderr.write(date_time() + 'Reorganizing files ' + ';'.join((rm_manta, mv_vcf, rm_strelka)))
+    call(rm_manta, shell=True)
+    call(mv_vcf, shell=True)
+    call(rm_strelka, shell=True)
 
     return 0
 
