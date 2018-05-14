@@ -16,7 +16,7 @@ def parse_config(config_file):
     return config_data['tools']['manta_cfg'], config_data['tools']['strelka_cfg'], config_data['refs']['capture_bgzip'],\
            config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['wg_flag'],\
            config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'],\
-           config_data['refs']['analysis_dir'], config_data['refs']['annotation_dir'],config_data['params']['user'],\
+           config_data['refs']['analysis'], config_data['refs']['annotation'],config_data['params']['user'],\
            config_data['params']['group']
 
 
