@@ -18,7 +18,7 @@ def parse_config(config_file):
            config_data['tools']['report'], config_data['refs']['dbsnp'], config_data['params']['vep_cache_version'], \
            config_data['params']['plugin_dir'], config_data['params']['threads'], config_data['refs']['intervals'], \
            config_data['params']['wg_flag'], config_data['refs']['tx_index'],\
-           config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['analysis']
+           config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['annotation']
 
 
 def run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, vcache, loc, plugin_dir):
@@ -47,7 +47,7 @@ def watch_mem(proc_obj, source, sample, loc):
 
 def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
     (vep_tool, vep_cache, fasta, report, dbsnp, vcache, plugin_dir, threads, intvl, wg_flag, tx_index,
-     project_dir, project, analysis) = parse_config(config_file)
+     project_dir, project, annotation) = parse_config(config_file)
     # scale back on the forking a bit
 
     if int(threads) > 2:
@@ -55,8 +55,8 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
         threads = str(int(threads) - 1)
     # track to prevent repeat annotation if same sample used as comparison
 
-    ana_dir = project_dir + project + '/' + analysis + '/' + sample_pair + '/OUTPUT'
-    loc = 'LOGS/' + sample_pair + '.vep91_anno.log'
+    ana_dir = project_dir + project + '/' + annotation + '/' + sample_pair + '/OUTPUT'
+    loc = '../LOGS/' + sample_pair + '.vep91_anno.log'
     cwd = os.getcwd()
     os.chdir(ana_dir)
     log(loc, date_time() + 'Changed to annotation directory ' + ana_dir + '\n')
