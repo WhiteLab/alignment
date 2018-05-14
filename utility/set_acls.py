@@ -4,6 +4,6 @@ import subprocess
 
 
 def set_acls(dirname, user, group):
-    cmd = 'chown -R ' + user + ':' + group + ' ' + dirname
+    cmd = 'chown -R ' + user + ':' + group + ' ' + dirname + '; chmod 770 ' + dirname
     sys.stderr.write('Setting acls ' + cmd + '\n')
     subprocess.call(cmd, shell=True)

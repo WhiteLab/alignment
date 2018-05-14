@@ -8,7 +8,7 @@ import subprocess
 from annotation.deprecated.annot_vcf_vep import parse_config
 from annotation.deprecated.annot_vcf_vep import run_vep
 from temp_pipes.batch_coverage import get_bam_name
-from annotation.vep_strelka_report import gen_report
+from annotation.deprecated.vep_strelka_report import gen_report
 
 
 def run_strelka(strelka_tools, norm_bam, tum_bam, pair, threads, fasta):

@@ -8,6 +8,7 @@ from subprocess import call
 from subprocess import check_output
 from utility.log import log
 from annotation.annot_strelka_VEP91 import annot_vcf_vep_pipe
+from utility.set_acls import set_acls
 
 
 def parse_config(config_file):
@@ -15,33 +16,35 @@ def parse_config(config_file):
     return config_data['tools']['manta_cfg'], config_data['tools']['strelka_cfg'], config_data['refs']['capture_bgzip'],\
            config_data['refs']['fa_ordered'], config_data['params']['threads'], config_data['params']['wg_flag'],\
            config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'],\
-           config_data['refs']['analysis_dir']
+           config_data['refs']['analysis_dir'], config_data['refs']['annotation_dir'],config_data['params']['user'],\
+           config_data['params']['group']
 
 
-def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file):
-    config_data = json.loads(open(config_file, 'r').read())
-    exome = config_data['refs']['exome']
-    loc = 'LOGS/' + pair + '_' + pair + '.genome_as_exome.strelka.log'
-    cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
-          + normal_bam + ' --window 600 --two-pass --bed ' + exome + ' --ref ' + fasta + ' 2> ' + loc
-    log(loc, date_time() + cmd + '\n')
-    check = call(cmd, shell=True)
-    if check != 0:
-        return 1, pair
-    return 0, pair
+# def wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, pair, config_file):
+#     config_data = json.loads(open(config_file, 'r').read())
+#     exome = config_data['refs']['exome']
+#     loc = 'LOGS/' + pair + '_' + pair + '.genome_as_exome.strelka.log'
+#     cmd = scalpel + ' --somatic --logs --numprocs ' + cpus + ' --tumor ' + tumor_bam + ' --normal ' \
+#           + normal_bam + ' --window 600 --two-pass --bed ' + exome + ' --ref ' + fasta + ' 2> ' + loc
+#     log(loc, date_time() + cmd + '\n')
+#     check = call(cmd, shell=True)
+#     if check != 0:
+#         return 1, pair
+#     return 0, pair
 
 
-def run_strelka(tumor_id, normal_id, log_dir, config_file):
-    (manta_cfg, strelka_cfg, bed, fasta, cpus, wg, project_dir, project,
-     align, analysis_dir) = parse_config(config_file)
+def run_strelka(tumor_id, normal_id, config_file):
+    (manta_cfg, strelka_cfg, bed, fasta, cpus, wg, project_dir, project, align, analysis_dir, annotation_dir, user,
+     group) = parse_config(config_file)
 
     sample_pair = tumor_id + '_' + normal_id
     run_dir_prefix = project_dir + project + '/' + analysis_dir + '/' + sample_pair
+    anno_complete_path = project_dir + project + '/' + annotation_dir + '/' + sample_pair
     manta_dir = run_dir_prefix + '/manta_out'
     manta_run = manta_dir + '/runWorkflow.py'
     strelka_dir = run_dir_prefix + '/strelka_out'
     strelka_run = strelka_dir + '/runWorkflow.py'
-    loc = log_dir + sample_pair + '.strelka.log'
+    loc = run_dir_prefix + '/LOGS/' + sample_pair + '.strelka.log'
     bam_dir = project_dir + project + '/' + align
     tumor_bam = bam_dir + '/' + tumor_id + '/BAM/' + tumor_id + '.merged.final.bam'
     normal_bam = bam_dir + '/' + normal_id + '/BAM/' + normal_id + '.merged.final.bam'
@@ -87,9 +90,9 @@ def run_strelka(tumor_id, normal_id, log_dir, config_file):
     #         sys.stderr.write('Scalpel failed for ' + normal_id + ' at ' + tumor_id + '\n')
     #         exit(1)
     log(loc, date_time() + 'Variant calling complete for pair ' + sample_pair + ' filtering output files\n')
-    strelka_snv_vcf = strelka_dir + ' results/variants/somatic.snvs.vcf.gz'
+    strelka_snv_vcf = strelka_dir + '/results/variants/somatic.snvs.vcf.gz'
     strelka_snv_pass = run_dir_prefix + '/' + sample_pair + '.strelka.snv_PASS.vcf'
-    strelka_indel_vcf = strelka_dir + ' results/variants/somatic.indels.vcf.gz'
+    strelka_indel_vcf = strelka_dir + '/results/variants/somatic.indels.vcf.gz'
     strelka_indel_pass = run_dir_prefix + '/' + sample_pair + '.strelka.indel_PASS.vcf'
     filter_vcf_cmd = 'zcat ' + strelka_snv_vcf + ' | grep -E "^#|PASS" > ' + strelka_snv_pass + ';'
     filter_vcf_cmd += 'zcat ' + strelka_indel_vcf + ' | grep -E "^#|PASS" > ' + strelka_indel_pass
@@ -121,7 +124,9 @@ def run_strelka(tumor_id, normal_id, log_dir, config_file):
     call(rm_manta, shell=True)
     call(mv_vcf, shell=True)
     call(rm_strelka, shell=True)
-
+    set_acls(run_dir_prefix, user, group)
+    set_acls(anno_complete_path, user, group)
+    sys.stderr.write(date_time() + 'Strelka somatic variant calling for ' + sample_pair + ' complete\n')
     return 0
 
 
@@ -135,12 +140,11 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--normal', action='store', dest='normal', help='Normal sample id')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (tumor_id, normal_id, log_dir, config_file) = (inputs.tumor, inputs.normal, inputs.log_dir, inputs.config_file)
-    run_strelka(tumor_id, normal_id, log_dir, config_file)
+    (tumor_id, normal_id, config_file) = (inputs.tumor, inputs.normal, inputs.config_file)
+    run_strelka(tumor_id, normal_id, config_file)

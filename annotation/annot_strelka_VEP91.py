@@ -4,6 +4,7 @@ import sys
 import os
 import signal
 sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+from annotation.VEP91_strelka_report import gen_report as gen_strelka_report
 from utility.date_time import date_time
 from utility.log import log
 import subprocess
@@ -87,8 +88,6 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
             exit(1)
     else:
         log(loc, date_time() + 'VEP annotation of ' + sample_pair + in_suffix + ' successful!\n')
-
-    from annotation.vep_strelka_report import gen_report as gen_strelka_report
 
     check = gen_strelka_report(out_vcf, intvl, tx_index)
     if check != 0:
