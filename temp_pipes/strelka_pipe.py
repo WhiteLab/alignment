@@ -66,24 +66,24 @@ def run_strelka(tumor_id, normal_id, config_file):
             sys.stderr.write(date_time() + 'Indel calling run failed for pair ' + sample_pair + ' with command:\n' +
                      manta_setup_cmd + '\n')
             exit(1)
-            strelka_setup_cmd = strelka_cfg + ' --tumorBam ' + tumor_bam + ' --normalBam ' + normal_bam \
-                                + ' --callRegions ' + bed + ' --exome --referenceFasta ' + fasta + ' --runDir ' \
-                                + strelka_dir + ' --indelCandidates ' + manta_dir \
-                                + '/results/variants/candidateSmallIndels.vcf.gz 2>> ' + loc + ' >> ' + loc
-            sys.stderr.write(date_time() + 'Starting snv calls for ' + sample_pair + ' in capture mode with command:\n'
-                + strelka_setup_cmd + '\n')
-            check = call(strelka_setup_cmd, shell=True)
-            if check != 0:
-                sys.stderr.write(date_time() + 'SNV calling setup failed for pair ' + sample_pair + ' with command:\n' +
-                                 strelka_setup_cmd + '\n')
-                exit(1)
-            strelka_run_cmd = strelka_run + ' -m local -j ' + cpus + ' 2>> ' + loc + ' >> ' + loc
-            sys.stderr.write(date_time() + 'Executing strelka workflow ' + strelka_run_cmd + '\n')
-            check = call(strelka_run_cmd, shell=True)
-            if check != 0:
-                sys.stderr.write(date_time() + 'SNV calling run failed for pair ' + sample_pair + ' with command:\n' +
-                                 strelka_setup_cmd + '\n')
-                exit(1)
+        strelka_setup_cmd = strelka_cfg + ' --tumorBam ' + tumor_bam + ' --normalBam ' + normal_bam \
+                            + ' --callRegions ' + bed + ' --exome --referenceFasta ' + fasta + ' --runDir ' \
+                            + strelka_dir + ' --indelCandidates ' + manta_dir \
+                            + '/results/variants/candidateSmallIndels.vcf.gz 2>> ' + loc + ' >> ' + loc
+        sys.stderr.write(date_time() + 'Starting snv calls for ' + sample_pair + ' in capture mode with command:\n'
+            + strelka_setup_cmd + '\n')
+        check = call(strelka_setup_cmd, shell=True)
+        if check != 0:
+            sys.stderr.write(date_time() + 'SNV calling setup failed for pair ' + sample_pair + ' with command:\n' +
+                             strelka_setup_cmd + '\n')
+            exit(1)
+        strelka_run_cmd = strelka_run + ' -m local -j ' + cpus + ' 2>> ' + loc + ' >> ' + loc
+        sys.stderr.write(date_time() + 'Executing strelka workflow ' + strelka_run_cmd + '\n')
+        check = call(strelka_run_cmd, shell=True)
+        if check != 0:
+            sys.stderr.write(date_time() + 'SNV calling run failed for pair ' + sample_pair + ' with command:\n' +
+                             strelka_setup_cmd + '\n')
+            exit(1)
     # else:
     #     check = wg_mode(scalpel, tumor_bam, normal_bam, fasta, cpus, sample_pair, config_file)
     #     if check[0] != 0:

@@ -31,12 +31,11 @@ def run_vep(vep_tool, in_vcf, out_vcf, buffer_size, threads, fasta, vep_cache, v
     return run_cmd
 
 
-def watch_mem(proc_obj, source, sample, loc):
+def watch_mem(proc_obj, sample, loc):
     from time import sleep
     while proc_obj.poll() is None:
         mem_pct = psutil.virtual_memory().percent
-        log(loc, date_time() + 'Current memory usage at ' + str(mem_pct) + '% processing sample ' + sample
-            + ' from source ' + source + '\n')
+        log(loc, date_time() + 'Current memory usage at ' + str(mem_pct) + '% processing sample ' + sample + '\n')
         if mem_pct >= 99:
             log(loc, date_time() + 'Memory exceeded while running VEP.')
             return 1
@@ -69,7 +68,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
     log(loc, date_time() + 'Annotating sample ' + sample_pair + in_suffix + ' ' + run_cmd + '\n')
     # from stack overflow to allow killing of spawned processes in main process fails for cleaner restart
     check = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-    check_run = watch_mem(check, source, sample_pair, loc)
+    check_run = watch_mem(check, sample_pair, loc)
     if check_run != 0:
 
         buffer_size = str(int(buffer_size)/2)
@@ -113,6 +112,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pair, in_suffix, out_suffix, in_mutect, source) = (inputs.config_file,
-            inputs.sample_pair, inputs.in_suffix, inputs.out_suffix, inputs.in_mutect, inputs.source)
+    (config_file, sample_pair, in_suffix, out_suffix) = (inputs.config_file,
+            inputs.sample_pair, inputs.in_suffix, inputs.out_suffix)
     annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix)
