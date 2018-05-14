@@ -66,6 +66,7 @@ def run_strelka(tumor_id, normal_id, config_file):
             sys.stderr.write(date_time() + 'Indel calling run failed for pair ' + sample_pair + ' with command:\n' +
                      manta_setup_cmd + '\n')
             exit(1)
+        loc = run_dir_prefix + '/LOGS/' + sample_pair + '.strelka.log'
         strelka_setup_cmd = strelka_cfg + ' --tumorBam ' + tumor_bam + ' --normalBam ' + normal_bam \
                             + ' --callRegions ' + bed + ' --exome --referenceFasta ' + fasta + ' --runDir ' \
                             + strelka_dir + ' --indelCandidates ' + manta_dir \
@@ -100,16 +101,16 @@ def run_strelka(tumor_id, normal_id, config_file):
     call(filter_vcf_cmd, shell=True)
     sys.stderr.write(date_time() + 'Completed variant calls for ' + sample_pair + '\n')
     # check pass vcf before calling vep
-    check_snv = 'cat ' + strelka_snv_pass + ' grep PASS | wc -l'
+    check_snv = 'cat ' + strelka_snv_pass + ' | grep PASS | wc -l'
     check_snv = check_output(check_snv, shell=True)
-    if check_snv.decode().rstrip('\n') == '0':
+    if check_snv.decode().rstrip('\n') != '0':
         sys.stderr.write(date_time() + 'Starting vep strelka snv annotation for ' + sample_pair + '\n')
         annot_vcf_vep_pipe(config_file, sample_pair, '.strelka.snv_PASS.vcf', '.strelka.snv.VEP91.vcf')
     else:
         sys.stderr.write(date_time() + 'No PASS calls for ' + strelka_snv_pass + ', skipping annotation!\n')
-    check_indel = 'cat ' + strelka_indel_pass + ' grep PASS | wc -l'
+    check_indel = 'cat ' + strelka_indel_pass + ' | grep PASS | wc -l'
     check_indel = check_output(check_indel, shell=True)
-    if check_indel.decode().rstrip('\n') == '0':
+    if check_indel.decode().rstrip('\n') != '0':
         sys.stderr.write(date_time() + 'Starting vep strelka indel annotation for ' + sample_pair + '\n')
         annot_vcf_vep_pipe(config_file, sample_pair, '.strelka.indel_PASS.vcf', '.strelka.indel.VEP91.vcf')
     else:
