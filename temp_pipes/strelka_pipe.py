@@ -44,22 +44,23 @@ def run_strelka(tumor_id, normal_id, config_file):
     manta_run = manta_dir + '/runWorkflow.py'
     strelka_dir = run_dir_prefix + '/strelka_out'
     strelka_run = strelka_dir + '/runWorkflow.py'
-    loc = run_dir_prefix + '/LOGS/' + sample_pair + '.strelka.log'
+    loc = run_dir_prefix + '/LOGS/' + sample_pair + '.manta.log'
     bam_dir = project_dir + project + '/' + align
     tumor_bam = bam_dir + '/' + tumor_id + '/BAM/' + tumor_id + '.merged.final.bam'
     normal_bam = bam_dir + '/' + normal_id + '/BAM/' + normal_id + '.merged.final.bam'
     if wg == 'n':
         manta_setup_cmd = manta_cfg + ' --tumorBam ' + tumor_bam + ' --normalBam ' + normal_bam + ' --callRegions ' \
-                          + bed + ' --exome --referenceFasta ' + fasta + ' --runDir ' + manta_dir + ' 2>> ' + loc
-        sys.stderr.write(date_time() + 'Starting indel calls for ' + sample_pair + '\n')
-        log(loc, date_time() + 'Starting indel calls for ' + sample_pair + ' in capture mode with command:\n'
+                          + bed + ' --exome --referenceFasta ' + fasta + ' --runDir ' + manta_dir + ' 2>> ' + loc \
+                          + ' >> ' + loc
+        sys.stderr.write(date_time() + 'Starting indel calls for ' + sample_pair + ' in capture mode with command:\n'
             + manta_setup_cmd + '\n')
         check = call(manta_setup_cmd, shell=True)
         if check != 0:
             sys.stderr.write(date_time() + 'Indel calling setup failed for pair ' + sample_pair + ' with command:\n' +
                              manta_setup_cmd + '\n')
             exit(1)
-        manta_run_cmd = manta_run + ' -m local -j ' + cpus
+        manta_run_cmd = manta_run + ' -m local -j ' + cpus + ' 2>> ' + loc + ' >> ' + loc
+        sys.stderr.write(date_time() + 'Executing manta workflow ' + manta_run_cmd + '\n')
         check = call(manta_run_cmd, shell=True)
         if check != 0:
             sys.stderr.write(date_time() + 'Indel calling run failed for pair ' + sample_pair + ' with command:\n' +
@@ -68,16 +69,16 @@ def run_strelka(tumor_id, normal_id, config_file):
             strelka_setup_cmd = strelka_cfg + ' --tumorBam ' + tumor_bam + ' --normalBam ' + normal_bam \
                                 + ' --callRegions ' + bed + ' --exome --referenceFasta ' + fasta + ' --runDir ' \
                                 + strelka_dir + ' --indelCandidates ' + manta_dir \
-                                + '/results/variants/candidateSmallIndels.vcf.gz 2>> ' + loc
-            sys.stderr.write(date_time() + 'Starting snv calls for ' + sample_pair + '\n')
-            log(loc, date_time() + 'Starting indel calls for ' + sample_pair + ' in capture mode with command:\n'
+                                + '/results/variants/candidateSmallIndels.vcf.gz 2>> ' + loc + ' >> ' + loc
+            sys.stderr.write(date_time() + 'Starting snv calls for ' + sample_pair + ' in capture mode with command:\n'
                 + strelka_setup_cmd + '\n')
             check = call(strelka_setup_cmd, shell=True)
             if check != 0:
                 sys.stderr.write(date_time() + 'SNV calling setup failed for pair ' + sample_pair + ' with command:\n' +
                                  strelka_setup_cmd + '\n')
                 exit(1)
-            strelka_run_cmd = strelka_run + ' -m local -j ' + cpus
+            strelka_run_cmd = strelka_run + ' -m local -j ' + cpus + ' 2>> ' + loc + ' >> ' + loc
+            sys.stderr.write(date_time() + 'Executing strelka workflow ' + strelka_run_cmd + '\n')
             check = call(strelka_run_cmd, shell=True)
             if check != 0:
                 sys.stderr.write(date_time() + 'SNV calling run failed for pair ' + sample_pair + ' with command:\n' +
