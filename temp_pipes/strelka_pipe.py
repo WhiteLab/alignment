@@ -92,9 +92,9 @@ def run_strelka(tumor_id, normal_id, config_file):
     #         exit(1)
     log(loc, date_time() + 'Variant calling complete for pair ' + sample_pair + ' filtering output files\n')
     strelka_snv_vcf = strelka_dir + '/results/variants/somatic.snvs.vcf.gz'
-    strelka_snv_pass = run_dir_prefix + '/' + sample_pair + '.strelka.snv_PASS.vcf'
+    strelka_snv_pass = run_dir_prefix + '/OUTPUT/' + sample_pair + '/' + sample_pair + '.strelka.snv_PASS.vcf'
     strelka_indel_vcf = strelka_dir + '/results/variants/somatic.indels.vcf.gz'
-    strelka_indel_pass = run_dir_prefix + '/' + sample_pair + '.strelka.indel_PASS.vcf'
+    strelka_indel_pass = run_dir_prefix + '/OUTPUT/' + sample_pair + '/' + sample_pair + '.strelka.indel_PASS.vcf'
     filter_vcf_cmd = 'zcat ' + strelka_snv_vcf + ' | grep -E "^#|PASS" > ' + strelka_snv_pass + ';'
     filter_vcf_cmd += 'zcat ' + strelka_indel_vcf + ' | grep -E "^#|PASS" > ' + strelka_indel_pass
     log(loc, date_time() + filter_vcf_cmd + '\n')

@@ -54,7 +54,7 @@ def annot_vcf_vep_pipe(config_file, sample_pair, in_suffix, out_suffix):
         threads = str(int(threads) - 1)
     # track to prevent repeat annotation if same sample used as comparison
 
-    ana_dir = project_dir + project + '/' + annotation + '/' + sample_pair
+    ana_dir = project_dir + project + '/' + annotation + '/' + sample_pair + '/OUTPUT'
     loc = '../LOGS/' + sample_pair + '.strelka.vep91_anno.log'
     cwd = os.getcwd()
     os.chdir(ana_dir)
