@@ -111,8 +111,18 @@ def gen_report(vcf, c, ref_flag):
     # open out file and index counts, context, etc
     fn = os.path.basename(vcf)
     parts = fn.split('.')
-    loc = 'LOGS/' + parts[0] + '.snv.strelka.vep_priority.report.log'
-    log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
+    loc = 'LOGS/' + parts[0] + '.strelka.vep_priority.report.log'
+    try:
+        log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
+    except:
+        sys.stderr.write(date_time() + 'Writing log to ' + loc + ' failed, trying alternate location\n')
+        loc = '../LOGS/' + parts[0] + '.strelka.vep_priority.report.log'
+        try:
+            log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
+        except:
+            sys.stderr.write(date_time() + 'Writing log to ' + loc + ' failed, trying current directory\n')
+            loc = parts[0] + '.strelka.vep_priority.report.log'
+            log(loc, date_time() + 'Creating prioritized impact reports for ' + vcf + '\n')
     on_dict = {}
     if c != 'n':
         on_dict = create_target(c)
