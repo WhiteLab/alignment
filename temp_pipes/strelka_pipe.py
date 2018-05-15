@@ -118,8 +118,7 @@ def run_strelka(tumor_id, normal_id, config_file):
     # cleanup and reorg
     rm_manta = 'rm -rf ' + manta_dir
 
-    mv_vcf = 'mv -t ' + run_dir_prefix + '/OUTPUT ' + ' '.join((strelka_snv_pass, strelka_indel_pass,
-                                                                strelka_indel_vcf, strelka_snv_vcf))
+    mv_vcf = 'mv -t ' + run_dir_prefix + '/OUTPUT ' + ' '.join((strelka_indel_vcf, strelka_snv_vcf))
     rm_strelka = 'rm -rf ' + strelka_dir
     sys.stderr.write(date_time() + 'Reorganizing files ' + ';'.join((rm_manta, mv_vcf, rm_strelka)))
     call(rm_manta, shell=True)
